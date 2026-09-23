@@ -98,18 +98,29 @@ curl -X POST http://localhost:4000/api/films \
 `video_url` should be an **embeddable** link (a YouTube/Vimeo *embed* URL,
 not the regular watch page) since it's dropped straight into an `<iframe>`.
 
-## Deploying
+## Deploying to Vercel via Git
 
-- **Backend**: any Node host works (Render, Railway, a college server, a VPS).
-  Just make sure the `backend/db/` folder is on persistent storage — the
-  SQLite file lives there.
-- **Frontend**: since `server.js` already serves the `frontend/` folder as
-  static files, deploying the backend deploys the whole site. No separate
-  static host needed unless you want one.
+This repository is pre-configured with `vercel.json`, root `package.json`, and `api/index.js` for zero-configuration full-stack deployment on Vercel:
 
-## Next steps you might want
+### Step 1: Push your code to GitHub
 
-- A small admin page (HTML form) that calls the POST/PUT/DELETE endpoints,
-  instead of curl or Postman.
-- User accounts for members instead of a single shared admin key.
-- An events/screenings page using the same pattern as the film gallery.
+1. Create a new repository on [GitHub](https://github.com/new) (e.g. `impactframe`).
+2. Run the following commands in this folder:
+   ```bash
+   git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPO_NAME>.git
+   git push -u origin main
+   ```
+
+### Step 2: Import into Vercel
+
+1. Log into your [Vercel Dashboard](https://vercel.com/dashboard).
+2. Click **"Add New..."** &rarr; **"Project"**.
+3. Select your **`impactframe`** GitHub repository and click **"Import"**.
+4. In Project Settings:
+   - **Framework Preset**: *Other* (detected automatically)
+   - **Root Directory**: `./` (leave default)
+5. Under **Environment Variables** (Optional):
+   - Add `ADMIN_KEY` = `impactframe2026` (or your chosen master secret).
+6. Click **"Deploy"**!
+
+Vercel will build and launch your site with a live `*.vercel.app` URL. Every subsequent `git push` to your `main` branch will automatically deploy updates!
