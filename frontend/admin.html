@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crew Vault & Datasheets — IMPACTFRAME</title>
+  <meta name="description" content="Crew access, film archive management, auditions datasheet, access logs, and user management for IMPACTFRAME media club." />
+  <link rel="icon" href="assets/favicon.png" type="image/png" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-page="admin" class="admin-page">
+
+  <header class="site-header">
+    <div class="wrap nav-row">
+      <a class="brand" href="index.html">
+        <img src="assets/logo-mark.png" alt="" width="40" height="40" />
+        IMPACT<span>FRAME</span>
+      </a>
+      <nav class="primary-nav">
+        <ul>
+          <li><a href="index.html" data-page="home">Home</a></li>
+          <li><a href="gallery.html" data-page="gallery">Gallery</a></li>
+          <li><a href="about.html" data-page="about">About</a></li>
+          <li><a href="events.html" data-page="events">Events</a></li>
+          <li><a href="apply.html" data-page="apply">Auditions & Roles</a></li>
+          <li><a href="join.html" data-page="join">Join Crew</a></li>
+        </ul>
+      </nav>
+      <div class="header-right-actions">
+        <div class="social-links">
+          <a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener" class="social-icon-yt" aria-label="IMPACTFRAME on YouTube">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </a>
+          <a href="https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="social-icon-ig" aria-label="IMPACTFRAME on Instagram">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 2 .25 2.5.42.6.24 1 .5 1.5 1s.75.9 1 1.5c.17.5.36 1.3.42 2.5.06 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.25 2-.42 2.5-.24.6-.5 1-1 1.5s-.9.75-1.5 1c-.5.17-1.3.36-2.5.42-1.3.06-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-2-.25-2.5-.42-.6-.24-1-.5-1.5-1s-.75-.9-1-1.5c-.17-.5-.36-1.3-.42-2.5C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.25-2 .42-2.5.24-.6.5-1 1-1.5s.9-.75 1.5-1c.5-.17 1.3-.36 2.5-.42C8.4 2.2 8.8 2.2 12 2.2Zm0 1.8c-3.15 0-3.52 0-4.76.07-1 .04-1.5.2-1.86.34-.47.18-.8.4-1.15.75s-.57.68-.75 1.15c-.14.36-.3.86-.34 1.86C3.02 8.4 3 8.77 3 12s0 3.6.07 4.84c.04 1 .2 1.5.34 1.86.18.47.4.8.75 1.15s.68.57 1.15.75c.36.14.86.3 1.86.34C8.4 21 8.77 21 12 21s3.6 0 4.84-.07c1-.04 1.5-.2 1.86-.34.47-.18.8-.4 1.15-.75s.57-.68.75-1.15c.14-.36.3-.86.34-1.86.06-1.24.07-1.6.07-4.84s0-3.6-.07-4.84c-.04-1-.2-1.5-.34-1.86a3.1 3.1 0 0 0-.75-1.15 3.1 3.1 0 0 0-1.15-.75c-.36-.14-.86-.3-1.86-.34C15.6 4 15.23 4 12 4Zm0 3.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1.8a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Zm4.7-2a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Z"/>
+            </svg>
+          </a>
+        </div>
+        <a href="admin.html" class="crew-portal-trigger active" title="Crew Portal" aria-label="Crew Portal Access">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+    <div class="sprocket-rule"></div>
+  </header>
+
+  <!-- LOCKED STATE: Multi-User Password Challenge Gate -->
+  <section id="crew-lock-gate" class="section wrap lock-gate-section">
+    <div class="lock-gate-card sprocket-frame">
+      <div class="lock-gate-badge">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <div class="viewfinder-tag">[ RESTRICTED // CREW VAULT ]</div>
+      <h2>Projectionist & Admin Booth</h2>
+      <p class="lock-gate-desc">
+        Authentication required. For security, your session strictly locks whenever you navigate away or leave this page.
+      </p>
+
+      <form id="lock-gate-form" class="lock-gate-form">
+        <div class="form-group">
+          <label for="vault-username-input">Crew Username</label>
+          <input type="text" id="vault-username-input" required placeholder="e.g. ADMIN_MAIN or ADMIN_NAME" autocomplete="username" />
+          <small class="form-help">Enter master login <code>ADMIN_MAIN</code> or your assigned <code>ADMIN_[NAME]</code> account.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="vault-password-input">Account Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="vault-password-input" required placeholder="Enter your password…" autocomplete="current-password" />
+            <button type="button" id="toggle-pw-visibility" class="toggle-pw-btn" aria-label="Show or hide password">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="lock-error-msg" class="lock-error" style="display: none;"></div>
+        <button type="submit" class="btn btn-primary btn-block" id="vault-unlock-btn">
+          Authenticate & Unlock Booth &rarr;
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- UNLOCKED STATE: Full Management Dashboard -->
+  <main id="admin-content-view" class="section wrap admin-container" style="display: none;">
+    <div class="admin-header-row">
+      <div>
+        <div class="viewfinder-tag">[ CREW WORKSPACE // CHARUSAT ]</div>
+        <h2>Control Desk & Vault</h2>
+        <p>Manage film archive catalogs, review applicant sheets, monitor access logs, and provision crew logins.</p>
+      </div>
+      <div class="admin-top-controls">
+        <div id="operator-badge-wrap" class="hud-pill" style="font-size: 0.82rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 8px;">
+          <span class="rec-dot"></span>
+          <span>OPERATOR: <strong id="operator-username" style="color: var(--paper);">ADMIN_MAIN</strong></span>
+          <span id="operator-role-badge" class="role-badge-main">MAIN</span>
+        </div>
+        <div id="backend-status-badge" class="status-badge checking">
+          <span class="dot"></span>
+          <span class="text">Checking server…</span>
+        </div>
+        <button type="button" id="lock-vault-btn" class="btn btn-ghost btn-sm" title="Lock and exit immediately">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Lock & Exit
+        </button>
+      </div>
+    </div>
+
+    <!-- Admin Navigation Tabs -->
+    <nav class="admin-tab-nav" role="tablist">
+      <button type="button" class="admin-tab-btn active" id="tab-btn-films" data-tab="films" role="tab" aria-selected="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+        Films & Reels Catalog
+      </button>
+      <button type="button" class="admin-tab-btn" id="tab-btn-datasheet" data-tab="datasheet" role="tab" aria-selected="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Auditions Datasheet <span class="badge-count" id="datasheet-count-badge">0</span>
+      </button>
+      <button type="button" class="admin-tab-btn" id="tab-btn-forms" data-tab="forms" role="tab" aria-selected="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Form Customizer
+      </button>
+      <button type="button" class="admin-tab-btn" id="tab-btn-audit" data-tab="audit" role="tab" aria-selected="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Access Logs Datasheet <span class="badge-count" id="audit-count-badge">0</span>
+      </button>
+      <button type="button" class="admin-tab-btn" id="tab-btn-users" data-tab="users" role="tab" aria-selected="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        Crew Logins
+      </button>
+    </nav>
+
+    <!-- Notification toast -->
+    <div id="admin-notification" class="admin-notification" style="display: none;"></div>
+
+    <!-- ================= TAB 1: FILMS CATALOG ================= -->
+    <section id="panel-films" class="admin-tab-panel active" role="tabpanel">
+      <div class="admin-toolbar">
+        <div class="filters" id="admin-filters"></div>
+        <button type="button" class="btn btn-primary" id="open-add-modal-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add Film / Reel
+        </button>
+      </div>
+
+      <div id="admin-films-container" class="admin-films-list">
+        <p class="state-msg">Loading films…</p>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: AUDITIONS DATASHEET ================= -->
+    <section id="panel-datasheet" class="admin-tab-panel" role="tabpanel">
+      <div class="datasheet-toolbar">
+        <div class="datasheet-filters-group">
+          <input type="text" id="datasheet-search-input" class="input" placeholder="Search applicant, email, phone..." style="min-width: 240px; padding: 8px 12px; font-size: 0.88rem;" />
+          <select id="datasheet-role-filter" class="input" style="padding: 8px 12px; font-size: 0.88rem;">
+            <option value="All">All Roles</option>
+            <option value="Actor">Actors & Narrators</option>
+            <option value="Cinematographer">Cinematography / Camera</option>
+            <option value="Director">Directors & Screenwriters</option>
+            <option value="Editor">Video Editors & Colorists</option>
+            <option value="Sound">Sound Recordists</option>
+            <option value="AI">Generative AI Artists</option>
+          </select>
+          <select id="datasheet-status-filter" class="input" style="padding: 8px 12px; font-size: 0.88rem;">
+            <option value="All">All Statuses</option>
+            <option value="New">New</option>
+            <option value="Reviewing">Reviewing</option>
+            <option value="Shortlisted">Shortlisted</option>
+            <option value="Accepted">Accepted</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="datasheet-actions-group">
+          <button type="button" class="btn btn-ghost btn-sm" id="refresh-datasheet-btn" title="Refresh data">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            Refresh
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="export-csv-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Datasheet (.CSV)
+          </button>
+        </div>
+      </div>
+
+      <!-- Datasheet Table Container -->
+      <div class="datasheet-table-wrap sprocket-frame">
+        <table class="datasheet-table">
+          <thead>
+            <tr>
+              <th>Ref / ID</th>
+              <th>Date</th>
+              <th>Applicant</th>
+              <th>Contact Info</th>
+              <th>Role of Interest</th>
+              <th>Status</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="datasheet-table-body">
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 32px; color: var(--parchment-dim);">
+                Loading submissions datasheet…
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: FORM CUSTOMIZER ================= -->
+    <section id="panel-forms" class="admin-tab-panel" role="tabpanel">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h3 style="margin: 0 0 6px; font-size: 1.3rem; color: var(--paper);">Auditions & Roles Form Builder</h3>
+          <p style="margin: 0; color: var(--parchment-dim); font-size: 0.9rem;">
+            Questions customized here are live and appear directly on the public <a href="apply.html" target="_blank" style="color: var(--leaf-light); text-decoration: underline;">apply.html</a> page.
+          </p>
+        </div>
+        <button type="button" class="btn btn-primary" id="open-add-field-modal-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Add New Question
+        </button>
+      </div>
+
+      <div id="form-builder-container" class="form-builder-list">
+        <p class="state-msg">Loading form fields…</p>
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: ACCESS LOGS DATASHEET ================= -->
+    <section id="panel-audit" class="admin-tab-panel" role="tabpanel">
+      <div class="datasheet-toolbar">
+        <div class="datasheet-filters-group">
+          <input type="text" id="audit-search-input" class="input" placeholder="Search user, session ID..." style="min-width: 220px; padding: 8px 12px; font-size: 0.88rem;" />
+          <select id="audit-status-filter" class="input" style="padding: 8px 12px; font-size: 0.88rem;">
+            <option value="All">All Session Statuses</option>
+            <option value="ACTIVE">Active Now</option>
+            <option value="LOGGED_OUT">Logged Out / Exited</option>
+          </select>
+          <select id="audit-user-filter" class="input" style="padding: 8px 12px; font-size: 0.88rem;">
+            <option value="All">All Users</option>
+          </select>
+        </div>
+        <div class="datasheet-actions-group">
+          <button type="button" class="btn btn-ghost btn-sm" id="refresh-audit-btn" title="Refresh access logs">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            Refresh
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" id="export-audit-csv-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Access Logs (.CSV)
+          </button>
+        </div>
+      </div>
+
+      <!-- Access Logs Table Container -->
+      <div class="datasheet-table-wrap sprocket-frame">
+        <table class="datasheet-table">
+          <thead>
+            <tr>
+              <th>Session ID</th>
+              <th>User</th>
+              <th>Role</th>
+              <th>Login Timestamp</th>
+              <th>Logout / Exit Timestamp</th>
+              <th>Duration</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body">
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 32px; color: var(--parchment-dim);">
+                Loading access logs datasheet…
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= TAB 5: CREW LOGINS ================= -->
+    <section id="panel-users" class="admin-tab-panel" role="tabpanel">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h3 style="margin: 0 0 6px; font-size: 1.3rem; color: var(--paper);">Crew Admin Accounts</h3>
+          <p style="margin: 0; color: var(--parchment-dim); font-size: 0.9rem;">
+            Primary user <strong>ADMIN_MAIN</strong> can provision dedicated logins for sub crew members formatted as <code>ADMIN_[NAME]</code>.
+          </p>
+        </div>
+        <button type="button" class="btn btn-primary" id="open-add-user-modal-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Provision Crew Login
+        </button>
+      </div>
+
+      <div id="users-list-container" class="form-builder-list">
+        <p class="state-msg">Loading crew logins…</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= MODAL: ADD / EDIT FILM ================= -->
+  <div id="film-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-box sprocket-frame">
+      <div class="modal-header">
+        <h3 id="modal-title">Add New Film / Reel</h3>
+        <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <form id="film-form" class="modal-form">
+        <input type="hidden" id="film-id" />
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="film-title">Title / Project Name *</label>
+            <input type="text" id="film-title" required placeholder="e.g. Last Light" />
+          </div>
+          <div class="form-group flex-1">
+            <label for="film-category">Category *</label>
+            <select id="film-category" required>
+              <option value="Short Film">Short Film</option>
+              <option value="AI Film">AI Film</option>
+              <option value="Documentary">Documentary</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="film-duration">Duration (mins) *</label>
+            <input type="number" id="film-duration" required min="1" max="600" placeholder="e.g. 8" />
+          </div>
+          <div class="form-group flex-1">
+            <label for="film-year">Release Year *</label>
+            <input type="number" id="film-year" required min="2000" max="2099" value="2026" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="film-url">Video or Reel URL (YouTube, Vimeo, or Instagram) *</label>
+          <input type="url" id="film-url" required placeholder="https://www.youtube.com/watch?v=... or https://www.instagram.com/reel/..." />
+          <small class="form-help">Supports YouTube watch links, Shorts, and Instagram Reel URLs.</small>
+        </div>
+
+        <!-- Video Preview -->
+        <div class="video-preview-wrapper" id="video-preview-box" style="display: none;">
+          <label>Embed Preview</label>
+          <div class="video-slot">
+            <iframe id="preview-iframe" src="" title="Video preview" loading="lazy" allowfullscreen></iframe>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="film-synopsis">Synopsis & Logline *</label>
+          <textarea id="film-synopsis" required rows="3" placeholder="Brief description of the story, conservation focus, or production techniques..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-submit-btn">Save to Archive</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: SUBMISSION DETAILS SHEET ================= -->
+  <div id="submission-detail-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-box sprocket-frame" style="max-width: 680px;">
+      <div class="modal-header">
+        <div>
+          <span class="hud-pill" style="margin-bottom: 4px; display: inline-block;"><span class="rec-dot"></span> CANDIDATE RECORD</span>
+          <h3 id="sub-detail-title" style="margin: 2px 0 0;">Applicant Audition Sheet</h3>
+        </div>
+        <button type="button" class="modal-close-btn" id="sub-detail-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div style="max-height: 70vh; overflow-y: auto; padding-right: 6px;">
+        <div id="sub-detail-summary" style="background: var(--navy-dark); padding: 14px 18px; border-radius: var(--radius); margin-bottom: 16px; border: 1px solid var(--navy-mid);">
+          <!-- Summary chips loaded dynamically -->
+        </div>
+
+        <h4 style="margin: 16px 0 8px; color: var(--leaf-light); font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.05em;">Submitted Question Responses</h4>
+        <dl class="detail-grid" id="sub-detail-answers">
+          <!-- Filled dynamically -->
+        </dl>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button type="button" class="btn btn-ghost" id="sub-detail-dismiss-btn">Close Sheet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: ADD / EDIT FORM FIELD ================= -->
+  <div id="field-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-box sprocket-frame" style="max-width: 540px;">
+      <div class="modal-header">
+        <h3 id="field-modal-title">Add Form Question</h3>
+        <button type="button" class="modal-close-btn" id="field-modal-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <form id="field-form" class="modal-form">
+        <input type="hidden" id="field-id" />
+
+        <div class="form-group">
+          <label for="field-label">Question Label / Prompt *</label>
+          <input type="text" id="field-label" required placeholder="e.g. Which camera models have you operated?" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="field-key">Field Key (Identifier) *</label>
+            <input type="text" id="field-key" required pattern="[a-zA-Z0-9_]+" placeholder="e.g. camera_models" />
+            <small class="form-help">Letters, numbers, and underscores only.</small>
+          </div>
+          <div class="form-group flex-1">
+            <label for="field-type">Response Type *</label>
+            <select id="field-type" required>
+              <option value="text">Single Line Text</option>
+              <option value="textarea">Paragraph / Multi-line</option>
+              <option value="select">Dropdown Menu</option>
+              <option value="email">Email Address</option>
+              <option value="tel">Phone / WhatsApp</option>
+              <option value="url">Web Link (URL)</option>
+              <option value="number">Number</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="field-options-group" style="display: none;">
+          <label for="field-options">Dropdown Options (Comma-separated)</label>
+          <input type="text" id="field-options" placeholder="Option A, Option B, Option C" />
+          <small class="form-help">Separate each dropdown choice with a comma.</small>
+        </div>
+
+        <div class="form-row" style="align-items: center;">
+          <div class="form-group flex-1" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+            <input type="checkbox" id="field-required" style="width: 18px; height: 18px; cursor: pointer;" />
+            <label for="field-required" style="margin-bottom: 0; cursor: pointer;">Required Answer</label>
+          </div>
+          <div class="form-group flex-1">
+            <label for="field-order">Display Order</label>
+            <input type="number" id="field-order" min="1" max="99" value="10" />
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 24px;">
+          <button type="button" class="btn btn-ghost" id="field-modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="field-modal-submit-btn">Save Question</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: PROVISION CREW LOGIN ================= -->
+  <div id="user-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-box sprocket-frame" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 id="user-modal-title">Provision New Crew Login</h3>
+        <button type="button" class="modal-close-btn" id="user-modal-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <form id="user-form" class="modal-form">
+        <div class="form-group">
+          <label for="crew-name-input">Crew Member Full Name *</label>
+          <input type="text" id="crew-name-input" required placeholder="e.g. Jeet Patel or Aryan" />
+          <small class="form-help">Username will be formatted as: <code id="username-preview-tag" style="color: var(--amber); font-weight: 600;">ADMIN_NAME</code></small>
+        </div>
+
+        <div class="form-group">
+          <label for="crew-password-input">Unique Password *</label>
+          <input type="password" id="crew-password-input" required minlength="4" placeholder="Enter unique password for this crew member…" />
+          <small class="form-help">Must be at least 4 characters.</small>
+        </div>
+
+        <div id="user-modal-error" class="lock-error" style="display: none; margin-bottom: 12px;"></div>
+
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button type="button" class="btn btn-ghost" id="user-modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="user-modal-submit-btn">Provision Login &rarr;</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="wrap foot-row">
+      <div>
+        <div class="brand">
+          <img src="assets/logo-mark.png" alt="" width="36" height="36" />
+          IMPACT<span>FRAME</span>
+        </div>
+        <p class="motto">Create. Conserve. Inspire.</p>
+      </div>
+      <div class="contact">
+        <a href="mailto:impactframe.ee@charusat.ac.in">impactframe.ee@charusat.ac.in</a>
+        <div class="social-links">
+          <a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener" class="social-icon-yt" aria-label="IMPACTFRAME on YouTube">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </a>
+          <a href="https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="social-icon-ig" aria-label="IMPACTFRAME on Instagram">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 2 .25 2.5.42.6.24 1 .5 1.5 1s.75.9 1 1.5c.17.5.36 1.3.42 2.5.06 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.25 2-.42 2.5-.24.6-.5 1-1 1.5s-.9.75-1.5 1c-.5.17-1.3.36-2.5.42-1.3.06-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-2-.25-2.5-.42-.6-.24-1-.5-1.5-1s-.75-.9-1-1.5c-.17-.5-.36-1.3-.42-2.5C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.25-2 .42-2.5.24-.6.5-1 1-1.5s.9-.75 1.5-1c.5-.17 1.3-.36 2.5-.42C8.4 2.2 8.8 2.2 12 2.2Zm0 1.8c-3.15 0-3.52 0-4.76.07-1 .04-1.5.2-1.86.34-.47.18-.8.4-1.15.75s-.57.68-.75 1.15c-.14.36-.3.86-.34 1.86C3.02 8.4 3 8.77 3 12s0 3.6.07 4.84c.04 1 .2 1.5.34 1.86.18.47.4.8.75 1.15s.68.57 1.15.75c.36.14.86.3 1.86.34C8.4 21 8.77 21 12 21s3.6 0 4.84-.07c1-.04 1.5-.2 1.86-.34.47-.18.8-.4 1.15-.75s.57-.68.75-1.15c.14-.36.3-.86.34-1.86.06-1.24.07-1.6.07-4.84s0-3.6-.07-4.84c-.04-1-.2-1.5-.34-1.86a3.1 3.1 0 0 0-.75-1.15 3.1 3.1 0 0 0-1.15-.75c-.36-.14-.86-.3-1.86-.34C15.6 4 15.23 4 12 4Zm0 3.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1.8a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Zm4.7-2a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "impactframe",
+  "version": "1.0.0",
+  "description": "IMPACTFRAME - College Media Club Web Platform",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^11.3.0"
+  },
+  "engines": {
+    "node": ">=20.x"
+  }
+}
