@@ -39,7 +39,7 @@ app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(FRONTEND_DIR, "index.html"));
 });
 
-if (!process.env.VERCEL) {
+if (require.main === module && !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`IMPACTFRAME server running at http://localhost:${PORT}`);
   });
