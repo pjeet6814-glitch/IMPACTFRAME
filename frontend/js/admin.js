@@ -1286,7 +1286,7 @@ document.addEventListener("DOMContentLoaded", () => {
      ========================================================================== */
   function formatDuration(seconds) {
     if (seconds === null || seconds === undefined) return "—";
-    const s = Math.max(0, parseInt(seconds, 10));
+    const s = Math.max(0, parseInt(seconds, 10) || 0);
     if (s < 60) return `${s}s`;
     const m = Math.floor(s / 60);
     const remS = s % 60;
@@ -1298,12 +1298,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function formatTimestamp(isoStr) {
     if (!isoStr) return "—";
-    const d = new Date(isoStr);
-    if (isNaN(d.getTime())) return isoStr;
-    return d.toLocaleString("en-IN", {
-      dateStyle: "medium",
-      timeStyle: "medium",
-    });
+    try {
+      const str = String(isoStr).trim();
+      const sanitized = str.includes("T") ? str : str.replace(" ", "T");
+      const d = new Date(sanitized);
+      if (isNaN(d.getTime())) return str;
+      return d.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+    } catch {
+      return String(isoStr);
+    }
   }
 
   async function loadAuditLogs() {

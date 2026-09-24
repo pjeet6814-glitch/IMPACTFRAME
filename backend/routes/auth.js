@@ -2,6 +2,7 @@ const express = require("express");
 const crypto = require("node:crypto");
 const { db, hashPassword, verifyPassword } = require("../db/init");
 const adminAuth = require("../middleware/adminAuth");
+const { signSessionToken } = require("../utils/tokens");
 
 const router = express.Router();
 
@@ -56,15 +57,25 @@ router.post("/login", (req, res) => {
 
   // Generate session credentials
   const sessionId = "IF-SES-" + crypto.randomUUID().slice(0, 8).toUpperCase();
-  const token = crypto.randomBytes(32).toString("hex");
+  const token = signSessionToken({
+    session_id: sessionId,
+    username: user.username,
+    role: user.role,
+    full_name: user.full_name || user.username,
+    exp: Date.now() + 7 * 24 * 60 * 60 * 1000,
+  });
   const ipAddress = req.ip || req.socket.remoteAddress || "127.0.0.1";
   const userAgent = (req.headers["user-agent"] || "").slice(0, 150);
 
-  // Record login event in admin_audit_logs
-  db.prepare(`
-    INSERT INTO admin_audit_logs (session_id, token, username, role, login_time, ip_address, user_agent, status)
-    VALUES (?, ?, ?, ?, datetime('now'), ?, ?, 'ACTIVE')
-  `).run(sessionId, token, user.username, user.role, ipAddress, userAgent);
+  // Record login event in admin_audit_logs (best-effort)
+  try {
+    db.prepare(`
+      INSERT INTO admin_audit_logs (session_id, token, username, role, login_time, ip_address, user_agent, status)
+      VALUES (?, ?, ?, ?, datetime('now'), ?, ?, 'ACTIVE')
+    `).run(sessionId, token, user.username, user.role, ipAddress, userAgent);
+  } catch (err) {
+    console.warn("Audit log insert notice:", err.message);
+  }
 
   return res.json({
     ok: true,
@@ -202,7 +213,8 @@ router.post("/users", adminAuth, (req, res) => {
 
   // Clean and enforce prefix ADMIN_<NAME>
   const cleanName = rawName.toUpperCase().replace(/[^A-Z0-9]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
-  const username = cleanName.startsWith("ADMIN_") ? cleanName : `ADMIN_${cleanName}`;
+  const cleanSuffix = cleanName || `MEMBER_${Date.now().toString().slice(-4)}`;
+  const username = cleanSuffix.startsWith("ADMIN_") ? cleanSuffix : `ADMIN_${cleanSuffix}`;
 
   if (username === "ADMIN_MAIN") {
     return res.status(400).json({ error: "Cannot create duplicate ADMIN_MAIN account." });

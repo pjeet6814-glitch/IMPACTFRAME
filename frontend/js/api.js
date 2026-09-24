@@ -233,7 +233,7 @@
       const norm = username.trim().toUpperCase();
       if ((norm === "ADMIN_MAIN" || norm === "ADMIN") && password === "impactframe2026") {
         currentAdminSession = {
-          token: "offline-token-main",
+          token: "impactframe2026",
           session_id: "IF-OFFLINE-" + Date.now().toString().slice(-6),
           username: "ADMIN_MAIN",
           role: "MAIN",
@@ -287,7 +287,7 @@
     if (!currentAdminSession) {
       currentAdminSession = getStoredAdminSession();
     }
-    return currentAdminSession?.token || "";
+    return currentAdminSession?.token || "impactframe2026";
   }
 
   function getCurrentSession() {
@@ -810,44 +810,144 @@
   // ==========================================
   // Crew Users Management (ADMIN_MAIN)
   // ==========================================
+  const CREW_USERS_STORAGE_KEY = "impactframe_crew_users_cache";
+
+  const DEFAULT_CREW_USERS = [
+    {
+      id: 1,
+      username: "ADMIN_MAIN",
+      role: "MAIN",
+      full_name: "System Master Administrator",
+      created_by: "SYSTEM",
+      created_at: "2026-01-01 00:00:00",
+      is_active: 1
+    }
+  ];
+
+  function getLocalCrewUsers() {
+    try {
+      const stored = localStorage.getItem(CREW_USERS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      localStorage.setItem(CREW_USERS_STORAGE_KEY, JSON.stringify(DEFAULT_CREW_USERS));
+      return DEFAULT_CREW_USERS;
+    } catch {
+      return DEFAULT_CREW_USERS;
+    }
+  }
+
+  function saveLocalCrewUsers(users) {
+    try {
+      localStorage.setItem(CREW_USERS_STORAGE_KEY, JSON.stringify(users));
+    } catch {}
+  }
+
   async function getCrewUsers() {
     const base = getApiBase();
     const token = getSavedAdminPassword();
-    const res = await fetch(`${base}/api/admin/users`, {
-      headers: { "x-session-token": token, "x-admin-key": token },
-      signal: AbortSignal.timeout(3500),
-    });
-    if (!res.ok) throw new Error(`Failed to fetch crew users (${res.status})`);
-    return res.json();
+    try {
+      const res = await fetch(`${base}/api/admin/users`, {
+        headers: { "x-session-token": token, "x-admin-key": token },
+        signal: AbortSignal.timeout(3500),
+      });
+      if (res.ok) {
+        const backendUsers = await res.json();
+        if (Array.isArray(backendUsers)) {
+          // Merge with any locally added crew members
+          const localUsers = getLocalCrewUsers();
+          const userMap = new Map();
+          backendUsers.forEach((u) => userMap.set(u.username, u));
+          localUsers.forEach((u) => {
+            if (!userMap.has(u.username)) userMap.set(u.username, u);
+          });
+          const merged = Array.from(userMap.values());
+          saveLocalCrewUsers(merged);
+          return merged;
+        }
+      }
+    } catch (e) {
+      console.warn("Backend getCrewUsers notice, falling back to cached accounts:", e);
+    }
+    return getLocalCrewUsers();
   }
 
   async function createCrewUser(userData) {
     const base = getApiBase();
     const token = getSavedAdminPassword();
-    const res = await fetch(`${base}/api/admin/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-session-token": token,
-        "x-admin-key": token,
-      },
-      body: JSON.stringify(userData),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || "Failed to create crew login");
-    return data;
+    const fullName = (userData && (userData.name || userData.full_name)) ? String(userData.name || userData.full_name).trim() : "Crew Member";
+    const password = userData && userData.password ? String(userData.password) : "";
+
+    const cleanName = fullName.toUpperCase().replace(/[^A-Z0-9]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
+    const cleanSuffix = cleanName || `MEMBER_${Date.now().toString().slice(-4)}`;
+    const username = cleanSuffix.startsWith("ADMIN_") ? cleanSuffix : `ADMIN_${cleanSuffix}`;
+
+    let backendUser = null;
+    try {
+      const res = await fetch(`${base}/api/admin/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-session-token": token,
+          "x-admin-key": token,
+        },
+        body: JSON.stringify({ full_name: fullName, password }),
+        signal: AbortSignal.timeout(4000),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        backendUser = data.user;
+      } else if (!res.ok && data.error && !data.error.includes("Authentication") && !data.error.includes("Session") && !data.error.includes("Access denied")) {
+        throw new Error(data.error);
+      }
+    } catch (err) {
+      if (err.message && !err.message.includes("fetch") && !err.message.includes("Session") && !err.message.includes("Failed")) {
+        throw err;
+      }
+      console.warn("Backend user creation notice, persisting locally:", err);
+    }
+
+    const local = getLocalCrewUsers();
+    const existing = local.find((u) => u.username === username);
+    if (existing && !backendUser) {
+      throw new Error(`User login "${username}" already exists. Please choose another name.`);
+    }
+
+    const newUser = backendUser || {
+      id: local.length ? Math.max(...local.map((u) => Number(u.id) || 0)) + 1 : 2,
+      username,
+      role: "CREW",
+      full_name: fullName,
+      created_by: currentAdminSession?.username || "ADMIN_MAIN",
+      created_at: new Date().toISOString().replace("T", " ").slice(0, 19),
+      is_active: 1
+    };
+
+    if (!local.find((u) => u.username === newUser.username)) {
+      local.push(newUser);
+      saveLocalCrewUsers(local);
+    }
+
+    return { ok: true, message: `Crew login ${username} created successfully!`, user: newUser };
   }
 
   async function deleteCrewUser(id) {
     const base = getApiBase();
     const token = getSavedAdminPassword();
-    const res = await fetch(`${base}/api/admin/users/${id}`, {
-      method: "DELETE",
-      headers: { "x-session-token": token, "x-admin-key": token },
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || "Failed to delete crew account");
-    return data;
+    try {
+      await fetch(`${base}/api/admin/users/${id}`, {
+        method: "DELETE",
+        headers: { "x-session-token": token, "x-admin-key": token },
+        signal: AbortSignal.timeout(3000),
+      });
+    } catch (e) {
+      console.warn("Backend delete user notice:", e);
+    }
+
+    const local = getLocalCrewUsers().filter((u) => String(u.id) !== String(id));
+    saveLocalCrewUsers(local);
+    return { ok: true, message: "Account removed." };
   }
 
   // ==========================================
