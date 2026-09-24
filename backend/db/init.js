@@ -216,56 +216,11 @@ db.exec(`
 `);
 
 function seed() {
-  // Seed sample films if empty
-  const countRow = db.prepare("SELECT COUNT(*) AS n FROM films").get();
-  const count = countRow ? countRow.n : 0;
-  if (count === 0) {
-    const insertFilm = db.prepare(`
-      INSERT INTO films (title, category, synopsis, duration_minutes, video_url, thumbnail_url, release_year)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const samples = [
-      {
-        title: "Groundwater",
-        category: "Documentary",
-        synopsis: "A look at the campus borewell crisis and the students mapping it street by street.",
-        duration_minutes: 14,
-        video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        thumbnail_url: "",
-        release_year: 2025,
-      },
-      {
-        title: "Ash & After",
-        category: "Short Film",
-        synopsis: "A forest fire's aftermath, told through the eyes of a ranger returning home.",
-        duration_minutes: 9,
-        video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        thumbnail_url: "",
-        release_year: 2025,
-      },
-      {
-        title: "What the River Remembers",
-        category: "AI Film",
-        synopsis: "An AI-generated visual poem imagining the river before the dam.",
-        duration_minutes: 4,
-        video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        thumbnail_url: "",
-        release_year: 2024,
-      },
-    ];
-
-    db.exec("BEGIN TRANSACTION;");
-    try {
-      for (const row of samples) {
-        insertFilm.run(row.title, row.category, row.synopsis, row.duration_minutes, row.video_url, row.thumbnail_url, row.release_year);
-      }
-      db.exec("COMMIT;");
-      console.log(`Seeded ${samples.length} sample films successfully.`);
-    } catch (err) {
-      db.exec("ROLLBACK;");
-      throw err;
-    }
+  // Purge any legacy demo films that were seeded previously
+  try {
+    db.exec("DELETE FROM films WHERE video_url LIKE '%dQw4w9WgXcQ%' OR title IN ('Groundwater', 'Ash & After', 'What the River Remembers');");
+  } catch (err) {
+    console.warn("Notice cleaning legacy demo films:", err.message);
   }
 
   // Seed default form questions if empty

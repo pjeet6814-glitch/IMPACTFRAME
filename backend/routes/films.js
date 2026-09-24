@@ -95,7 +95,7 @@ router.put("/:id", adminAuth, (req, res) => {
 
 // DELETE /api/films/:id — remove a film (admin only)
 router.delete("/:id", adminAuth, (req, res) => {
-  const result = db.prepare("DELETE FROM films WHERE id = ?").run(req.params.id);
+  const result = db.prepare("DELETE FROM films WHERE id = ? OR id = CAST(? AS INTEGER)").run(req.params.id, req.params.id);
   if (result.changes === 0) return res.status(404).json({ error: "Film not found." });
   res.status(204).send();
 });

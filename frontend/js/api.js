@@ -10,44 +10,15 @@
   const FORM_SETTINGS_STORAGE_KEY = "impactframe_form_settings_cache";
   const ADMIN_SESSION_KEY = "impactframe_crew_auth";
 
-  const DEFAULT_SAMPLE_FILMS = [
-    {
-      id: 1,
-      title: "Groundwater",
-      category: "Documentary",
-      synopsis: "A look at the campus borewell crisis and the students mapping it street by street.",
-      duration_minutes: 14,
-      video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      thumbnail_url: "",
-      release_year: 2025,
-      created_at: "2025-01-15 10:00:00",
-      aspect_ratio: "16:9"
-    },
-    {
-      id: 2,
-      title: "Ash & After",
-      category: "Short Film",
-      synopsis: "A forest fire's aftermath, told through the eyes of a ranger returning home.",
-      duration_minutes: 9,
-      video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      thumbnail_url: "",
-      release_year: 2025,
-      created_at: "2025-02-01 14:30:00",
-      aspect_ratio: "16:9"
-    },
-    {
-      id: 3,
-      title: "What the River Remembers",
-      category: "AI Film",
-      synopsis: "An AI-generated visual poem imagining the river before the dam.",
-      duration_minutes: 4,
-      video_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      thumbnail_url: "",
-      release_year: 2024,
-      created_at: "2024-11-20 09:15:00",
-      aspect_ratio: "16:9"
+  const DEFAULT_SAMPLE_FILMS = [];
+
+  // Purge any legacy cached demo films from browser localStorage
+  try {
+    const cachedFilms = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (cachedFilms && (cachedFilms.includes("dQw4w9WgXcQ") || cachedFilms.includes("Groundwater") || cachedFilms.includes("Ash & After"))) {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
     }
-  ];
+  } catch {}
 
   // Official Social & Email Contact
   const SOCIAL_LINKS = {
@@ -57,35 +28,7 @@
   };
 
   // Curated Instagram Reels & Shorts Highlights from the club
-  const FEATURED_REELS = [
-    {
-      id: "reel-1",
-      title: "Campus Energy Audit: Night Thermal Camera Scan",
-      platform: "instagram",
-      url: "https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==",
-      embed_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      views: "2.4K",
-      caption: "We walked the mechanical engineering wings with thermal sensors at 2 AM. Look at where heat leaks."
-    },
-    {
-      id: "reel-2",
-      title: "Field Audio: Capturing Rain on Solar Panels",
-      platform: "instagram",
-      url: "https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==",
-      embed_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      views: "4.1K",
-      caption: "Hydrophones taped to aluminum frames during the first monsoon shower. Pure tactile resonance."
-    },
-    {
-      id: "reel-3",
-      title: "AI Generative Forest: 100 Years of Rewilding",
-      platform: "youtube",
-      url: "https://www.youtube.com/@ImpactFrameEE",
-      embed_url: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      views: "5.8K",
-      caption: "Diffusing satellite topographical maps into a century of continuous tree canopy growth."
-    }
-  ];
+  const FEATURED_REELS = [];
 
   // Fallback Form Questions if offline
   const DEFAULT_FORM_FIELDS = [
@@ -415,11 +358,13 @@
     };
 
     try {
+      const token = adminKey || getSavedAdminPassword();
       const res = await fetch(`${base}/api/films`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-key": adminKey || getSavedAdminPassword(),
+          "x-admin-key": token,
+          "x-session-token": token,
         },
         body: JSON.stringify(formattedData),
         signal: AbortSignal.timeout(3000),
@@ -458,11 +403,13 @@
     };
 
     try {
+      const token = adminKey || getSavedAdminPassword();
       const res = await fetch(`${base}/api/films/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "x-admin-key": adminKey || getSavedAdminPassword(),
+          "x-admin-key": token,
+          "x-session-token": token,
         },
         body: JSON.stringify(formattedData),
         signal: AbortSignal.timeout(3000),
@@ -489,11 +436,13 @@
 
   async function deleteFilm(id, adminKey) {
     const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
     try {
       const res = await fetch(`${base}/api/films/${id}`, {
         method: "DELETE",
         headers: {
-          "x-admin-key": adminKey || getSavedAdminPassword(),
+          "x-admin-key": token,
+          "x-session-token": token,
         },
         signal: AbortSignal.timeout(3000),
       });
