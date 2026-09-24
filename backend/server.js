@@ -23,12 +23,12 @@ app.use(
   })
 );
 
-// API routes
-app.use("/api/films", filmsRouter);
-app.use("/api", formsRouter);
-app.use("/api/admin", authRouter);
+// API routes (supports both direct Express server and Vercel serverless rewrites)
+app.use(["/api/films", "/films"], filmsRouter);
+app.use(["/api/admin", "/admin"], authRouter);
+app.use(["/api", "/"], formsRouter);
 
-app.get("/api/health", (req, res) => {
+app.get(["/api/health", "/health"], (req, res) => {
   res.json({ status: "ok", club: "IMPACTFRAME", time: new Date().toISOString() });
 });
 
