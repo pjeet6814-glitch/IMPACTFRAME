@@ -7,6 +7,7 @@
   const LOCAL_STORAGE_KEY = "impactframe_films_cache";
   const SUBMISSIONS_STORAGE_KEY = "impactframe_submissions_cache";
   const FORMS_STORAGE_KEY = "impactframe_form_fields_cache";
+  const FORM_SETTINGS_STORAGE_KEY = "impactframe_form_settings_cache";
   const ADMIN_SESSION_KEY = "impactframe_crew_auth";
 
   const DEFAULT_SAMPLE_FILMS = [
@@ -509,6 +510,56 @@
   }
 
   // ==========================================
+  // Form Settings & Google Forms Builder Controls
+  // ==========================================
+  const DEFAULT_FORM_SETTINGS = {
+    form_title: "IMPACTFRAME 2026 Auditions & Roles Application",
+    form_description: "Audition for on-screen performance or apply for director, cinematographer, AI artist, sound, and editor positions in upcoming short films.",
+    is_accepting_responses: true,
+    closed_message: "This audition form is currently closed to new responses. Thank you for your interest in IMPACTFRAME!",
+    confirmation_message: "Thank you! Your response has been recorded. Our production directors will review your application and contact you soon via WhatsApp/Email.",
+    header_banner_url: "",
+  };
+
+  async function getFormSettings() {
+    const base = getApiBase();
+    try {
+      const res = await fetch(`${base}/api/form-settings`, { signal: AbortSignal.timeout(2500) });
+      if (res.ok) {
+        const settings = await res.json();
+        localStorage.setItem(FORM_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+        return settings;
+      }
+    } catch {}
+    try {
+      const cached = localStorage.getItem(FORM_SETTINGS_STORAGE_KEY);
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    return DEFAULT_FORM_SETTINGS;
+  }
+
+  async function updateFormSettings(settingsData, adminKey) {
+    const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
+    const res = await fetch(`${base}/api/form-settings`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-session-token": token,
+        "x-admin-key": token,
+      },
+      body: JSON.stringify(settingsData),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Failed to update form settings (${res.status})`);
+    }
+    const updated = await res.json();
+    localStorage.setItem(FORM_SETTINGS_STORAGE_KEY, JSON.stringify(updated));
+    return updated;
+  }
+
+  // ==========================================
   // Dynamic Form Fields & Form Builder
   // ==========================================
   async function getFormFields() {
@@ -530,9 +581,10 @@
 
   async function getAllFormFields(adminKey) {
     const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
     try {
       const res = await fetch(`${base}/api/form-fields/all`, {
-        headers: { "x-admin-key": adminKey || getSavedAdminPassword() },
+        headers: { "x-session-token": token, "x-admin-key": token },
         signal: AbortSignal.timeout(2500)
       });
       if (res.ok) return await res.json();
@@ -542,11 +594,13 @@
 
   async function createFormField(fieldData, adminKey) {
     const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
     const res = await fetch(`${base}/api/form-fields`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-admin-key": adminKey || getSavedAdminPassword(),
+        "x-session-token": token,
+        "x-admin-key": token,
       },
       body: JSON.stringify(fieldData),
     });
@@ -559,11 +613,13 @@
 
   async function updateFormField(id, fieldData, adminKey) {
     const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
     const res = await fetch(`${base}/api/form-fields/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "x-admin-key": adminKey || getSavedAdminPassword(),
+        "x-session-token": token,
+        "x-admin-key": token,
       },
       body: JSON.stringify(fieldData),
     });
@@ -574,12 +630,50 @@
     return res.json();
   }
 
+  async function reorderFormFields(orderedIds, adminKey) {
+    const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
+    const res = await fetch(`${base}/api/form-fields/reorder`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-session-token": token,
+        "x-admin-key": token,
+      },
+      body: JSON.stringify({ ordered_ids: orderedIds }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Reorder failed (${res.status})`);
+    }
+    return res.json();
+  }
+
+  async function duplicateFormField(id, adminKey) {
+    const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
+    const res = await fetch(`${base}/api/form-fields/${id}/duplicate`, {
+      method: "POST",
+      headers: {
+        "x-session-token": token,
+        "x-admin-key": token,
+      },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Duplicate failed (${res.status})`);
+    }
+    return res.json();
+  }
+
   async function deleteFormField(id, adminKey) {
     const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
     const res = await fetch(`${base}/api/form-fields/${id}`, {
       method: "DELETE",
       headers: {
-        "x-admin-key": adminKey || getSavedAdminPassword(),
+        "x-session-token": token,
+        "x-admin-key": token,
       },
     });
     if (!res.ok && res.status !== 204) {
@@ -598,14 +692,20 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-        signal: AbortSignal.timeout(3500)
+        signal: AbortSignal.timeout(4500)
       });
       if (res.ok) {
         return await res.json();
       }
       const err = await res.json().catch(() => ({}));
+      if (res.status === 403 && err.closed) {
+        throw new Error(err.error || "This form is currently closed to new responses.");
+      }
       throw new Error(err.error || `Submission failed (${res.status})`);
     } catch (e) {
+      if (e.message && e.message.includes("closed")) {
+        throw e;
+      }
       // Offline fallback: store locally
       let subs = [];
       try {
@@ -624,7 +724,7 @@
       };
       subs.unshift(submission);
       localStorage.setItem(SUBMISSIONS_STORAGE_KEY, JSON.stringify(subs));
-      return { success: true, reference_id: `IF-OFFLINE-${fallbackId}`, submission };
+      return { success: true, reference_id: `IF-OFFLINE-${fallbackId}`, confirmation_message: DEFAULT_FORM_SETTINGS.confirmation_message, submission };
     }
   }
 
@@ -819,10 +919,14 @@
     updateFilm,
     deleteFilm,
     // Dynamic Forms & Submissions
+    getFormSettings,
+    updateFormSettings,
     getFormFields,
     getAllFormFields,
     createFormField,
     updateFormField,
+    reorderFormFields,
+    duplicateFormField,
     deleteFormField,
     submitApplication,
     getSubmissions,

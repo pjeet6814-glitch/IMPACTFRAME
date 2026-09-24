@@ -1575,3 +1575,90 @@ a:focus-visible, button:focus-visible {
   font-weight: 600;
 }
 
+/* ==========================================================================
+   GOOGLE FORMS BUILDER & ADVANCED DYNAMIC FORM STYLES
+   ========================================================================== */
+.form-field-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--navy-dark);
+  border: 1px solid var(--navy-mid);
+  border-radius: var(--radius);
+  gap: 16px;
+  flex-wrap: wrap;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-field-card:hover {
+  border-color: rgba(94, 234, 212, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.form-field-card.is-disabled {
+  opacity: 0.55;
+  filter: grayscale(40%);
+}
+
+.form-field-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.84rem;
+  color: var(--parchment-dim);
+  flex-wrap: wrap;
+}
+
+.field-type-pill {
+  font-family: monospace;
+  font-size: 0.8rem;
+  padding: 2px 7px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  color: var(--amber);
+}
+
+.req-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.opt-badge {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--parchment-dim);
+  border-radius: 999px;
+}
+
+/* Public Form Question Cards (Google Forms Style) */
+.question-card {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.question-card:focus-within {
+  border-color: var(--leaf-light) !important;
+  box-shadow: 0 0 0 1px var(--leaf-light), 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.choices-list label:hover {
+  color: var(--leaf-light) !important;
+}
+
+.choices-list input[type="radio"]:checked + span,
+.choices-list input[type="checkbox"]:checked + span {
+  color: var(--leaf-light);
+  font-weight: 600;
+}
+
+.form-section-banner {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+

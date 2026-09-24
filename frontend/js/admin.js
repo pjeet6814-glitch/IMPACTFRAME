@@ -72,7 +72,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const subDetailCloseBtn = document.getElementById("sub-detail-close-btn");
   const subDetailDismissBtn = document.getElementById("sub-detail-dismiss-btn");
 
-  // Form Customizer Elements
+  // Form Settings & Header Controls Elements
+  const formSettingsForm = document.getElementById("form-settings-form");
+  const formTitleInput = document.getElementById("form-title-input");
+  const formBannerInput = document.getElementById("form-banner-input");
+  const formDescInput = document.getElementById("form-desc-input");
+  const formConfirmMsgInput = document.getElementById("form-confirm-msg-input");
+  const formClosedMsgInput = document.getElementById("form-closed-msg-input");
+  const formAcceptingToggle = document.getElementById("form-accepting-toggle");
+  const acceptingStatusLabel = document.getElementById("accepting-status-label");
+  const saveFormSettingsBtn = document.getElementById("save-form-settings-btn");
+
+  // Form Questions Elements
+  const addSectionDividerBtn = document.getElementById("add-section-divider-btn");
   const openAddFieldModalBtn = document.getElementById("open-add-field-modal-btn");
   const formBuilderContainer = document.getElementById("form-builder-container");
   const fieldModal = document.getElementById("field-modal");
@@ -82,12 +94,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const fieldForm = document.getElementById("field-form");
   const fieldIdInput = document.getElementById("field-id");
   const fieldLabelInput = document.getElementById("field-label");
-  const fieldKeyInput = document.getElementById("field-key");
   const fieldTypeSelect = document.getElementById("field-type");
+  const fieldDescriptionInput = document.getElementById("field-description");
+  const fieldPlaceholderGroup = document.getElementById("field-placeholder-group");
+  const fieldPlaceholderInput = document.getElementById("field-placeholder");
   const fieldOptionsGroup = document.getElementById("field-options-group");
-  const fieldOptionsInput = document.getElementById("field-options");
-  const fieldRequiredInput = document.getElementById("field-required");
+  const fieldOptionsList = document.getElementById("field-options-list");
+  const newOptionInput = document.getElementById("new-option-input");
+  const addOptionBtn = document.getElementById("add-option-btn");
+  const fieldAllowOther = document.getElementById("field-allow-other");
+  const fieldScaleGroup = document.getElementById("field-scale-group");
+  const fieldScaleMin = document.getElementById("field-scale-min");
+  const fieldScaleMax = document.getElementById("field-scale-max");
+  const fieldScaleMinLabel = document.getElementById("field-scale-min-label");
+  const fieldScaleMaxLabel = document.getElementById("field-scale-max-label");
+  const fieldKeyInput = document.getElementById("field-key");
   const fieldOrderInput = document.getElementById("field-order");
+  const fieldRequiredWrap = document.getElementById("field-required-wrap");
+  const fieldRequiredInput = document.getElementById("field-required");
+  let currentModalOptions = [];
 
   // Access Logs Datasheet Elements
   const auditSearchInput = document.getElementById("audit-search-input");
@@ -181,6 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderFilterChips();
     loadAllFilms();
     loadSubmissions();
+    loadFormSettings();
     loadFormFields();
     loadAuditLogs();
     if (session && session.role === "MAIN") {
@@ -269,7 +295,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (tab === "datasheet") loadSubmissions();
-      if (tab === "forms") loadFormFields();
+      if (tab === "forms") {
+        loadFormSettings();
+        loadFormFields();
+      }
       if (tab === "audit") loadAuditLogs();
       if (tab === "users") loadCrewUsers();
     });
@@ -631,16 +660,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     subDetailAnswers.innerHTML = "";
     Object.entries(subData).forEach(([key, val]) => {
+      const fieldDef = formFieldsList.find((f) => f.field_key === key);
+      const displayLabel = fieldDef ? fieldDef.label : key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
       const dt = document.createElement("dt");
-      dt.textContent = key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      dt.textContent = displayLabel;
 
       const dd = document.createElement("dd");
-      const strVal = String(val || "—");
-
-      if (strVal.startsWith("http://") || strVal.startsWith("https://")) {
-        dd.innerHTML = `<a href="${escapeHtml(strVal)}" target="_blank" rel="noopener" style="color: var(--leaf-light); text-decoration: underline;">${escapeHtml(strVal)} &nearr;</a>`;
+      if (Array.isArray(val)) {
+        dd.innerHTML = val.length
+          ? val.map((item) => `<span class="hud-pill" style="font-size: 0.78rem; margin-right: 6px; margin-bottom: 4px; display: inline-block;">${escapeHtml(item)}</span>`).join("")
+          : "—";
       } else {
-        dd.textContent = strVal;
+        const strVal = String(val ?? "—");
+        if (strVal.startsWith("http://") || strVal.startsWith("https://")) {
+          dd.innerHTML = `<a href="${escapeHtml(strVal)}" target="_blank" rel="noopener" style="color: var(--leaf-light); text-decoration: underline;">${escapeHtml(strVal)} &nearr;</a>`;
+        } else {
+          dd.textContent = strVal;
+        }
       }
 
       subDetailAnswers.appendChild(dt);
@@ -689,8 +726,83 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ==========================================================================
-     TAB 3: AUDITIONS FORM CUSTOMIZER
+     TAB 3: GOOGLE FORMS CUSTOMIZER & SETTINGS
      ========================================================================== */
+
+  // Load and apply form-level settings (Title, Description, Accepting status, Closed msg)
+  async function loadFormSettings() {
+    try {
+      const settings = await window.impactframeApi.getFormSettings();
+      if (formTitleInput) formTitleInput.value = settings.form_title || "";
+      if (formBannerInput) formBannerInput.value = settings.header_banner_url || "";
+      if (formDescInput) formDescInput.value = settings.form_description || "";
+      if (formConfirmMsgInput) formConfirmMsgInput.value = settings.confirmation_message || "";
+      if (formClosedMsgInput) formClosedMsgInput.value = settings.closed_message || "";
+
+      const isAccepting = Boolean(settings.is_accepting_responses);
+      if (formAcceptingToggle) formAcceptingToggle.checked = isAccepting;
+      updateAcceptingStatusUI(isAccepting);
+    } catch (err) {
+      console.warn("Could not load form settings:", err);
+    }
+  }
+
+  function updateAcceptingStatusUI(isAccepting) {
+    if (!acceptingStatusLabel) return;
+    if (isAccepting) {
+      acceptingStatusLabel.textContent = "● Accepting Responses";
+      acceptingStatusLabel.style.color = "#86efac";
+    } else {
+      acceptingStatusLabel.textContent = "○ Closed (Not Accepting)";
+      acceptingStatusLabel.style.color = "#fca5a5";
+    }
+  }
+
+  // Live toggle for accepting responses
+  if (formAcceptingToggle) {
+    formAcceptingToggle.addEventListener("change", async () => {
+      const isAccepting = formAcceptingToggle.checked;
+      updateAcceptingStatusUI(isAccepting);
+      try {
+        await window.impactframeApi.updateFormSettings({ is_accepting_responses: isAccepting });
+        showNotice(
+          isAccepting
+            ? "Form is now OPEN and accepting responses on apply.html."
+            : "Form is now CLOSED. Visitors will see the closed notice.",
+          isAccepting ? "success" : "info"
+        );
+      } catch (err) {
+        showNotice("Failed to update response status: " + err.message, "error");
+      }
+    });
+  }
+
+  // Save all form header & behavior settings
+  if (saveFormSettingsBtn) {
+    saveFormSettingsBtn.addEventListener("click", async () => {
+      saveFormSettingsBtn.disabled = true;
+      saveFormSettingsBtn.textContent = "Saving…";
+      try {
+        const payload = {
+          form_title: formTitleInput.value.trim(),
+          form_description: formDescInput.value.trim(),
+          header_banner_url: formBannerInput.value.trim(),
+          confirmation_message: formConfirmMsgInput.value.trim(),
+          closed_message: formClosedMsgInput.value.trim(),
+          is_accepting_responses: formAcceptingToggle ? formAcceptingToggle.checked : true,
+        };
+        await window.impactframeApi.updateFormSettings(payload);
+        showNotice("Form settings saved successfully! Updated on live website.", "success");
+      } catch (err) {
+        showNotice("Failed to save settings: " + err.message, "error");
+      } finally {
+        saveFormSettingsBtn.disabled = false;
+        saveFormSettingsBtn.textContent = "Save Settings";
+      }
+    });
+  }
+
+  // Load and render question fields
   async function loadFormFields() {
     formBuilderContainer.innerHTML = `<p class="state-msg">Loading question fields…</p>`;
     try {
@@ -701,48 +813,155 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function getFieldTypeBadge(type) {
+    const map = {
+      text: { label: "Short answer", color: "#93c5fd" },
+      textarea: { label: "Paragraph", color: "#a5b4fc" },
+      radio: { label: "Multiple choice", color: "#fcd34d" },
+      checkbox: { label: "Checkboxes", color: "#fdba74" },
+      select: { label: "Dropdown", color: "#c084fc" },
+      scale: { label: "Linear scale", color: "#86efac" },
+      date: { label: "Date", color: "#67e8f9" },
+      time: { label: "Time", color: "#6ee7b7" },
+      number: { label: "Number", color: "#f9a8d4" },
+      email: { label: "Email", color: "#93c5fd" },
+      tel: { label: "Phone", color: "#fde047" },
+      url: { label: "Link / URL", color: "#5eead4" },
+      file: { label: "File upload", color: "#cbd5e1" },
+      section: { label: "Section divider", color: "#fbbf24" },
+    };
+    return map[type] || { label: type, color: "var(--leaf-light)" };
+  }
+
   function renderFormFields() {
     if (!formFieldsList || formFieldsList.length === 0) {
-      formBuilderContainer.innerHTML = `<p class="state-msg">No custom questions created yet. Click "+ Add New Question" above.</p>`;
+      formBuilderContainer.innerHTML = `
+        <div style="text-align: center; padding: 48px; border: 1px dashed var(--navy-mid); border-radius: var(--radius);">
+          <p class="state-msg" style="margin-bottom: 14px;">No questions created yet.</p>
+          <button type="button" class="btn btn-primary" onclick="document.getElementById('open-add-field-modal-btn').click()">
+            + Add Your First Question
+          </button>
+        </div>
+      `;
       return;
     }
 
     formBuilderContainer.innerHTML = formFieldsList
-      .map((field) => {
-        const isActive = field.is_active !== 0;
+      .map((field, index) => {
+        const isActive = field.is_active !== false && field.active !== false && field.is_active !== 0 && field.active !== 0;
+        const isSection = field.type === "section";
+        const typeInfo = getFieldTypeBadge(field.type);
+
+        if (isSection) {
+          return `
+            <div class="form-field-card section-divider-card sprocket-frame ${!isActive ? "is-disabled" : ""}" data-field-id="${field.id}" style="background: rgba(30, 48, 40, 0.7); border: 2px solid var(--leaf-dark); padding: 16px 20px;">
+              <div style="flex: 1; min-width: 240px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                  <span class="hud-pill" style="background: var(--amber); color: #000; font-weight: 700; font-size: 0.72rem; padding: 2px 8px;">
+                    SECTION DIVIDER
+                  </span>
+                  <strong style="color: var(--amber-light); font-size: 1.15rem; letter-spacing: 0.02em;">${escapeHtml(field.label)}</strong>
+                </div>
+                ${field.description ? `<p style="margin: 4px 0 0; color: var(--parchment-dim); font-size: 0.88rem;">${escapeHtml(field.description)}</p>` : ""}
+                <div class="form-field-meta" style="margin-top: 8px;">
+                  <span>Order: <strong>${field.sort_order}</strong></span>
+                  <span>Status: <strong style="color: ${isActive ? "#86efac" : "#fca5a5"};">${isActive ? "Active" : "Hidden"}</strong></span>
+                </div>
+              </div>
+
+              <!-- Reorder, Duplicate & Actions -->
+              <div class="field-actions-row" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-ghost btn-sm move-field-up-btn" data-field-idx="${index}" title="Move Up" ${index === 0 ? "disabled style='opacity: 0.35;'" : ""}>
+                  ▲
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm move-field-down-btn" data-field-idx="${index}" title="Move Down" ${index === formFieldsList.length - 1 ? "disabled style='opacity: 0.35;'" : ""}>
+                  ▼
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm toggle-field-status-btn" data-field-id="${field.id}" data-current-active="${isActive}">
+                  ${isActive ? "Hide" : "Show"}
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm edit-field-btn" data-field-id="${field.id}">
+                  Edit
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm delete-field-btn" data-field-id="${field.id}" style="color: #ff8888;">
+                  Delete
+                </button>
+              </div>
+            </div>
+          `;
+        }
+
+        // Options or scale summary preview
+        let previewInfo = "";
+        if (["radio", "checkbox", "select"].includes(field.type)) {
+          const optCount = Array.isArray(field.options) ? field.options.length : 0;
+          previewInfo = `<span style="font-size: 0.8rem; color: var(--parchment-dim);">(${optCount} option${optCount === 1 ? "" : "s"}${field.allow_other ? " + Other" : ""})</span>`;
+        } else if (field.type === "scale") {
+          previewInfo = `<span style="font-size: 0.8rem; color: var(--parchment-dim);">(${field.scale_min} to ${field.scale_max}: "${escapeHtml(field.scale_min_label || "Min")}" → "${escapeHtml(field.scale_max_label || "Max")}")</span>`;
+        }
+
         return `
-        <div class="form-field-card sprocket-frame ${!isActive ? "is-disabled" : ""}" data-field-id="${field.id}">
-          <div style="flex: 1; min-width: 240px;">
-            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-              <strong style="color: var(--paper); font-size: 1.05rem;">${escapeHtml(field.label)}</strong>
-              ${
-                field.required
-                  ? '<span class="req-badge" title="Candidate must answer">* Required</span>'
-                  : '<span class="opt-badge">Optional</span>'
-              }
+          <div class="form-field-card sprocket-frame ${!isActive ? "is-disabled" : ""}" data-field-id="${field.id}">
+            <div style="flex: 1; min-width: 240px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-family: monospace; font-size: 0.82rem; font-weight: 700; color: var(--amber); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">#${index + 1}</span>
+                <strong style="color: var(--paper); font-size: 1.05rem;">${escapeHtml(field.label)}</strong>
+                ${
+                  field.required
+                    ? '<span class="req-badge" title="Candidate must answer">* Required</span>'
+                    : '<span class="opt-badge">Optional</span>'
+                }
+              </div>
+
+              ${field.description ? `<p style="margin: 4px 0 0; color: var(--parchment-dim); font-size: 0.85rem;">${escapeHtml(field.description)}</p>` : ""}
+
+              <div class="form-field-meta" style="margin-top: 6px;">
+                <span>Type: <strong style="color: ${typeInfo.color};">${typeInfo.label}</strong> ${previewInfo}</span>
+                <span>Key: <span class="field-type-pill">${escapeHtml(field.field_key)}</span></span>
+                <span>Status: <strong style="color: ${isActive ? "#86efac" : "#fca5a5"};">${isActive ? "Active (Visible)" : "Disabled"}</strong></span>
+              </div>
             </div>
-            <div class="form-field-meta">
-              <span>Key: <span class="field-type-pill">${escapeHtml(field.field_key)}</span></span>
-              <span>Type: <strong style="color: var(--leaf-light);">${field.type}</strong></span>
-              <span>Order: ${field.sort_order}</span>
-              <span>Status: <strong style="color: ${isActive ? "#86efac" : "#fca5a5"};">${isActive ? "Active (Visible)" : "Disabled"}</strong></span>
+
+            <!-- Reorder, Duplicate & Actions -->
+            <div class="field-actions-row" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-ghost btn-sm move-field-up-btn" data-field-idx="${index}" title="Move Up in Form" ${index === 0 ? "disabled style='opacity: 0.35;'" : ""}>
+                ▲
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm move-field-down-btn" data-field-idx="${index}" title="Move Down in Form" ${index === formFieldsList.length - 1 ? "disabled style='opacity: 0.35;'" : ""}>
+                ▼
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm duplicate-field-btn" data-field-id="${field.id}" title="Duplicate this question">
+                Duplicate
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm toggle-field-status-btn" data-field-id="${field.id}" data-current-active="${isActive}">
+                ${isActive ? "Disable" : "Enable"}
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm edit-field-btn" data-field-id="${field.id}">
+                Edit
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm delete-field-btn" data-field-id="${field.id}" style="color: #ff8888;">
+                Delete
+              </button>
             </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <button type="button" class="btn btn-ghost btn-sm toggle-field-status-btn" data-field-id="${field.id}" data-current-active="${isActive}">
-              ${isActive ? "Disable" : "Enable"}
-            </button>
-            <button type="button" class="btn btn-ghost btn-sm edit-field-btn" data-field-id="${field.id}">
-              Edit
-            </button>
-            <button type="button" class="btn btn-ghost btn-sm delete-field-btn" data-field-id="${field.id}" style="color: #ff8888;">
-              Delete
-            </button>
-          </div>
-        </div>
-      `;
+        `;
       })
       .join("");
+
+    // Move Up
+    formBuilderContainer.querySelectorAll(".move-field-up-btn").forEach((btn) => {
+      btn.addEventListener("click", () => handleReorderMove(parseInt(btn.dataset.fieldIdx, 10), -1));
+    });
+
+    // Move Down
+    formBuilderContainer.querySelectorAll(".move-field-down-btn").forEach((btn) => {
+      btn.addEventListener("click", () => handleReorderMove(parseInt(btn.dataset.fieldIdx, 10), 1));
+    });
+
+    // Duplicate question (Google Forms feature)
+    formBuilderContainer.querySelectorAll(".duplicate-field-btn").forEach((btn) => {
+      btn.addEventListener("click", () => handleDuplicateField(btn.dataset.fieldId));
+    });
 
     // Toggle active status
     formBuilderContainer.querySelectorAll(".toggle-field-status-btn").forEach((btn) => {
@@ -751,7 +970,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const currentActive = btn.dataset.currentActive === "true";
         try {
           await window.impactframeApi.updateFormField(id, { is_active: !currentActive });
-          showNotice(`Question status updated.`, "success");
+          showNotice(`Question visibility updated.`, "success");
           loadFormFields();
         } catch (err) {
           showNotice(err.message, "error");
@@ -770,60 +989,132 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function openAddFieldModal() {
-    fieldModalTitle.textContent = "Add New Form Question";
-    fieldIdInput.value = "";
-    fieldLabelInput.value = "";
-    fieldKeyInput.value = "";
-    fieldKeyInput.readOnly = false;
-    fieldTypeSelect.value = "text";
-    fieldOptionsGroup.style.display = "none";
-    fieldOptionsInput.value = "";
-    fieldRequiredInput.checked = false;
-    fieldOrderInput.value = (formFieldsList.length + 1) * 2;
-    fieldModal.style.display = "flex";
+  // Handle reordering up/down
+  async function handleReorderMove(fromIndex, delta) {
+    const toIndex = fromIndex + delta;
+    if (toIndex < 0 || toIndex >= formFieldsList.length) return;
+
+    const listCopy = [...formFieldsList];
+    const temp = listCopy[fromIndex];
+    listCopy[fromIndex] = listCopy[toIndex];
+    listCopy[toIndex] = temp;
+
+    const orderedIds = listCopy.map((f) => f.id);
+    try {
+      await window.impactframeApi.reorderFormFields(orderedIds);
+      formFieldsList = listCopy;
+      renderFormFields();
+      showNotice("Question order updated.", "success");
+    } catch (err) {
+      showNotice("Failed to reorder: " + err.message, "error");
+      loadFormFields();
+    }
   }
 
-  function openEditFieldModal(id) {
-    const field = formFieldsList.find((f) => String(f.id) === String(id));
-    if (!field) return;
+  // Handle 1-click duplicate
+  async function handleDuplicateField(id) {
+    try {
+      await window.impactframeApi.duplicateFormField(id);
+      showNotice("Question duplicated with all options and configurations!", "success");
+      loadFormFields();
+    } catch (err) {
+      showNotice("Failed to duplicate: " + err.message, "error");
+    }
+  }
 
-    fieldModalTitle.textContent = `Edit Question: ${field.label}`;
-    fieldIdInput.value = field.id;
-    fieldLabelInput.value = field.label;
-    fieldKeyInput.value = field.field_key;
-    fieldKeyInput.readOnly = true; // Protect key name on update
-    fieldTypeSelect.value = field.type || "text";
-
-    if (field.type === "select") {
-      fieldOptionsGroup.style.display = "block";
-      const opts = Array.isArray(field.options) ? field.options.join(", ") : field.options || "";
-      fieldOptionsInput.value = opts;
-    } else {
-      fieldOptionsGroup.style.display = "none";
-      fieldOptionsInput.value = "";
+  // Dynamic Options Editor in Modal
+  function renderModalOptions() {
+    if (!fieldOptionsList) return;
+    if (!currentModalOptions || currentModalOptions.length === 0) {
+      fieldOptionsList.innerHTML = `<span style="font-size: 0.85rem; color: var(--parchment-dim);">No choices added yet. Add an option below:</span>`;
+      return;
     }
 
-    fieldRequiredInput.checked = Boolean(field.required);
-    fieldOrderInput.value = field.sort_order || 10;
-    fieldModal.style.display = "flex";
+    fieldOptionsList.innerHTML = currentModalOptions
+      .map(
+        (opt, idx) => `
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span style="color: var(--amber); font-weight: 600; font-size: 0.8rem; width: 18px;">${idx + 1}.</span>
+          <input type="text" class="input modal-option-item-input" value="${escapeHtml(opt)}" data-opt-idx="${idx}" style="flex: 1; padding: 6px 10px; font-size: 0.88rem;" />
+          <button type="button" class="btn btn-ghost btn-sm remove-modal-option-btn" data-opt-idx="${idx}" style="padding: 4px 8px; color: #ff8888;" title="Delete this option">
+            &times;
+          </button>
+        </div>
+      `
+      )
+      .join("");
+
+    fieldOptionsList.querySelectorAll(".modal-option-item-input").forEach((inp) => {
+      inp.addEventListener("input", () => {
+        const idx = parseInt(inp.dataset.optIdx, 10);
+        currentModalOptions[idx] = inp.value;
+      });
+    });
+
+    fieldOptionsList.querySelectorAll(".remove-modal-option-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.optIdx, 10);
+        currentModalOptions.splice(idx, 1);
+        renderModalOptions();
+      });
+    });
   }
 
-  function closeFieldModal() {
-    fieldModal.style.display = "none";
+  function addModalOption() {
+    if (!newOptionInput) return;
+    const val = newOptionInput.value.trim();
+    if (!val) return;
+    currentModalOptions.push(val);
+    newOptionInput.value = "";
+    renderModalOptions();
+    newOptionInput.focus();
   }
 
-  fieldTypeSelect.addEventListener("change", () => {
-    if (fieldTypeSelect.value === "select") {
-      fieldOptionsGroup.style.display = "block";
-    } else {
-      fieldOptionsGroup.style.display = "none";
+  if (addOptionBtn) {
+    addOptionBtn.addEventListener("click", addModalOption);
+  }
+  if (newOptionInput) {
+    newOptionInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addModalOption();
+      }
+    });
+  }
+
+  // Update modal input sections based on selected Question Type
+  function updateModalTypeVisibility() {
+    const type = fieldTypeSelect.value;
+    const isChoice = ["radio", "checkbox", "select"].includes(type);
+    const isScale = type === "scale";
+    const isSection = type === "section";
+    const isTextLike = ["text", "textarea", "number", "email", "tel", "url"].includes(type);
+
+    if (fieldOptionsGroup) fieldOptionsGroup.style.display = isChoice ? "block" : "none";
+    if (fieldScaleGroup) fieldScaleGroup.style.display = isScale ? "block" : "none";
+    if (fieldPlaceholderGroup) fieldPlaceholderGroup.style.display = isTextLike ? "block" : "none";
+
+    const allowOtherContainer = document.getElementById("allow-other-container");
+    if (allowOtherContainer) {
+      allowOtherContainer.style.display = (type === "radio" || type === "checkbox") ? "flex" : "none";
     }
-  });
 
-  // Auto slugify field key from label if new
+    if (fieldRequiredWrap) {
+      fieldRequiredWrap.style.display = isSection ? "none" : "flex";
+    }
+
+    // Adapt labels for section dividers
+    const labelTitleEl = fieldLabelInput.previousElementSibling;
+    if (labelTitleEl) {
+      labelTitleEl.textContent = isSection ? "Section Header Title *" : "Question Title / Prompt *";
+    }
+  }
+
+  fieldTypeSelect.addEventListener("change", updateModalTypeVisibility);
+
+  // Auto slugify field key from question prompt
   fieldLabelInput.addEventListener("input", () => {
-    if (!fieldIdInput.value && !fieldKeyInput.value) {
+    if (!fieldIdInput.value && !fieldKeyInput.readOnly) {
       fieldKeyInput.value = fieldLabelInput.value
         .toLowerCase()
         .replace(/[^a-z0-9]/g, "_")
@@ -832,31 +1123,106 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  function openAddFieldModal(isSection = false) {
+    fieldModalTitle.textContent = isSection ? "Add Section Divider" : "Add Form Question";
+    fieldIdInput.value = "";
+    fieldLabelInput.value = isSection ? "Section Title" : "";
+    fieldDescriptionInput.value = "";
+    fieldPlaceholderInput.value = "";
+    fieldKeyInput.value = "";
+    fieldKeyInput.readOnly = false;
+    fieldTypeSelect.value = isSection ? "section" : "text";
+
+    currentModalOptions = isSection ? [] : ["Option 1", "Option 2"];
+    renderModalOptions();
+
+    if (fieldAllowOther) fieldAllowOther.checked = false;
+    if (fieldScaleMin) fieldScaleMin.value = "1";
+    if (fieldScaleMax) fieldScaleMax.value = "5";
+    if (fieldScaleMinLabel) fieldScaleMinLabel.value = "";
+    if (fieldScaleMaxLabel) fieldScaleMaxLabel.value = "";
+
+    fieldRequiredInput.checked = !isSection;
+    fieldOrderInput.value = (formFieldsList.length + 1) * 2;
+
+    updateModalTypeVisibility();
+    fieldModal.style.display = "flex";
+    fieldLabelInput.focus();
+  }
+
+  function openEditFieldModal(id) {
+    const field = formFieldsList.find((f) => String(f.id) === String(id));
+    if (!field) return;
+
+    fieldModalTitle.textContent = `Edit: ${field.label}`;
+    fieldIdInput.value = field.id;
+    fieldLabelInput.value = field.label;
+    fieldDescriptionInput.value = field.description || "";
+    fieldPlaceholderInput.value = field.placeholder || "";
+    fieldKeyInput.value = field.field_key;
+    fieldKeyInput.readOnly = true;
+    fieldTypeSelect.value = field.type || "text";
+
+    let opts = [];
+    if (Array.isArray(field.options)) {
+      opts = [...field.options];
+    } else if (typeof field.options === "string") {
+      try {
+        opts = JSON.parse(field.options);
+      } catch {
+        opts = field.options.split(",").map((s) => s.trim()).filter(Boolean);
+      }
+    }
+    currentModalOptions = opts;
+    renderModalOptions();
+
+    if (fieldAllowOther) fieldAllowOther.checked = Boolean(field.allow_other);
+    if (fieldScaleMin) fieldScaleMin.value = String(field.scale_min ?? 1);
+    if (fieldScaleMax) fieldScaleMax.value = String(field.scale_max ?? 5);
+    if (fieldScaleMinLabel) fieldScaleMinLabel.value = field.scale_min_label || "";
+    if (fieldScaleMaxLabel) fieldScaleMaxLabel.value = field.scale_max_label || "";
+
+    fieldRequiredInput.checked = Boolean(field.required);
+    fieldOrderInput.value = field.sort_order || 10;
+
+    updateModalTypeVisibility();
+    fieldModal.style.display = "flex";
+  }
+
+  function closeFieldModal() {
+    fieldModal.style.display = "none";
+  }
+
   fieldModalCloseBtn.addEventListener("click", closeFieldModal);
   fieldModalCancelBtn.addEventListener("click", closeFieldModal);
   fieldModal.addEventListener("click", (e) => {
     if (e.target === fieldModal) closeFieldModal();
   });
-  openAddFieldModalBtn.addEventListener("click", openAddFieldModal);
 
+  openAddFieldModalBtn.addEventListener("click", () => openAddFieldModal(false));
+  if (addSectionDividerBtn) {
+    addSectionDividerBtn.addEventListener("click", () => openAddFieldModal(true));
+  }
+
+  // Submit Question / Section Save
   fieldForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const id = fieldIdInput.value;
     const type = fieldTypeSelect.value;
-    let options = [];
-    if (type === "select") {
-      options = fieldOptionsInput.value
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    }
 
     const payload = {
       label: fieldLabelInput.value.trim(),
+      description: fieldDescriptionInput.value.trim(),
       field_key: fieldKeyInput.value.trim().toLowerCase(),
       type: type,
-      options: options,
-      required: fieldRequiredInput.checked ? 1 : 0,
+      placeholder: fieldPlaceholderInput.value.trim(),
+      options: currentModalOptions.filter((s) => Boolean(s && s.trim())),
+      allow_other: fieldAllowOther && fieldAllowOther.checked ? 1 : 0,
+      scale_min: parseInt(fieldScaleMin.value, 10) || 1,
+      scale_max: parseInt(fieldScaleMax.value, 10) || 5,
+      scale_min_label: fieldScaleMinLabel.value.trim(),
+      scale_max_label: fieldScaleMaxLabel.value.trim(),
+      required: type === "section" ? 0 : (fieldRequiredInput.checked ? 1 : 0),
       sort_order: parseInt(fieldOrderInput.value, 10) || 10,
     };
 

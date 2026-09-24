@@ -79,19 +79,95 @@ db.exec(`
   );
 `);
 
-// 2. Dynamic Form Fields Configuration Table
+// 2. Dynamic Form Fields Configuration Table (Google Forms Compatible)
 db.exec(`
   CREATE TABLE IF NOT EXISTS form_fields (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     field_key TEXT UNIQUE NOT NULL,
     label TEXT NOT NULL,
-    type TEXT NOT NULL CHECK (type IN ('text', 'email', 'tel', 'select', 'textarea', 'url')),
+    description TEXT DEFAULT '',
+    type TEXT NOT NULL,
     required INTEGER NOT NULL DEFAULT 1,
+    placeholder TEXT DEFAULT '',
     options_json TEXT DEFAULT '[]',
+    allow_other INTEGER DEFAULT 0,
+    scale_min INTEGER DEFAULT 1,
+    scale_max INTEGER DEFAULT 5,
+    scale_min_label TEXT DEFAULT '',
+    scale_max_label TEXT DEFAULT '',
     sort_order INTEGER NOT NULL DEFAULT 0,
     active INTEGER NOT NULL DEFAULT 1
   );
 `);
+
+// Auto-migrate from older restrictive check constraint schema if present
+try {
+  const tableSqlRow = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='form_fields'").get();
+  if (tableSqlRow && tableSqlRow.sql && tableSqlRow.sql.includes("CHECK (type IN")) {
+    db.exec(`
+      CREATE TABLE form_fields_migrated (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        field_key TEXT UNIQUE NOT NULL,
+        label TEXT NOT NULL,
+        description TEXT DEFAULT '',
+        type TEXT NOT NULL,
+        required INTEGER NOT NULL DEFAULT 1,
+        placeholder TEXT DEFAULT '',
+        options_json TEXT DEFAULT '[]',
+        allow_other INTEGER DEFAULT 0,
+        scale_min INTEGER DEFAULT 1,
+        scale_max INTEGER DEFAULT 5,
+        scale_min_label TEXT DEFAULT '',
+        scale_max_label TEXT DEFAULT '',
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        active INTEGER NOT NULL DEFAULT 1
+      );
+      INSERT INTO form_fields_migrated (id, field_key, label, type, required, options_json, sort_order, active)
+      SELECT id, field_key, label, type, required, options_json, sort_order, active FROM form_fields;
+      DROP TABLE form_fields;
+      ALTER TABLE form_fields_migrated RENAME TO form_fields;
+    `);
+  } else {
+    // Add columns if table already exists without them
+    const existingCols = db.prepare("PRAGMA table_info(form_fields)").all().map(c => c.name);
+    if (!existingCols.includes("description")) db.exec("ALTER TABLE form_fields ADD COLUMN description TEXT DEFAULT ''");
+    if (!existingCols.includes("placeholder")) db.exec("ALTER TABLE form_fields ADD COLUMN placeholder TEXT DEFAULT ''");
+    if (!existingCols.includes("allow_other")) db.exec("ALTER TABLE form_fields ADD COLUMN allow_other INTEGER DEFAULT 0");
+    if (!existingCols.includes("scale_min")) db.exec("ALTER TABLE form_fields ADD COLUMN scale_min INTEGER DEFAULT 1");
+    if (!existingCols.includes("scale_max")) db.exec("ALTER TABLE form_fields ADD COLUMN scale_max INTEGER DEFAULT 5");
+    if (!existingCols.includes("scale_min_label")) db.exec("ALTER TABLE form_fields ADD COLUMN scale_min_label TEXT DEFAULT ''");
+    if (!existingCols.includes("scale_max_label")) db.exec("ALTER TABLE form_fields ADD COLUMN scale_max_label TEXT DEFAULT ''");
+  }
+} catch (e) {
+  console.warn("[DB] form_fields migration check:", e.message);
+}
+
+// 2b. Form Header & Behavior Settings Table (Google Forms Controls)
+db.exec(`
+  CREATE TABLE IF NOT EXISTS form_settings (
+    id INTEGER PRIMARY KEY,
+    form_title TEXT NOT NULL DEFAULT 'IMPACTFRAME 2026 Auditions & Roles Application',
+    form_description TEXT NOT NULL DEFAULT 'Audition for on-screen performance or apply for director, cinematographer, AI artist, sound, and editor positions in upcoming short films.',
+    is_accepting_responses INTEGER NOT NULL DEFAULT 1,
+    closed_message TEXT NOT NULL DEFAULT 'This audition form is currently closed to new responses. Thank you for your interest in IMPACTFRAME!',
+    confirmation_message TEXT NOT NULL DEFAULT 'Thank you! Your response has been recorded. Our production directors will review your application and contact you soon via WhatsApp/Email.',
+    header_banner_url TEXT DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+`);
+
+// Seed default settings row if not exists
+try {
+  const settingsRow = db.prepare("SELECT id FROM form_settings WHERE id = 1").get();
+  if (!settingsRow) {
+    db.prepare(`
+      INSERT INTO form_settings (id, form_title, form_description, is_accepting_responses, closed_message, confirmation_message)
+      VALUES (1, 'IMPACTFRAME 2026 Auditions & Roles Application', 'Audition for on-screen performance or apply for director, cinematographer, AI artist, sound, and editor positions in upcoming short films.', 1, 'This audition form is currently closed to new responses. Thank you for your interest in IMPACTFRAME!', 'Thank you! Your response has been recorded. Our production directors will review your application and contact you soon via WhatsApp/Email.')
+    `).run();
+  }
+} catch (err) {
+  console.warn("Form settings seed notice:", err.message);
+}
 
 // 3. Form Submissions / Audition Datasheet Table
 db.exec(`

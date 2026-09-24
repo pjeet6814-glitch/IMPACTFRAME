@@ -219,21 +219,81 @@
 
     <!-- ================= TAB 3: FORM CUSTOMIZER ================= -->
     <section id="panel-forms" class="admin-tab-panel" role="tabpanel">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; flex-wrap: wrap; gap: 14px;">
+      <!-- Google Forms Settings & Header Controls Card -->
+      <div class="form-settings-card sprocket-frame" style="margin-bottom: 28px; background: rgba(14, 26, 23, 0.7); border: 1px solid var(--navy-mid); border-radius: var(--radius); padding: 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--navy-mid); padding-bottom: 14px; margin-bottom: 18px; flex-wrap: wrap; gap: 14px;">
+          <div>
+            <div class="viewfinder-tag" style="margin-bottom: 4px;">[ FORM SETTINGS // GOOGLE FORMS CONTROLS ]</div>
+            <h3 style="margin: 0; font-size: 1.25rem; color: var(--paper);">Form Configuration & Response Status</h3>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <!-- Real-time Accepting Responses Toggle -->
+            <label class="switch-control" style="display: inline-flex; align-items: center; gap: 10px; cursor: pointer; background: var(--navy-dark); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--navy-mid);">
+              <span id="accepting-status-label" style="font-size: 0.85rem; font-weight: 600; color: #86efac;">● Accepting Responses</span>
+              <input type="checkbox" id="form-accepting-toggle" checked style="accent-color: var(--leaf); width: 18px; height: 18px; cursor: pointer;" />
+            </label>
+            <a href="apply.html" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="display: inline-flex; align-items: center; gap: 6px;" title="Open live form in new tab">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              View Public Form
+            </a>
+            <button type="button" class="btn btn-primary btn-sm" id="save-form-settings-btn">
+              Save Settings
+            </button>
+          </div>
+        </div>
+
+        <form id="form-settings-form" style="display: flex; flex-direction: column; gap: 14px;">
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label for="form-title-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">Form Title *</label>
+              <input type="text" id="form-title-input" required class="input" placeholder="e.g. IMPACTFRAME 2026 Auditions & Roles Application" />
+            </div>
+            <div class="form-group flex-1">
+              <label for="form-banner-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">Header Banner URL (Optional)</label>
+              <input type="url" id="form-banner-input" class="input" placeholder="https://..." />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="form-desc-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">Form Description / Instructions</label>
+            <textarea id="form-desc-input" rows="2" class="input" placeholder="Explain the purpose of this form, who can apply, deadlines, or expectations..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="form-confirm-msg-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">Confirmation / Thank You Message</label>
+              <textarea id="form-confirm-msg-input" rows="2" class="input" placeholder="Message shown immediately upon submission..."></textarea>
+            </div>
+            <div class="form-group flex-1">
+              <label for="form-closed-msg-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">Closed Form Notice Message</label>
+              <textarea id="form-closed-msg-input" rows="2" class="input" placeholder="Notice displayed to visitors when Accepting Responses is turned OFF..."></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Question Items Section Header -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
         <div>
-          <h3 style="margin: 0 0 6px; font-size: 1.3rem; color: var(--paper);">Auditions & Roles Form Builder</h3>
-          <p style="margin: 0; color: var(--parchment-dim); font-size: 0.9rem;">
-            Questions customized here are live and appear directly on the public <a href="apply.html" target="_blank" style="color: var(--leaf-light); text-decoration: underline;">apply.html</a> page.
+          <h3 style="margin: 0 0 4px; font-size: 1.25rem; color: var(--paper);">Questions & Form Sections</h3>
+          <p style="margin: 0; color: var(--parchment-dim); font-size: 0.88rem;">
+            Order, reorder, duplicate, customize question types, or add divider sections.
           </p>
         </div>
-        <button type="button" class="btn btn-primary" id="open-add-field-modal-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Add New Question
-        </button>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-ghost btn-sm" id="add-section-divider-btn" style="border: 1px dashed var(--leaf-light); color: var(--leaf-light);">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            + Add Section Header
+          </button>
+          <button type="button" class="btn btn-primary" id="open-add-field-modal-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add New Question
+          </button>
+        </div>
       </div>
 
       <div id="form-builder-container" class="form-builder-list">
-        <p class="state-msg">Loading form fields…</p>
+        <p class="state-msg">Loading form questions…</p>
       </div>
     </section>
 
@@ -401,60 +461,145 @@
     </div>
   </div>
 
-  <!-- ================= MODAL: ADD / EDIT FORM FIELD ================= -->
+  <!-- ================= MODAL: ADD / EDIT FORM FIELD (GOOGLE FORMS BUILDER) ================= -->
   <div id="field-modal" class="modal-backdrop" style="display: none;">
-    <div class="modal-box sprocket-frame" style="max-width: 540px;">
+    <div class="modal-box sprocket-frame" style="max-width: 640px; max-height: 90vh; overflow-y: auto;">
       <div class="modal-header">
-        <h3 id="field-modal-title">Add Form Question</h3>
+        <div>
+          <span class="hud-pill" style="margin-bottom: 4px; display: inline-block;"><span class="rec-dot"></span> QUESTION EDITOR</span>
+          <h3 id="field-modal-title" style="margin: 2px 0 0;">Add Form Question</h3>
+        </div>
         <button type="button" class="modal-close-btn" id="field-modal-close-btn" aria-label="Close dialog">&times;</button>
       </div>
 
-      <form id="field-form" class="modal-form">
+      <form id="field-form" class="modal-form" style="display: flex; flex-direction: column; gap: 14px;">
         <input type="hidden" id="field-id" />
 
-        <div class="form-group">
-          <label for="field-label">Question Label / Prompt *</label>
-          <input type="text" id="field-label" required placeholder="e.g. Which camera models have you operated?" />
-        </div>
-
+        <!-- 1. Question Title & Response Type -->
         <div class="form-row">
-          <div class="form-group flex-1">
-            <label for="field-key">Field Key (Identifier) *</label>
-            <input type="text" id="field-key" required pattern="[a-zA-Z0-9_]+" placeholder="e.g. camera_models" />
-            <small class="form-help">Letters, numbers, and underscores only.</small>
+          <div class="form-group flex-2">
+            <label for="field-label">Question Title / Prompt *</label>
+            <input type="text" id="field-label" required placeholder="e.g. Rate your cinematography lighting experience" class="input" />
           </div>
           <div class="form-group flex-1">
-            <label for="field-type">Response Type *</label>
-            <select id="field-type" required>
-              <option value="text">Single Line Text</option>
-              <option value="textarea">Paragraph / Multi-line</option>
-              <option value="select">Dropdown Menu</option>
-              <option value="email">Email Address</option>
-              <option value="tel">Phone / WhatsApp</option>
-              <option value="url">Web Link (URL)</option>
-              <option value="number">Number</option>
+            <label for="field-type">Question Type *</label>
+            <select id="field-type" required class="input">
+              <optgroup label="Text & Details">
+                <option value="text">Short answer</option>
+                <option value="textarea">Paragraph</option>
+                <option value="email">Email Address</option>
+                <option value="tel">Phone / WhatsApp</option>
+                <option value="number">Number</option>
+                <option value="url">Link / Portfolio URL</option>
+              </optgroup>
+              <optgroup label="Choices & Scales">
+                <option value="radio">Multiple choice (Single select)</option>
+                <option value="checkbox">Checkboxes (Multi select)</option>
+                <option value="select">Dropdown Menu</option>
+                <option value="scale">Linear scale (Rating)</option>
+              </optgroup>
+              <optgroup label="Date, Time & Upload">
+                <option value="date">Date</option>
+                <option value="time">Time</option>
+                <option value="file">File / Drive Upload Link</option>
+              </optgroup>
+              <optgroup label="Layout">
+                <option value="section">Section Header & Divider</option>
+              </optgroup>
             </select>
           </div>
         </div>
 
-        <div class="form-group" id="field-options-group" style="display: none;">
-          <label for="field-options">Dropdown Options (Comma-separated)</label>
-          <input type="text" id="field-options" placeholder="Option A, Option B, Option C" />
-          <small class="form-help">Separate each dropdown choice with a comma.</small>
+        <!-- 2. Helper Description (Google Forms style subtitle) -->
+        <div class="form-group">
+          <label for="field-description">Description / Helper Subtitle (Optional)</label>
+          <input type="text" id="field-description" class="input" placeholder="e.g. Include your primary cinema rigs or gimbal models" />
+          <small class="form-help">Guidance or instructions shown directly beneath the question title.</small>
         </div>
 
-        <div class="form-row" style="align-items: center;">
-          <div class="form-group flex-1" style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
-            <input type="checkbox" id="field-required" style="width: 18px; height: 18px; cursor: pointer;" />
-            <label for="field-required" style="margin-bottom: 0; cursor: pointer;">Required Answer</label>
+        <!-- 3. Placeholder Text (for text inputs) -->
+        <div class="form-group" id="field-placeholder-group">
+          <label for="field-placeholder">Input Placeholder</label>
+          <input type="text" id="field-placeholder" class="input" placeholder="e.g. Sony FX3, RED Komodo, DJI RS3..." />
+        </div>
+
+        <!-- 4. Dynamic Options Editor (for radio, checkbox, select) -->
+        <div class="form-group" id="field-options-group" style="display: none; background: rgba(10, 20, 18, 0.6); padding: 14px; border-radius: var(--radius); border: 1px solid var(--navy-mid);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label style="margin: 0; font-weight: 600; color: var(--paper);">Choice Options</label>
+            <span style="font-size: 0.8rem; color: var(--parchment-dim);">Add choices for candidates</span>
+          </div>
+
+          <div id="field-options-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
+            <!-- Dynamically populated option items -->
+          </div>
+
+          <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+            <input type="text" id="new-option-input" class="input" placeholder="Enter option text..." style="flex: 1;" />
+            <button type="button" class="btn btn-ghost btn-sm" id="add-option-btn" style="white-space: nowrap;">
+              + Add Option
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;" id="allow-other-container">
+            <input type="checkbox" id="field-allow-other" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--leaf);" />
+            <label for="field-allow-other" style="margin-bottom: 0; cursor: pointer; font-size: 0.88rem; color: var(--paper);">
+              Include "Other: [write-in]" response option
+            </label>
+          </div>
+        </div>
+
+        <!-- 5. Linear Scale Controls (for scale type) -->
+        <div class="form-group" id="field-scale-group" style="display: none; background: rgba(10, 20, 18, 0.6); padding: 14px; border-radius: var(--radius); border: 1px solid var(--navy-mid);">
+          <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--paper);">Linear Scale Settings</label>
+          <div class="form-row" style="margin-bottom: 10px;">
+            <div class="form-group flex-1">
+              <label for="field-scale-min" style="font-size: 0.82rem;">Min Value</label>
+              <select id="field-scale-min" class="input">
+                <option value="0">0</option>
+                <option value="1" selected>1</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label for="field-scale-max" style="font-size: 0.82rem;">Max Value</label>
+              <select id="field-scale-max" class="input">
+                <option value="3">3</option>
+                <option value="5" selected>5</option>
+                <option value="7">7</option>
+                <option value="10">10</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="field-scale-min-label" style="font-size: 0.82rem;">Label for Min (Optional)</label>
+              <input type="text" id="field-scale-min-label" class="input" placeholder="e.g. Beginner / Poor" />
+            </div>
+            <div class="form-group flex-1">
+              <label for="field-scale-max-label" style="font-size: 0.82rem;">Label for Max (Optional)</label>
+              <input type="text" id="field-scale-max-label" class="input" placeholder="e.g. Expert / Excellent" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Key, Order & Required Settings -->
+        <div class="form-row" style="align-items: center; border-top: 1px solid var(--navy-mid); padding-top: 12px; margin-top: 4px;">
+          <div class="form-group flex-1">
+            <label for="field-key" style="font-size: 0.82rem;">Field Key (Identifier) *</label>
+            <input type="text" id="field-key" required pattern="[a-zA-Z0-9_]+" placeholder="e.g. camera_exp" class="input" style="font-family: monospace; font-size: 0.85rem;" />
+            <small class="form-help">Unique key used in datasheets.</small>
           </div>
           <div class="form-group flex-1">
-            <label for="field-order">Display Order</label>
-            <input type="number" id="field-order" min="1" max="99" value="10" />
+            <label for="field-order" style="font-size: 0.82rem;">Display Order</label>
+            <input type="number" id="field-order" min="1" max="999" value="10" class="input" />
+          </div>
+          <div class="form-group flex-1" id="field-required-wrap" style="display: flex; align-items: center; gap: 8px; margin-top: 14px;">
+            <input type="checkbox" id="field-required" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--leaf);" />
+            <label for="field-required" style="margin-bottom: 0; cursor: pointer; font-size: 0.88rem; font-weight: 600; color: var(--paper);">Required</label>
           </div>
         </div>
 
-        <div class="modal-actions" style="margin-top: 24px;">
+        <div class="modal-actions" style="margin-top: 16px;">
           <button type="button" class="btn btn-ghost" id="field-modal-cancel-btn">Cancel</button>
           <button type="submit" class="btn btn-primary" id="field-modal-submit-btn">Save Question</button>
         </div>
