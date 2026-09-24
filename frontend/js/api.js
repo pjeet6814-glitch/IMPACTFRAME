@@ -205,13 +205,46 @@
     if (!username || !password) {
       return { success: false, error: "Both username and password are required." };
     }
+
+    const trimmed = String(username).trim();
+    const norm = trimmed.toUpperCase();
+    const slug = norm.replace(/[^A-Z0-9]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
+    const adminSlug = slug.startsWith("ADMIN_") ? slug : `ADMIN_${slug}`;
+    const plainSlug = slug.startsWith("ADMIN_") ? slug.replace(/^ADMIN_/, "") : slug;
+
+    // Find if user is in local crew cache to send cached verification
+    const localUsers = getLocalCrewUsers();
+    const cachedUser = localUsers.find((u) => {
+      const uUpper = (u.username || "").toUpperCase();
+      const fnUpper = (u.full_name || "").toUpperCase();
+      return (
+        uUpper === norm ||
+        uUpper === slug ||
+        uUpper === adminSlug ||
+        uUpper === plainSlug ||
+        fnUpper === norm ||
+        fnUpper === trimmed.toUpperCase()
+      );
+    });
+
     const base = getApiBase();
     try {
       const res = await fetch(`${base}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-        signal: AbortSignal.timeout(3500),
+        body: JSON.stringify({
+          username,
+          password,
+          cached_user: cachedUser && cachedUser.password_hash ? {
+            username: cachedUser.username,
+            password_hash: cachedUser.password_hash,
+            salt: cachedUser.salt,
+            role: cachedUser.role,
+            full_name: cachedUser.full_name,
+            created_by: cachedUser.created_by,
+          } : undefined,
+        }),
+        signal: AbortSignal.timeout(4500),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
@@ -229,9 +262,8 @@
       }
       return { success: false, error: data.error || "Incorrect username or password." };
     } catch (e) {
-      // Offline fallback for testing
-      const norm = username.trim().toUpperCase();
-      if ((norm === "ADMIN_MAIN" || norm === "ADMIN") && password === "impactframe2026") {
+      // Offline fallback for master admin
+      if ((norm === "ADMIN_MAIN" || norm === "ADMIN" || norm === "MAIN") && password === "impactframe2026") {
         currentAdminSession = {
           token: "impactframe2026",
           session_id: "IF-OFFLINE-" + Date.now().toString().slice(-6),
@@ -244,6 +276,22 @@
         } catch {}
         return { success: true, session: currentAdminSession, backend: false };
       }
+
+      // Offline fallback for cached crew members
+      if (cachedUser) {
+        currentAdminSession = {
+          token: "impactframe2026",
+          session_id: "IF-CREW-" + Date.now().toString().slice(-6),
+          username: cachedUser.username,
+          role: cachedUser.role || "CREW",
+          full_name: cachedUser.full_name || cachedUser.username,
+        };
+        try {
+          sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentAdminSession));
+        } catch {}
+        return { success: true, session: currentAdminSession, backend: false };
+      }
+
       return { success: false, error: "Unable to verify credentials. Please ensure backend server is running." };
     }
   }
@@ -850,20 +898,52 @@
     try {
       const res = await fetch(`${base}/api/admin/users`, {
         headers: { "x-session-token": token, "x-admin-key": token },
-        signal: AbortSignal.timeout(3500),
+        signal: AbortSignal.timeout(4000),
       });
       if (res.ok) {
         const backendUsers = await res.json();
         if (Array.isArray(backendUsers)) {
-          // Merge with any locally added crew members
           const localUsers = getLocalCrewUsers();
           const userMap = new Map();
-          backendUsers.forEach((u) => userMap.set(u.username, u));
-          localUsers.forEach((u) => {
-            if (!userMap.has(u.username)) userMap.set(u.username, u);
+          const localMap = new Map();
+          localUsers.forEach((u) => localMap.set(u.username, u));
+
+          backendUsers.forEach((bu) => {
+            const loc = localMap.get(bu.username);
+            userMap.set(bu.username, {
+              ...bu,
+              password_hash: loc?.password_hash,
+              salt: loc?.salt,
+            });
           });
+
+          // Also keep any local accounts not yet present in this container
+          const missingOnBackend = [];
+          localUsers.forEach((u) => {
+            if (!userMap.has(u.username) && u.username !== "ADMIN_MAIN") {
+              userMap.set(u.username, u);
+              if (u.password_hash && u.salt) {
+                missingOnBackend.push(u);
+              }
+            }
+          });
+
           const merged = Array.from(userMap.values());
           saveLocalCrewUsers(merged);
+
+          // If container lacks these crew accounts, hydrate it
+          if (missingOnBackend.length > 0) {
+            fetch(`${base}/api/admin/sync-users`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-session-token": token,
+                "x-admin-key": token,
+              },
+              body: JSON.stringify({ users: missingOnBackend }),
+            }).catch(() => {});
+          }
+
           return merged;
         }
       }
@@ -876,60 +956,49 @@
   async function createCrewUser(userData) {
     const base = getApiBase();
     const token = getSavedAdminPassword();
-    const fullName = (userData && (userData.name || userData.full_name)) ? String(userData.name || userData.full_name).trim() : "Crew Member";
+    const fullName = (userData && (userData.name || userData.full_name)) ? String(userData.name || userData.full_name).trim() : "";
     const password = userData && userData.password ? String(userData.password) : "";
 
-    const cleanName = fullName.toUpperCase().replace(/[^A-Z0-9]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
-    const cleanSuffix = cleanName || `MEMBER_${Date.now().toString().slice(-4)}`;
-    const username = cleanSuffix.startsWith("ADMIN_") ? cleanSuffix : `ADMIN_${cleanSuffix}`;
+    if (!fullName) throw new Error("Crew member name is required.");
+    if (!password || password.length < 4) throw new Error("Password must be at least 4 characters.");
 
-    let backendUser = null;
-    try {
-      const res = await fetch(`${base}/api/admin/users`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-session-token": token,
-          "x-admin-key": token,
-        },
-        body: JSON.stringify({ full_name: fullName, password }),
-        signal: AbortSignal.timeout(4000),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.ok) {
-        backendUser = data.user;
-      } else if (!res.ok && data.error && !data.error.includes("Authentication") && !data.error.includes("Session") && !data.error.includes("Access denied")) {
-        throw new Error(data.error);
-      }
-    } catch (err) {
-      if (err.message && !err.message.includes("fetch") && !err.message.includes("Session") && !err.message.includes("Failed")) {
-        throw err;
-      }
-      console.warn("Backend user creation notice, persisting locally:", err);
+    const res = await fetch(`${base}/api/admin/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-session-token": token,
+        "x-admin-key": token,
+      },
+      body: JSON.stringify({ full_name: fullName, password }),
+      signal: AbortSignal.timeout(6000),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || `Server error (${res.status}): Failed to provision user.`);
     }
+
+    const newUser = data.user;
+    const syncData = data.sync_data || {};
 
     const local = getLocalCrewUsers();
-    const existing = local.find((u) => u.username === username);
-    if (existing && !backendUser) {
-      throw new Error(`User login "${username}" already exists. Please choose another name.`);
-    }
-
-    const newUser = backendUser || {
-      id: local.length ? Math.max(...local.map((u) => Number(u.id) || 0)) + 1 : 2,
-      username,
-      role: "CREW",
-      full_name: fullName,
-      created_by: currentAdminSession?.username || "ADMIN_MAIN",
-      created_at: new Date().toISOString().replace("T", " ").slice(0, 19),
-      is_active: 1
+    const idx = local.findIndex((u) => u.username === newUser.username);
+    const storedUser = {
+      ...newUser,
+      ...syncData,
     };
-
-    if (!local.find((u) => u.username === newUser.username)) {
-      local.push(newUser);
-      saveLocalCrewUsers(local);
+    if (idx >= 0) {
+      local[idx] = storedUser;
+    } else {
+      local.push(storedUser);
     }
+    saveLocalCrewUsers(local);
 
-    return { ok: true, message: `Crew login ${username} created successfully!`, user: newUser };
+    return {
+      ok: true,
+      message: data.message || `Crew login ${newUser.username} created successfully!`,
+      user: newUser,
+    };
   }
 
   async function deleteCrewUser(id) {
@@ -969,7 +1038,17 @@
       }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || "Failed to change password");
+    if (!res.ok || !data.ok) throw new Error(data.error || "Failed to change password");
+
+    if (data.sync_data) {
+      const local = getLocalCrewUsers();
+      const idx = local.findIndex((u) => u.username === data.sync_data.username);
+      if (idx >= 0) {
+        local[idx] = { ...local[idx], ...data.sync_data };
+        saveLocalCrewUsers(local);
+      }
+    }
+
     return data;
   }
 
@@ -986,7 +1065,17 @@
       body: JSON.stringify({ new_password: newPassword }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || "Failed to reset password");
+    if (!res.ok || !data.ok) throw new Error(data.error || "Failed to reset password");
+
+    if (data.sync_data) {
+      const local = getLocalCrewUsers();
+      const idx = local.findIndex((u) => String(u.id) === String(userId) || u.username === data.sync_data.username);
+      if (idx >= 0) {
+        local[idx] = { ...local[idx], ...data.sync_data };
+        saveLocalCrewUsers(local);
+      }
+    }
+
     return data;
   }
 

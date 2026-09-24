@@ -1563,7 +1563,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       try {
         const res = await window.impactframeApi.createCrewUser({ full_name: fullName, password });
-        showNotice(`Crew account "${res.user.username}" created successfully!`, "success");
+        showNotice(`Crew account "${res.user.username}" created! Login with "${res.user.username}" or "${fullName}".`, "success");
         closeUserModal();
         loadCrewUsers();
       } catch (err) {

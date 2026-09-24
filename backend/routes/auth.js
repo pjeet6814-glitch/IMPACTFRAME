@@ -18,21 +18,50 @@ router.post("/login", (req, res) => {
     return res.status(400).json({ ok: false, error: "Username and password are required." });
   }
 
-  const normalizedUser = username.trim().toUpperCase();
+  const trimmed = String(username).trim();
+  const upper = trimmed.toUpperCase();
+  const slug = upper.replace(/[^A-Z0-9]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
+  const adminSlug = slug.startsWith("ADMIN_") ? slug : `ADMIN_${slug}`;
+  const plainSlug = slug.startsWith("ADMIN_") ? slug.replace(/^ADMIN_/, "") : slug;
 
-  // Find user in database
-  let user = db.prepare("SELECT * FROM admin_users WHERE username = ? AND is_active = 1").get(normalizedUser);
+  // Find user in database by direct, slugified, prefixed, or full name
+  let user = db.prepare(`
+    SELECT * FROM admin_users 
+    WHERE (
+      username = ? OR username = ? OR username = ? OR username = ? 
+      OR UPPER(full_name) = ? OR UPPER(full_name) = ?
+    ) AND is_active = 1
+  `).get(upper, slug, adminSlug, plainSlug, upper, trimmed.toUpperCase());
 
   // Fallback for default ADMIN_MAIN if not yet in database
-  if (!user && normalizedUser === "ADMIN_MAIN") {
+  if (!user && (upper === "ADMIN_MAIN" || upper === "MAIN" || upper === "ADMIN" || slug === "ADMIN_MAIN" || slug === "MAIN" || slug === "ADMIN")) {
     const masterKey = process.env.ADMIN_KEY || "impactframe2026";
     if (password === masterKey) {
       const { hash, salt } = hashPassword(masterKey);
       db.prepare(`
-        INSERT INTO admin_users (username, password_hash, salt, role, full_name, created_by)
+        INSERT OR REPLACE INTO admin_users (username, password_hash, salt, role, full_name, created_by)
         VALUES ('ADMIN_MAIN', ?, ?, 'MAIN', 'System Master Administrator', 'SYSTEM')
       `).run(hash, salt);
       user = db.prepare("SELECT * FROM admin_users WHERE username = 'ADMIN_MAIN'").get();
+    }
+  }
+
+  // Restore from cached_user if container was cold-started without this crew account
+  if (!user && req.body && req.body.cached_user) {
+    const cu = req.body.cached_user;
+    if (cu.password_hash && cu.salt) {
+      const matches = verifyPassword(password, cu.password_hash, cu.salt);
+      if (matches) {
+        try {
+          db.prepare(`
+            INSERT OR REPLACE INTO admin_users (username, password_hash, salt, role, full_name, created_by)
+            VALUES (?, ?, ?, ?, ?, ?)
+          `).run(cu.username, cu.password_hash, cu.salt, cu.role || "CREW", cu.full_name || cu.username, cu.created_by || "ADMIN_MAIN");
+          user = db.prepare("SELECT * FROM admin_users WHERE username = ?").get(cu.username);
+        } catch (e) {
+          console.warn("Restore cached user notice:", e.message);
+        }
+      }
     }
   }
 
@@ -47,7 +76,7 @@ router.post("/login", (req, res) => {
   }
 
   // Backup check against env master key for ADMIN_MAIN only if explicitly configured in environment
-  if (!isPasswordValid && normalizedUser === "ADMIN_MAIN" && process.env.ADMIN_KEY && password === process.env.ADMIN_KEY) {
+  if (!isPasswordValid && (user.username === "ADMIN_MAIN" || normalizedUser === "ADMIN_MAIN") && process.env.ADMIN_KEY && password === process.env.ADMIN_KEY) {
     isPasswordValid = true;
   }
 
@@ -243,7 +272,34 @@ router.post("/users", adminAuth, (req, res) => {
     ok: true,
     message: `Crew login ${username} created successfully!`,
     user: newUser,
+    sync_data: {
+      username,
+      password_hash: hash,
+      salt,
+      role: "CREW",
+      full_name: rawName,
+      created_by: createdBy,
+      created_at: newUser ? newUser.created_at : new Date().toISOString()
+    }
   });
+});
+
+// POST /api/admin/sync-users — Hydrate container database with provisioned crew users
+router.post("/sync-users", adminAuth, (req, res) => {
+  const users = Array.isArray(req.body && req.body.users) ? req.body.users : [];
+  let added = 0;
+  for (const u of users) {
+    if (u && u.username && u.username !== "ADMIN_MAIN" && u.password_hash && u.salt) {
+      try {
+        db.prepare(`
+          INSERT OR IGNORE INTO admin_users (username, password_hash, salt, role, full_name, created_by)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run(u.username, u.password_hash, u.salt, u.role || "CREW", u.full_name || u.username, u.created_by || "ADMIN_MAIN");
+        added++;
+      } catch {}
+    }
+  }
+  res.json({ ok: true, synced: added });
 });
 
 // DELETE /api/admin/users/:id — Remove a sub crew login
@@ -312,7 +368,17 @@ router.post("/change-password", adminAuth, (req, res) => {
     WHERE username = ?
   `).run(hash, salt, username);
 
-  res.json({ ok: true, message: "Your password has been changed successfully!" });
+  res.json({
+    ok: true,
+    message: "Your password has been changed successfully!",
+    sync_data: {
+      username,
+      password_hash: hash,
+      salt,
+      role: user.role,
+      full_name: user.full_name,
+    },
+  });
 });
 
 // POST /api/admin/users/:id/reset-password — ADMIN_MAIN resets password for a sub crew member
@@ -338,7 +404,18 @@ router.post("/users/:id/reset-password", adminAuth, (req, res) => {
     WHERE id = ?
   `).run(hash, salt, req.params.id);
 
-  res.json({ ok: true, message: `Password for ${targetUser.username} has been reset successfully!` });
+  res.json({
+    ok: true,
+    message: `Password for ${targetUser.username} has been reset successfully!`,
+    sync_data: {
+      id: targetUser.id,
+      username: targetUser.username,
+      password_hash: hash,
+      salt,
+      role: targetUser.role,
+      full_name: targetUser.full_name,
+    },
+  });
 });
 
 module.exports = router;
