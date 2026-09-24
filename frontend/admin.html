@@ -108,6 +108,10 @@
           <span class="dot"></span>
           <span class="text">Checking server…</span>
         </div>
+        <button type="button" id="open-change-pw-btn" class="btn btn-ghost btn-sm" title="Change your login password">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Change Password
+        </button>
         <button type="button" id="lock-vault-btn" class="btn btn-ghost btn-sm" title="Lock and exit immediately">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
           Lock & Exit
@@ -633,6 +637,82 @@
         <div class="modal-actions" style="margin-top: 20px;">
           <button type="button" class="btn btn-ghost" id="user-modal-cancel-btn">Cancel</button>
           <button type="submit" class="btn btn-primary" id="user-modal-submit-btn">Provision Login &rarr;</button>
+        </div>
+      </form>
+    </div>
+  <!-- ================= MODAL: CHANGE ADMIN PASSWORD ================= -->
+  <div id="change-pw-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-box sprocket-frame" style="max-width: 440px;">
+      <div class="modal-header">
+        <div>
+          <span class="hud-pill" style="margin-bottom: 4px; display: inline-block;"><span class="rec-dot"></span> SECURITY KEY</span>
+          <h3 style="margin: 2px 0 0;">Change Password</h3>
+        </div>
+        <button type="button" class="modal-close-btn" id="change-pw-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <form id="change-pw-form" class="modal-form">
+        <p style="margin: 0 0 14px; font-size: 0.88rem; color: var(--parchment-dim);">
+          Update your access credentials for <strong id="change-pw-target-username" style="color: var(--amber);">ADMIN_MAIN</strong>.
+        </p>
+
+        <div class="form-group">
+          <label for="change-pw-current">Current Password *</label>
+          <input type="password" id="change-pw-current" required autocomplete="current-password" placeholder="Enter current password…" />
+        </div>
+
+        <div class="form-group">
+          <label for="change-pw-new">New Password *</label>
+          <input type="password" id="change-pw-new" required minlength="4" autocomplete="new-password" placeholder="Enter new password (min. 4 chars)…" />
+        </div>
+
+        <div class="form-group">
+          <label for="change-pw-confirm">Confirm New Password *</label>
+          <input type="password" id="change-pw-confirm" required minlength="4" autocomplete="new-password" placeholder="Re-type new password…" />
+        </div>
+
+        <div id="change-pw-error" class="lock-error" style="display: none; margin-bottom: 12px;"></div>
+
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button type="button" class="btn btn-ghost" id="change-pw-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="change-pw-submit-btn">Update Password &rarr;</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: RESET CREW PASSWORD (ADMIN_MAIN) ================= -->
+  <div id="reset-crew-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-box sprocket-frame" style="max-width: 440px;">
+      <div class="modal-header">
+        <div>
+          <span class="hud-pill" style="margin-bottom: 4px; display: inline-block;"><span class="rec-dot"></span> CREW CREDENTIALS</span>
+          <h3 style="margin: 2px 0 0;">Reset Crew Password</h3>
+        </div>
+        <button type="button" class="modal-close-btn" id="reset-crew-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <form id="reset-crew-form" class="modal-form">
+        <input type="hidden" id="reset-crew-user-id" />
+        <p style="margin: 0 0 14px; font-size: 0.88rem; color: var(--parchment-dim);">
+          Set a new login password for crew member: <strong id="reset-crew-target-name" style="color: var(--amber);"></strong>
+        </p>
+
+        <div class="form-group">
+          <label for="reset-crew-new-pw">New Password *</label>
+          <input type="password" id="reset-crew-new-pw" required minlength="4" placeholder="Enter new password (min. 4 chars)…" />
+        </div>
+
+        <div class="form-group">
+          <label for="reset-crew-confirm-pw">Confirm New Password *</label>
+          <input type="password" id="reset-crew-confirm-pw" required minlength="4" placeholder="Re-type new password…" />
+        </div>
+
+        <div id="reset-crew-error" class="lock-error" style="display: none; margin-bottom: 12px;"></div>
+
+        <div class="modal-actions" style="margin-top: 20px;">
+          <button type="button" class="btn btn-ghost" id="reset-crew-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="reset-crew-submit-btn">Reset Password &rarr;</button>
         </div>
       </form>
     </div>

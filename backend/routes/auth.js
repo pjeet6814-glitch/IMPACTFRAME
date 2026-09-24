@@ -45,8 +45,8 @@ router.post("/login", (req, res) => {
     isPasswordValid = verifyPassword(password, user.password_hash, user.salt);
   }
 
-  // Backup check against env master key for ADMIN_MAIN
-  if (!isPasswordValid && normalizedUser === "ADMIN_MAIN" && password === (process.env.ADMIN_KEY || "impactframe2026")) {
+  // Backup check against env master key for ADMIN_MAIN only if explicitly configured in environment
+  if (!isPasswordValid && normalizedUser === "ADMIN_MAIN" && process.env.ADMIN_KEY && password === process.env.ADMIN_KEY) {
     isPasswordValid = true;
   }
 
@@ -251,6 +251,82 @@ router.delete("/users/:id", adminAuth, (req, res) => {
 
   db.prepare("DELETE FROM admin_users WHERE id = ?").run(req.params.id);
   res.json({ ok: true, message: `Account ${targetUser.username} removed.` });
+});
+
+// ==========================================
+// 4. Password Management Endpoints
+// ==========================================
+
+// POST /api/admin/change-password — Current user changes their own password
+router.post("/change-password", adminAuth, (req, res) => {
+  const { current_password, new_password } = req.body || {};
+
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: "Current password and new password are required." });
+  }
+
+  if (new_password.length < 4) {
+    return res.status(400).json({ error: "New password must be at least 4 characters long." });
+  }
+
+  const username = req.adminUser ? req.adminUser.username : "ADMIN_MAIN";
+  const user = db.prepare("SELECT * FROM admin_users WHERE username = ?").get(username);
+  if (!user) {
+    return res.status(404).json({ error: "User account not found." });
+  }
+
+  // Verify current password
+  let isCurrentValid = false;
+  if (user.password_hash && user.salt) {
+    isCurrentValid = verifyPassword(current_password, user.password_hash, user.salt);
+  }
+  if (!isCurrentValid && username === "ADMIN_MAIN" && process.env.ADMIN_KEY && current_password === process.env.ADMIN_KEY) {
+    isCurrentValid = true;
+  }
+  // Also check default fallback if never changed before
+  if (!isCurrentValid && username === "ADMIN_MAIN" && !user.password_hash && current_password === "impactframe2026") {
+    isCurrentValid = true;
+  }
+
+  if (!isCurrentValid) {
+    return res.status(401).json({ error: "Current password is incorrect. Please re-check and try again." });
+  }
+
+  // Hash and save new password
+  const { hash, salt } = hashPassword(new_password);
+  db.prepare(`
+    UPDATE admin_users
+    SET password_hash = ?, salt = ?
+    WHERE username = ?
+  `).run(hash, salt, username);
+
+  res.json({ ok: true, message: "Your password has been changed successfully!" });
+});
+
+// POST /api/admin/users/:id/reset-password — ADMIN_MAIN resets password for a sub crew member
+router.post("/users/:id/reset-password", adminAuth, (req, res) => {
+  if (req.adminUser && req.adminUser.role !== "MAIN") {
+    return res.status(403).json({ error: "Only ADMIN_MAIN can reset crew passwords." });
+  }
+
+  const { new_password } = req.body || {};
+  if (!new_password || new_password.length < 4) {
+    return res.status(400).json({ error: "New password must be at least 4 characters long." });
+  }
+
+  const targetUser = db.prepare("SELECT * FROM admin_users WHERE id = ?").get(req.params.id);
+  if (!targetUser) {
+    return res.status(404).json({ error: "Crew account not found." });
+  }
+
+  const { hash, salt } = hashPassword(new_password);
+  db.prepare(`
+    UPDATE admin_users
+    SET password_hash = ?, salt = ?
+    WHERE id = ?
+  `).run(hash, salt, req.params.id);
+
+  res.json({ ok: true, message: `Password for ${targetUser.username} has been reset successfully!` });
 });
 
 module.exports = router;

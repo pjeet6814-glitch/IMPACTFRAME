@@ -138,6 +138,31 @@ document.addEventListener("DOMContentLoaded", () => {
   const userModalSubmitBtn = document.getElementById("user-modal-submit-btn");
   let crewUsersList = [];
 
+  // Change Password Elements
+  const openChangePwBtn = document.getElementById("open-change-pw-btn");
+  const changePwModal = document.getElementById("change-pw-modal");
+  const changePwCloseBtn = document.getElementById("change-pw-close-btn");
+  const changePwCancelBtn = document.getElementById("change-pw-cancel-btn");
+  const changePwForm = document.getElementById("change-pw-form");
+  const changePwTargetUsername = document.getElementById("change-pw-target-username");
+  const changePwCurrentInput = document.getElementById("change-pw-current");
+  const changePwNewInput = document.getElementById("change-pw-new");
+  const changePwConfirmInput = document.getElementById("change-pw-confirm");
+  const changePwError = document.getElementById("change-pw-error");
+  const changePwSubmitBtn = document.getElementById("change-pw-submit-btn");
+
+  // Reset Crew Password Elements
+  const resetCrewModal = document.getElementById("reset-crew-modal");
+  const resetCrewCloseBtn = document.getElementById("reset-crew-close-btn");
+  const resetCrewCancelBtn = document.getElementById("reset-crew-cancel-btn");
+  const resetCrewForm = document.getElementById("reset-crew-form");
+  const resetCrewUserIdInput = document.getElementById("reset-crew-user-id");
+  const resetCrewTargetName = document.getElementById("reset-crew-target-name");
+  const resetCrewNewPwInput = document.getElementById("reset-crew-new-pw");
+  const resetCrewConfirmPwInput = document.getElementById("reset-crew-confirm-pw");
+  const resetCrewError = document.getElementById("reset-crew-error");
+  const resetCrewSubmitBtn = document.getElementById("reset-crew-submit-btn");
+
   // Password visibility toggle
   if (togglePwBtn) {
     togglePwBtn.addEventListener("click", () => {
@@ -1433,10 +1458,18 @@ document.addEventListener("DOMContentLoaded", () => {
           <div>
             ${
               isMain
-                ? `<span class="crew-protected-pill">&#128274; Primary Account (Protected)</span>`
-                : `<button type="button" class="btn btn-ghost btn-sm delete-user-btn" data-user-id="${user.id}" data-username="${escapeHtml(user.username)}" style="color: #f87171;">
-                     Revoke Account
-                   </button>`
+                ? `<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                     <span class="crew-protected-pill">&#128274; Primary Account (Protected)</span>
+                     <button type="button" class="btn btn-ghost btn-sm trigger-change-my-pw-btn">Change Password</button>
+                   </div>`
+                : `<div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                     <button type="button" class="btn btn-ghost btn-sm reset-crew-pw-btn" data-user-id="${user.id}" data-username="${escapeHtml(user.username)}">
+                       Reset Password
+                     </button>
+                     <button type="button" class="btn btn-ghost btn-sm delete-user-btn" data-user-id="${user.id}" data-username="${escapeHtml(user.username)}" style="color: #f87171;">
+                       Revoke Account
+                     </button>
+                   </div>`
             }
           </div>
         </div>
@@ -1446,6 +1479,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     usersListContainer.querySelectorAll(".delete-user-btn").forEach((btn) => {
       btn.addEventListener("click", () => handleDeleteCrewUser(btn.dataset.userId, btn.dataset.username));
+    });
+    usersListContainer.querySelectorAll(".reset-crew-pw-btn").forEach((btn) => {
+      btn.addEventListener("click", () => openResetCrewModal(btn.dataset.userId, btn.dataset.username));
+    });
+    usersListContainer.querySelectorAll(".trigger-change-my-pw-btn").forEach((btn) => {
+      btn.addEventListener("click", openChangePwModal);
     });
   }
 
@@ -1523,6 +1562,137 @@ document.addEventListener("DOMContentLoaded", () => {
       } finally {
         userModalSubmitBtn.disabled = false;
         userModalSubmitBtn.innerHTML = "Provision Login &rarr;";
+      }
+    });
+  }
+
+  /* ==========================================================================
+     PASSWORD MANAGEMENT: CHANGE PASSWORD & RESET CREW PASSWORD
+     ========================================================================== */
+  function openChangePwModal() {
+    const session = window.impactframeApi.getCurrentSession();
+    const uname = session?.username || "ADMIN_MAIN";
+    if (changePwTargetUsername) changePwTargetUsername.textContent = uname;
+    if (changePwCurrentInput) changePwCurrentInput.value = "";
+    if (changePwNewInput) changePwNewInput.value = "";
+    if (changePwConfirmInput) changePwConfirmInput.value = "";
+    if (changePwError) changePwError.style.display = "none";
+    if (changePwModal) changePwModal.style.display = "flex";
+    if (changePwCurrentInput) changePwCurrentInput.focus();
+  }
+
+  function closeChangePwModal() {
+    if (changePwModal) changePwModal.style.display = "none";
+    if (changePwError) changePwError.style.display = "none";
+  }
+
+  if (openChangePwBtn) openChangePwBtn.addEventListener("click", openChangePwModal);
+  if (changePwCloseBtn) changePwCloseBtn.addEventListener("click", closeChangePwModal);
+  if (changePwCancelBtn) changePwCancelBtn.addEventListener("click", closeChangePwModal);
+  if (changePwModal) {
+    changePwModal.addEventListener("click", (e) => {
+      if (e.target === changePwModal) closeChangePwModal();
+    });
+  }
+
+  if (changePwForm) {
+    changePwForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const currentPw = changePwCurrentInput.value;
+      const newPw = changePwNewInput.value;
+      const confirmPw = changePwConfirmInput.value;
+
+      if (!currentPw || !newPw) return;
+
+      if (newPw !== confirmPw) {
+        changePwError.textContent = "New passwords do not match. Please re-type.";
+        changePwError.style.display = "block";
+        return;
+      }
+
+      if (newPw.length < 4) {
+        changePwError.textContent = "New password must be at least 4 characters long.";
+        changePwError.style.display = "block";
+        return;
+      }
+
+      changePwSubmitBtn.disabled = true;
+      changePwSubmitBtn.textContent = "Updating…";
+      changePwError.style.display = "none";
+
+      try {
+        await window.impactframeApi.changeAdminPassword(currentPw, newPw);
+        showNotice("Password changed successfully! Keep your new password safe.", "success");
+        closeChangePwModal();
+      } catch (err) {
+        changePwError.textContent = err.message || "Failed to update password.";
+        changePwError.style.display = "block";
+      } finally {
+        changePwSubmitBtn.disabled = false;
+        changePwSubmitBtn.innerHTML = "Update Password &rarr;";
+      }
+    });
+  }
+
+  function openResetCrewModal(userId, username) {
+    if (resetCrewUserIdInput) resetCrewUserIdInput.value = userId;
+    if (resetCrewTargetName) resetCrewTargetName.textContent = username;
+    if (resetCrewNewPwInput) resetCrewNewPwInput.value = "";
+    if (resetCrewConfirmPwInput) resetCrewConfirmPwInput.value = "";
+    if (resetCrewError) resetCrewError.style.display = "none";
+    if (resetCrewModal) resetCrewModal.style.display = "flex";
+    if (resetCrewNewPwInput) resetCrewNewPwInput.focus();
+  }
+
+  function closeResetCrewModal() {
+    if (resetCrewModal) resetCrewModal.style.display = "none";
+    if (resetCrewError) resetCrewError.style.display = "none";
+  }
+
+  if (resetCrewCloseBtn) resetCrewCloseBtn.addEventListener("click", closeResetCrewModal);
+  if (resetCrewCancelBtn) resetCrewCancelBtn.addEventListener("click", closeResetCrewModal);
+  if (resetCrewModal) {
+    resetCrewModal.addEventListener("click", (e) => {
+      if (e.target === resetCrewModal) closeResetCrewModal();
+    });
+  }
+
+  if (resetCrewForm) {
+    resetCrewForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userId = resetCrewUserIdInput.value;
+      const username = resetCrewTargetName.textContent;
+      const newPw = resetCrewNewPwInput.value;
+      const confirmPw = resetCrewConfirmPwInput.value;
+
+      if (!userId || !newPw) return;
+
+      if (newPw !== confirmPw) {
+        resetCrewError.textContent = "New passwords do not match. Please re-type.";
+        resetCrewError.style.display = "block";
+        return;
+      }
+
+      if (newPw.length < 4) {
+        resetCrewError.textContent = "New password must be at least 4 characters long.";
+        resetCrewError.style.display = "block";
+        return;
+      }
+
+      resetCrewSubmitBtn.disabled = true;
+      resetCrewSubmitBtn.textContent = "Resetting…";
+      resetCrewError.style.display = "none";
+
+      try {
+        await window.impactframeApi.resetCrewPassword(userId, newPw);
+        showNotice(`Password for "${username}" has been reset successfully!`, "success");
+        closeResetCrewModal();
+      } catch (err) {
+        resetCrewError.textContent = err.message || "Failed to reset crew password.";
+        resetCrewError.style.display = "block";
+      } finally {
+        resetCrewSubmitBtn.disabled = false;
+        resetCrewSubmitBtn.innerHTML = "Reset Password &rarr;";
       }
     });
   }

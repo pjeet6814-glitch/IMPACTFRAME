@@ -901,6 +901,46 @@
     return data;
   }
 
+  // ==========================================
+  // Password Management
+  // ==========================================
+  async function changeAdminPassword(currentPassword, newPassword) {
+    const base = getApiBase();
+    const token = getSavedAdminPassword();
+    const res = await fetch(`${base}/api/admin/change-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-session-token": token,
+        "x-admin-key": token,
+      },
+      body: JSON.stringify({
+        current_password: currentPassword,
+        new_password: newPassword,
+      }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Failed to change password");
+    return data;
+  }
+
+  async function resetCrewPassword(userId, newPassword) {
+    const base = getApiBase();
+    const token = getSavedAdminPassword();
+    const res = await fetch(`${base}/api/admin/users/${userId}/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-session-token": token,
+        "x-admin-key": token,
+      },
+      body: JSON.stringify({ new_password: newPassword }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "Failed to reset password");
+    return data;
+  }
+
   window.impactframeApi = {
     getApiBase,
     checkBackendOnline,
@@ -939,6 +979,9 @@
     getCrewUsers,
     createCrewUser,
     deleteCrewUser,
+    // Password Management
+    changeAdminPassword,
+    resetCrewPassword,
     // Constants
     socialLinks: SOCIAL_LINKS,
     featuredReels: FEATURED_REELS,
