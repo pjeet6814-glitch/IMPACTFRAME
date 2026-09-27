@@ -127,11 +127,15 @@
       </button>
       <button type="button" class="admin-tab-btn" id="tab-btn-datasheet" data-tab="datasheet" role="tab" aria-selected="false">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        Auditions Datasheet <span class="badge-count" id="datasheet-count-badge">0</span>
+        Submissions Datasheet <span class="badge-count" id="datasheet-count-badge">0</span>
       </button>
       <button type="button" class="admin-tab-btn" id="tab-btn-forms" data-tab="forms" role="tab" aria-selected="false">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Form Customizer
+      </button>
+      <button type="button" class="admin-tab-btn" id="tab-btn-events" data-tab="events" role="tab" aria-selected="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        Events & Schedule <span class="badge-count" id="events-count-badge">0</span>
       </button>
       <button type="button" class="admin-tab-btn" id="tab-btn-audit" data-tab="audit" role="tab" aria-selected="false">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
@@ -165,7 +169,13 @@
     <section id="panel-datasheet" class="admin-tab-panel" role="tabpanel">
       <div class="datasheet-toolbar">
         <div class="datasheet-filters-group">
-          <input type="text" id="datasheet-search-input" class="input" placeholder="Search applicant, email, phone..." style="min-width: 240px; padding: 8px 12px; font-size: 0.88rem;" />
+          <input type="text" id="datasheet-search-input" class="input" placeholder="Search applicant, email, phone..." style="min-width: 220px; padding: 8px 12px; font-size: 0.88rem;" />
+          <select id="datasheet-form-type-filter" class="input" style="padding: 8px 12px; font-size: 0.88rem; background: var(--navy-dark); color: var(--paper); border: 1px solid var(--navy-mid); font-weight: 600;">
+            <option value="All">All Form Types</option>
+            <option value="auditions">🎭 Auditions (apply.html)</option>
+            <option value="join_crew">🎬 Join Crew (join.html)</option>
+            <option value="events">🎟️ Events & Workshops (events.html)</option>
+          </select>
           <select id="datasheet-role-filter" class="input" style="padding: 8px 12px; font-size: 0.88rem;">
             <option value="All">All Roles</option>
             <option value="Actor">Actors & Narrators</option>
@@ -202,17 +212,18 @@
           <thead>
             <tr>
               <th>Ref / ID</th>
+              <th>Form</th>
               <th>Date</th>
               <th>Applicant</th>
               <th>Contact Info</th>
-              <th>Role of Interest</th>
+              <th>Role / Event</th>
               <th>Status</th>
               <th style="text-align: right;">Actions</th>
             </tr>
           </thead>
           <tbody id="datasheet-table-body">
             <tr>
-              <td colspan="7" style="text-align: center; padding: 32px; color: var(--parchment-dim);">
+              <td colspan="8" style="text-align: center; padding: 32px; color: var(--parchment-dim);">
                 Loading submissions datasheet…
               </td>
             </tr>
@@ -223,12 +234,48 @@
 
     <!-- ================= TAB 3: FORM CUSTOMIZER ================= -->
     <section id="panel-forms" class="admin-tab-panel" role="tabpanel">
+      <!-- Universal Form Switcher Bar -->
+      <div class="form-selector-bar sprocket-frame" style="margin-bottom: 22px; background: rgba(22, 38, 32, 0.95); border: 2px solid var(--leaf); border-radius: var(--radius); padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 320px;">
+          <div style="font-weight: 800; color: var(--leaf-light); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Choose Which Form to Edit &amp; Customize:
+          </div>
+          <!-- Big Visual Form Switcher Pills -->
+          <div class="form-switcher-pills" id="form-switcher-pills" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="form-pill-btn active" data-form="auditions" id="pill-form-auditions" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius); font-weight: 700; font-size: 0.92rem; cursor: pointer; border: 2px solid var(--leaf); background: rgba(82, 183, 136, 0.25); color: var(--paper); transition: all 0.2s ease;">
+              <span style="font-size: 1.25rem;">🎭</span>
+              <span>Auditions Form (apply.html)</span>
+            </button>
+            <button type="button" class="form-pill-btn" data-form="join_crew" id="pill-form-join_crew" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius); font-weight: 700; font-size: 0.92rem; cursor: pointer; border: 1px solid var(--navy-mid); background: var(--navy-dark); color: var(--parchment-dim); transition: all 0.2s ease;">
+              <span style="font-size: 1.25rem;">🎬</span>
+              <span>Join Crew Form (join.html)</span>
+            </button>
+            <button type="button" class="form-pill-btn" data-form="events" id="pill-form-events" style="display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: var(--radius); font-weight: 700; font-size: 0.92rem; cursor: pointer; border: 1px solid var(--navy-mid); background: var(--navy-dark); color: var(--parchment-dim); transition: all 0.2s ease;">
+              <span style="font-size: 1.25rem;">🎟️</span>
+              <span>Events Registration Form (events.html)</span>
+            </button>
+          </div>
+          <select id="admin-active-form-select" style="display: none;">
+            <option value="auditions" selected>Auditions</option>
+            <option value="join_crew">Join Crew</option>
+            <option value="events">Events</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <a id="admin-view-public-form-btn" href="apply.html" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; font-weight: 600;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open Live Form &nearr;
+          </a>
+        </div>
+      </div>
+
       <!-- Google Forms Settings & Header Controls Card -->
       <div class="form-settings-card sprocket-frame" style="margin-bottom: 28px; background: rgba(14, 26, 23, 0.7); border: 1px solid var(--navy-mid); border-radius: var(--radius); padding: 22px;">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--navy-mid); padding-bottom: 14px; margin-bottom: 18px; flex-wrap: wrap; gap: 14px;">
           <div>
-            <div class="viewfinder-tag" style="margin-bottom: 4px;">[ FORM SETTINGS // GOOGLE FORMS CONTROLS ]</div>
-            <h3 style="margin: 0; font-size: 1.25rem; color: var(--paper);">Form Configuration & Response Status</h3>
+            <div class="viewfinder-tag" style="margin-bottom: 4px;">[ FORM SETTINGS // CONFIGURATION CONTROLS ]</div>
+            <h3 id="form-settings-active-label" style="margin: 0; font-size: 1.25rem; color: var(--paper);">Auditions & Roles Form Configuration</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             <!-- Real-time Accepting Responses Toggle -->
@@ -236,10 +283,6 @@
               <span id="accepting-status-label" style="font-size: 0.85rem; font-weight: 600; color: #86efac;">● Accepting Responses</span>
               <input type="checkbox" id="form-accepting-toggle" checked style="accent-color: var(--leaf); width: 18px; height: 18px; cursor: pointer;" />
             </label>
-            <a href="apply.html" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="display: inline-flex; align-items: center; gap: 6px;" title="Open live form in new tab">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              View Public Form
-            </a>
             <button type="button" class="btn btn-primary btn-sm" id="save-form-settings-btn">
               Save Settings
             </button>
@@ -273,6 +316,48 @@
               <textarea id="form-closed-msg-input" rows="2" class="input" placeholder="Notice displayed to visitors when Accepting Responses is turned OFF..."></textarea>
             </div>
           </div>
+
+          <!-- QR Code Configuration Section -->
+          <div style="margin-top: 8px; padding-top: 14px; border-top: 1px dashed var(--navy-mid);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <strong style="color: var(--leaf-light); font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  Display QR Code Photo on Form (Payment UPI, WhatsApp Group, or Instructions)
+                </strong>
+                <p style="margin: 2px 0 0; color: var(--parchment-dim); font-size: 0.8rem;">
+                  Upload a photo of a QR code to display it prominently on the public form.
+                </p>
+              </div>
+              <div id="form-qr-preview-wrap" style="display: none; align-items: center; gap: 10px;">
+                <img id="form-qr-preview-img" src="" alt="QR Preview" style="width: 52px; height: 52px; object-fit: contain; background: #fff; padding: 2px; border-radius: 4px; border: 1px solid var(--leaf);" />
+                <button type="button" class="btn btn-ghost btn-sm" id="form-qr-remove-btn" style="color: #ff8888; padding: 3px 8px; font-size: 0.78rem;">Remove QR</button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="form-qr-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">QR Code Image (Upload File or Enter Image URL)</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="form-qr-input" class="input" placeholder="Upload photo below or paste https://..." style="flex: 1;" />
+                  <label class="btn btn-ghost btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Upload QR Photo
+                    <input type="file" id="form-qr-file-input" accept="image/*" style="display: none;" />
+                  </label>
+                </div>
+              </div>
+              <div class="form-group flex-1">
+                <label for="form-qr-title-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">QR Card Title</label>
+                <input type="text" id="form-qr-title-input" class="input" placeholder="e.g. Scan to Pay Registration Fee (UPI)" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="form-qr-instruction-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">QR Card Instructions / Notes</label>
+              <textarea id="form-qr-instruction-input" rows="1" class="input" placeholder="e.g. Scan using GPay / PhonePe and attach payment screenshot below..."></textarea>
+            </div>
+          </div>
         </form>
       </div>
 
@@ -285,6 +370,10 @@
           </p>
         </div>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-ghost btn-sm" id="add-photo-card-btn" style="border: 1px dashed var(--leaf-light); color: var(--leaf-light); display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            📷 + Add Photo Question
+          </button>
           <button type="button" class="btn btn-ghost btn-sm" id="add-section-divider-btn" style="border: 1px dashed var(--leaf-light); color: var(--leaf-light);">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             + Add Section Header
@@ -298,6 +387,47 @@
 
       <div id="form-builder-container" class="form-builder-list">
         <p class="state-msg">Loading form questions…</p>
+      </div>
+    </section>
+
+    <!-- ================= TAB: EVENTS & SCHEDULE ================= -->
+    <section id="panel-events" class="admin-tab-panel" role="tabpanel">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h3 style="margin: 0 0 6px; font-size: 1.3rem; color: var(--paper);">Events &amp; Schedule Catalog</h3>
+          <p style="margin: 0; color: var(--parchment-dim); font-size: 0.9rem;">
+            Add upcoming film showcases, workshops, and manage past/concluded events. Controls live content on <code>events.html</code>.
+          </p>
+        </div>
+        <button type="button" class="btn btn-primary" id="open-add-event-modal-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          + Add New Event
+        </button>
+      </div>
+
+      <div class="datasheet-toolbar">
+        <div class="datasheet-filters-group">
+          <input type="text" id="events-search-input" class="input" placeholder="Search event title, venue, category..." style="min-width: 240px; padding: 8px 12px; font-size: 0.88rem;" />
+          <select id="events-status-filter" class="input" style="padding: 8px 12px; font-size: 0.88rem;">
+            <option value="All">All Events (Upcoming &amp; Past)</option>
+            <option value="upcoming">Upcoming Events Only</option>
+            <option value="past">Past / Concluded Events Only</option>
+          </select>
+        </div>
+        <div class="datasheet-actions-group">
+          <a href="events.html" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            View Live Events Page &nearr;
+          </a>
+          <button type="button" class="btn btn-ghost btn-sm" id="refresh-events-btn" title="Refresh events list">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      <div id="admin-events-container" class="form-builder-list">
+        <p class="state-msg">Loading events catalog…</p>
       </div>
     </section>
 
@@ -505,10 +635,12 @@
               <optgroup label="Date, Time & Upload">
                 <option value="date">Date</option>
                 <option value="time">Time</option>
-                <option value="file">File / Drive Upload Link</option>
+                <option value="photo">📷 Photo / Image Upload (Screenshots, Headshots, IDs)</option>
+                <option value="file">File / Document Upload Link</option>
               </optgroup>
               <optgroup label="Layout">
-                <option value="section">Section Header & Divider</option>
+                <option value="section">Section Header &amp; Divider</option>
+                <option value="image_card">🖼️ Standalone Image Card (QR, Poster, Instructions)</option>
               </optgroup>
             </select>
           </div>
@@ -519,6 +651,29 @@
           <label for="field-description">Description / Helper Subtitle (Optional)</label>
           <input type="text" id="field-description" class="input" placeholder="e.g. Include your primary cinema rigs or gimbal models" />
           <small class="form-help">Guidance or instructions shown directly beneath the question title.</small>
+        </div>
+
+        <!-- Attached Question Photo / Image Illustration (Optional) -->
+        <div class="form-group" style="background: rgba(14, 26, 23, 0.7); border: 1px solid var(--navy-mid); border-radius: var(--radius); padding: 12px 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label for="field-image-url" style="margin: 0; font-weight: 600; color: var(--leaf-light); font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Attach Photo / Image Illustration to this Question (Optional)
+            </label>
+            <div id="field-image-preview-wrap" style="display: none; align-items: center; gap: 8px;">
+              <img id="field-image-preview-img" src="" alt="Question photo preview" style="width: 44px; height: 44px; object-fit: contain; background: #0b1512; border-radius: 4px; border: 1px solid var(--leaf);" />
+              <button type="button" class="btn btn-ghost btn-sm" id="field-image-remove-btn" style="color: #ff8888; padding: 2px 6px; font-size: 0.75rem;">Remove</button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="field-image-url" class="input" placeholder="Paste image URL (https://...) or upload below" style="flex: 1; font-size: 0.85rem;" />
+            <label class="btn btn-ghost btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload Photo
+              <input type="file" id="field-image-file-input" accept="image/*" style="display: none;" />
+            </label>
+          </div>
+          <small class="form-help">Displays an illustration, reference photo, QR code, or diagram for this question.</small>
         </div>
 
         <!-- 3. Placeholder Text (for text inputs) -->
@@ -623,7 +778,7 @@
         <div class="form-group">
           <label for="crew-name-input">Crew Member Full Name *</label>
           <input type="text" id="crew-name-input" required placeholder="e.g. Jeet Patel or Aryan" />
-          <small class="form-help">Username will be formatted as: <code id="username-preview-tag" style="color: var(--amber); font-weight: 600;">ADMIN_NAME</code></small>
+          <small class="form-help">Username will be formatted as: <code id="username-preview-tag" style="color: var(--amber); font-weight: 600;">ADMIN_NAME</code> (Member can log in using either this username or their name)</small>
         </div>
 
         <div class="form-group">
@@ -720,6 +875,91 @@
     </div>
   </div>
 
+  <!-- ================= MODAL: ADD / EDIT EVENT ================= -->
+  <div id="event-modal" class="modal-backdrop" style="display: none;">
+    <div class="modal-box sprocket-frame" style="max-width: 620px; max-height: 90vh; overflow-y: auto;">
+      <div class="modal-header">
+        <div>
+          <span class="hud-pill" style="margin-bottom: 4px; display: inline-block;"><span class="rec-dot"></span> CALENDAR EVENT</span>
+          <h3 id="event-modal-title" style="margin: 2px 0 0;">Add Calendar Event</h3>
+        </div>
+        <button type="button" class="modal-close-btn" id="event-modal-close-btn" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <form id="event-form" class="modal-form" style="display: flex; flex-direction: column; gap: 14px;">
+        <input type="hidden" id="event-id" />
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="event-title">Event Title *</label>
+            <input type="text" id="event-title" required class="input" placeholder="e.g. Annual IMPACTFRAME Showcase &amp; Production Kickoff" />
+          </div>
+          <div class="form-group flex-1">
+            <label for="event-category">Category / Tag *</label>
+            <input type="text" id="event-category" required class="input" placeholder="e.g. WORKSHOP, SCREENING, TALK" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="event-date-day">Day (Number) *</label>
+            <input type="text" id="event-date-day" required class="input" placeholder="e.g. 18" maxlength="10" />
+          </div>
+          <div class="form-group flex-1">
+            <label for="event-date-month">Month (e.g. OCTOBER) *</label>
+            <input type="text" id="event-date-month" required class="input" placeholder="e.g. OCTOBER" />
+          </div>
+          <div class="form-group flex-1">
+            <label for="event-time">Time info *</label>
+            <input type="text" id="event-time" required class="input" placeholder="e.g. 7:00 PM" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="event-location">Venue / Location *</label>
+            <input type="text" id="event-location" required class="input" placeholder="e.g. Central Campus Amphitheater" />
+          </div>
+          <div class="form-group flex-1">
+            <label for="event-entry-fee">Entry Fee / Note</label>
+            <input type="text" id="event-entry-fee" class="input" placeholder="e.g. Free Entry, Equipment Provided" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="event-description">Event Description *</label>
+          <textarea id="event-description" required rows="3" class="input" placeholder="Detailed outline of the event, itinerary, guest speakers, equipment provided..."></textarea>
+        </div>
+
+        <div class="form-row" style="background: rgba(10, 20, 18, 0.6); padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--navy-mid); align-items: center;">
+          <div class="form-group flex-1">
+            <label for="event-status-select" style="font-weight: 700; color: var(--leaf-light); font-size: 0.88rem;">Event Lifecycle Status</label>
+            <select id="event-status-select" class="input" style="font-weight: 600;">
+              <option value="0">🟢 Upcoming Event (Active on schedule)</option>
+              <option value="1">⚪ Past / Concluded Event (Gone)</option>
+            </select>
+          </div>
+          <div class="form-group flex-1" style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px;">
+            <label style="font-size: 0.82rem; color: var(--paper); font-weight: 600;">Seat Registration</label>
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; color: var(--parchment-dim);">
+              <input type="checkbox" id="event-reg-open" checked style="width: 16px; height: 16px; accent-color: var(--leaf);" />
+              Accepting Registrations
+            </label>
+          </div>
+          <div class="form-group" style="width: 90px;">
+            <label for="event-sort-order" style="font-size: 0.82rem;">Sort Order</label>
+            <input type="number" id="event-sort-order" value="10" min="0" max="999" class="input" />
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top: 14px;">
+          <button type="button" class="btn btn-ghost" id="event-modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="event-modal-submit-btn">Save Event &rarr;</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="wrap foot-row">
       <div>
@@ -747,8 +987,8 @@
     </div>
   </footer>
 
-  <script src="js/api.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/api.js?v=2.2"></script>
+  <script src="js/main.js?v=2.2"></script>
+  <script src="js/admin.js?v=2.2"></script>
 </body>
 </html>
