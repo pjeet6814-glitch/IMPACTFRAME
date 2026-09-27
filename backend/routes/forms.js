@@ -1,4 +1,6 @@
 const express = require("express");
+const fs = require("node:fs");
+const path = require("path");
 const { db } = require("../db/init");
 const adminAuth = require("../middleware/adminAuth");
 
@@ -93,13 +95,18 @@ router.put("/form-settings", adminAuth, (req, res) => {
       closed_message,
       confirmation_message,
       header_banner_url,
-    } = req.body;
+    } = req.body || {};
 
-    const newTitle = form_title !== undefined ? String(form_title).trim() : (existing?.form_title || "IMPACTFRAME Application");
-    const newDesc = form_description !== undefined ? String(form_description).trim() : (existing?.form_description || "");
+    const defaultTitle = "IMPACTFRAME 2026 Auditions & Roles Application";
+    const defaultDesc = "Audition for on-screen performance or apply for director, cinematographer, AI artist, sound, and editor positions in upcoming short films.";
+    const defaultClosed = "This audition form is currently closed to new responses. Thank you for your interest in IMPACTFRAME!";
+    const defaultConfirm = "Thank you! Your response has been recorded. Our production directors will review your application and contact you soon via WhatsApp/Email.";
+
+    const newTitle = form_title !== undefined ? String(form_title).trim() : (existing?.form_title || defaultTitle);
+    const newDesc = form_description !== undefined ? String(form_description).trim() : (existing?.form_description || defaultDesc);
     const newAccepting = is_accepting_responses !== undefined ? (is_accepting_responses ? 1 : 0) : (existing?.is_accepting_responses ?? 1);
-    const newClosedMsg = closed_message !== undefined ? String(closed_message).trim() : (existing?.closed_message || "This form is currently closed to new responses.");
-    const newConfirmMsg = confirmation_message !== undefined ? String(confirmation_message).trim() : (existing?.confirmation_message || "Thank you! Your response has been recorded.");
+    const newClosedMsg = closed_message !== undefined ? String(closed_message).trim() : (existing?.closed_message || defaultClosed);
+    const newConfirmMsg = confirmation_message !== undefined ? String(confirmation_message).trim() : (existing?.confirmation_message || defaultConfirm);
     const newBanner = header_banner_url !== undefined ? String(header_banner_url).trim() : (existing?.header_banner_url || "");
 
     if (existing) {
@@ -116,6 +123,27 @@ router.put("/form-settings", adminAuth, (req, res) => {
     }
 
     const updated = db.prepare("SELECT * FROM form_settings WHERE id = 1").get();
+
+    // Persist to seed_state.json for serverless redeployments
+    try {
+      const SEED_PATH = path.join(__dirname, "..", "db", "seed_state.json");
+      let seedObj = {};
+      if (fs.existsSync(SEED_PATH)) {
+        seedObj = JSON.parse(fs.readFileSync(SEED_PATH, "utf8"));
+      }
+      seedObj.form_settings = {
+        form_title: updated.form_title,
+        form_description: updated.form_description,
+        is_accepting_responses: updated.is_accepting_responses,
+        closed_message: updated.closed_message,
+        confirmation_message: updated.confirmation_message,
+        header_banner_url: updated.header_banner_url || "",
+      };
+      fs.writeFileSync(SEED_PATH, JSON.stringify(seedObj, null, 2), "utf8");
+    } catch (e) {
+      console.warn("Notice updating seed_state.json:", e.message);
+    }
+
     res.json({
       form_title: updated.form_title,
       form_description: updated.form_description,

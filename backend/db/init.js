@@ -156,14 +156,38 @@ db.exec(`
   );
 `);
 
-// Seed default settings row if not exists
+// Seed default settings row if not exists (loads from seed_state.json if available)
 try {
   const settingsRow = db.prepare("SELECT id FROM form_settings WHERE id = 1").get();
   if (!settingsRow) {
+    let initialSettings = {
+      form_title: "IMPACTFRAME 2026 Auditions & Roles Application",
+      form_description: "Audition for on-screen performance or apply for director, cinematographer, AI artist, sound, and editor positions in upcoming short films.",
+      is_accepting_responses: 1,
+      closed_message: "This audition form is currently closed to new responses. Thank you for your interest in IMPACTFRAME!",
+      confirmation_message: "Thank you! Your response has been recorded. Our production directors will review your application and contact you soon via WhatsApp/Email.",
+      header_banner_url: "",
+    };
+    const SEED_STATE_PATH = path.join(__dirname, "seed_state.json");
+    if (fs.existsSync(SEED_STATE_PATH)) {
+      try {
+        const parsed = JSON.parse(fs.readFileSync(SEED_STATE_PATH, "utf8"));
+        if (parsed.form_settings) {
+          initialSettings = { ...initialSettings, ...parsed.form_settings };
+        }
+      } catch {}
+    }
     db.prepare(`
-      INSERT INTO form_settings (id, form_title, form_description, is_accepting_responses, closed_message, confirmation_message)
-      VALUES (1, 'IMPACTFRAME 2026 Auditions & Roles Application', 'Audition for on-screen performance or apply for director, cinematographer, AI artist, sound, and editor positions in upcoming short films.', 1, 'This audition form is currently closed to new responses. Thank you for your interest in IMPACTFRAME!', 'Thank you! Your response has been recorded. Our production directors will review your application and contact you soon via WhatsApp/Email.')
-    `).run();
+      INSERT INTO form_settings (id, form_title, form_description, is_accepting_responses, closed_message, confirmation_message, header_banner_url)
+      VALUES (1, ?, ?, ?, ?, ?, ?)
+    `).run(
+      initialSettings.form_title,
+      initialSettings.form_description,
+      initialSettings.is_accepting_responses ? 1 : 0,
+      initialSettings.closed_message,
+      initialSettings.confirmation_message,
+      initialSettings.header_banner_url || ""
+    );
   }
 } catch (err) {
   console.warn("Form settings seed notice:", err.message);
@@ -207,6 +231,7 @@ db.exec(`
     username TEXT NOT NULL,
     role TEXT NOT NULL,
     login_time TEXT NOT NULL DEFAULT (datetime('now')),
+    last_seen TEXT NOT NULL DEFAULT (datetime('now')),
     logout_time TEXT,
     duration_seconds INTEGER,
     ip_address TEXT,
@@ -214,6 +239,17 @@ db.exec(`
     status TEXT NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'LOGGED_OUT', 'PAGE_EXIT', 'EXPIRED'))
   );
 `);
+
+// Migration for existing tables without last_seen
+try {
+  const auditCols = db.prepare("PRAGMA table_info(admin_audit_logs)").all().map((c) => c.name);
+  if (!auditCols.includes("last_seen")) {
+    db.exec("ALTER TABLE admin_audit_logs ADD COLUMN last_seen TEXT;");
+    db.exec("UPDATE admin_audit_logs SET last_seen = login_time WHERE last_seen IS NULL;");
+  }
+} catch (e) {
+  console.warn("Audit log schema update notice:", e.message);
+}
 
 function seed() {
   // Purge any legacy demo films that were seeded previously

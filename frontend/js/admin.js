@@ -192,6 +192,25 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Handle tab close, browser close, or page exit to log off admin in access logs
+  function handleAdminPageExit() {
+    window.impactframeApi.logoutAdminBeacon();
+  }
+
+  // W3C standard: pagehide fires reliably on tab close, window close, or navigation
+  window.addEventListener("pagehide", handleAdminPageExit);
+  // Fallback for desktop browsers
+  window.addEventListener("beforeunload", handleAdminPageExit);
+
+  // Periodic heartbeat every 40 seconds to keep session active while admin tab is open
+  setInterval(() => {
+    if (adminContentView && adminContentView.style.display !== "none") {
+      if (typeof window.impactframeApi.sendHeartbeat === "function") {
+        window.impactframeApi.sendHeartbeat();
+      }
+    }
+  }, 40000);
+
   // When restored from browser back/forward cache (bfcache) after navigating to another page:
   window.addEventListener("pageshow", (event) => {
     if (event.persisted) {
@@ -789,7 +808,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const isAccepting = formAcceptingToggle.checked;
       updateAcceptingStatusUI(isAccepting);
       try {
-        await window.impactframeApi.updateFormSettings({ is_accepting_responses: isAccepting });
+        const payload = {
+          is_accepting_responses: isAccepting,
+          form_title: formTitleInput ? formTitleInput.value.trim() : undefined,
+          form_description: formDescInput ? formDescInput.value.trim() : undefined,
+          header_banner_url: formBannerInput ? formBannerInput.value.trim() : undefined,
+          confirmation_message: formConfirmMsgInput ? formConfirmMsgInput.value.trim() : undefined,
+          closed_message: formClosedMsgInput ? formClosedMsgInput.value.trim() : undefined,
+        };
+        await window.impactframeApi.updateFormSettings(payload);
         showNotice(
           isAccepting
             ? "Form is now OPEN and accepting responses on apply.html."

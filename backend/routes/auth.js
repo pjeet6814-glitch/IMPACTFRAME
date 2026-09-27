@@ -99,8 +99,8 @@ router.post("/login", (req, res) => {
   // Record login event in admin_audit_logs (best-effort)
   try {
     db.prepare(`
-      INSERT INTO admin_audit_logs (session_id, token, username, role, login_time, ip_address, user_agent, status)
-      VALUES (?, ?, ?, ?, datetime('now'), ?, ?, 'ACTIVE')
+      INSERT INTO admin_audit_logs (session_id, token, username, role, login_time, last_seen, ip_address, user_agent, status)
+      VALUES (?, ?, ?, ?, datetime('now'), datetime('now'), ?, ?, 'ACTIVE')
     `).run(sessionId, token, user.username, user.role, ipAddress, userAgent);
   } catch (err) {
     console.warn("Audit log insert notice:", err.message);
@@ -118,22 +118,31 @@ router.post("/login", (req, res) => {
 });
 
 // POST /api/admin/logout — Terminate active session and record duration
-// Supports JSON bodies and navigator.sendBeacon text payloads
+// Supports JSON bodies, keepalive fetch, and navigator.sendBeacon text payloads
 router.post("/logout", (req, res) => {
   let sessionId = null;
   let token = null;
+  let username = null;
+  let role = null;
+  let loginTime = null;
 
   if (typeof req.body === "string" && req.body.trim()) {
     try {
       const parsed = JSON.parse(req.body);
       sessionId = parsed.session_id || parsed.sessionId;
       token = parsed.token;
+      username = parsed.username;
+      role = parsed.role;
+      loginTime = parsed.login_time;
     } catch {
       sessionId = req.body.trim();
     }
   } else if (req.body && typeof req.body === "object") {
     sessionId = req.body.session_id || req.body.sessionId;
     token = req.body.token;
+    username = req.body.username;
+    role = req.body.role;
+    loginTime = req.body.login_time;
   }
 
   if (!sessionId) {
@@ -144,16 +153,48 @@ router.post("/logout", (req, res) => {
   }
 
   if (sessionId || token) {
-    db.prepare(`
+    const updateResult = db.prepare(`
       UPDATE admin_audit_logs
       SET logout_time = datetime('now'),
+          last_seen = datetime('now'),
           duration_seconds = MAX(1, CAST((strftime('%s', 'now') - strftime('%s', login_time)) AS INTEGER)),
           status = 'LOGGED_OUT'
       WHERE (session_id = ? OR token = ?) AND status = 'ACTIVE'
     `).run(sessionId || null, token || null);
+
+    // If session row wasn't present on this container (serverless cold start), insert as finalized
+    if (updateResult.changes === 0 && (sessionId || username)) {
+      try {
+        const ip = req.ip || req.socket?.remoteAddress || "127.0.0.1";
+        const userAgent = (req.headers["user-agent"] || "").slice(0, 150);
+        const lt = loginTime || new Date().toISOString().replace("T", " ").slice(0, 19);
+        db.prepare(`
+          INSERT INTO admin_audit_logs (session_id, token, username, role, login_time, last_seen, logout_time, duration_seconds, ip_address, user_agent, status)
+          VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'), 1, ?, ?, 'LOGGED_OUT')
+        `).run(sessionId || "IF-SES-FINALIZED", token || "token", username || "ADMIN_MAIN", role || "MAIN", lt, ip, userAgent);
+      } catch (e) {
+        console.warn("Notice inserting finalized logout log:", e.message);
+      }
+    }
   }
 
   return res.json({ ok: true, message: "Session closed and audit record finalized." });
+});
+
+// POST /api/admin/heartbeat — Keep-alive ping from active admin tab
+router.post("/heartbeat", (req, res) => {
+  const sessionId = req.header("x-session-id") || req.body?.session_id;
+  const token = req.header("x-session-token") || req.body?.token;
+  if (sessionId || token) {
+    try {
+      db.prepare(`
+        UPDATE admin_audit_logs
+        SET last_seen = datetime('now')
+        WHERE (session_id = ? OR token = ?) AND status = 'ACTIVE'
+      `).run(sessionId || null, token || null);
+    } catch {}
+  }
+  res.json({ ok: true });
 });
 
 // Legacy backward-compatibility endpoint for verify
@@ -174,8 +215,22 @@ router.post("/verify", (req, res) => {
 router.get("/audit-logs", adminAuth, (req, res) => {
   const { username, status, q } = req.query;
 
+  // Auto-expire active sessions that have had no heartbeat for > 120 seconds
+  try {
+    db.exec(`
+      UPDATE admin_audit_logs
+      SET logout_time = COALESCE(last_seen, login_time, datetime('now')),
+          duration_seconds = MAX(1, CAST((strftime('%s', COALESCE(last_seen, login_time, datetime('now'))) - strftime('%s', login_time)) AS INTEGER)),
+          status = 'LOGGED_OUT'
+      WHERE status = 'ACTIVE' 
+        AND (strftime('%s', 'now') - strftime('%s', COALESCE(last_seen, login_time))) > 120;
+    `);
+  } catch (err) {
+    console.warn("Notice auto-expiring idle audit logs:", err.message);
+  }
+
   let query = `
-    SELECT id, session_id, username, role, login_time, logout_time,
+    SELECT id, session_id, username, role, login_time, logout_time, last_seen,
            duration_seconds, ip_address, status,
            CASE 
              WHEN status = 'ACTIVE' THEN CAST((strftime('%s', 'now') - strftime('%s', login_time)) AS INTEGER)
@@ -206,6 +261,47 @@ router.get("/audit-logs", adminAuth, (req, res) => {
 
   const logs = db.prepare(query).all(...params);
   res.json(logs);
+});
+
+// POST /api/admin/audit-logs/sync — Hydrate audit logs table with sessions from client cache
+router.post("/audit-logs/sync", adminAuth, (req, res) => {
+  const logs = Array.isArray(req.body && req.body.logs) ? req.body.logs : [];
+  let synced = 0;
+  for (const l of logs) {
+    if (l && l.session_id && l.username) {
+      try {
+        const existing = db.prepare("SELECT id FROM admin_audit_logs WHERE session_id = ?").get(l.session_id);
+        if (!existing) {
+          db.prepare(`
+            INSERT INTO admin_audit_logs (session_id, token, username, role, login_time, last_seen, logout_time, duration_seconds, ip_address, user_agent, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).run(
+            l.session_id,
+            l.token || "synced",
+            l.username,
+            l.role || "CREW",
+            l.login_time || new Date().toISOString(),
+            l.last_seen || l.logout_time || l.login_time || new Date().toISOString(),
+            l.logout_time || null,
+            l.duration_seconds || null,
+            l.ip_address || "127.0.0.1",
+            l.user_agent || "Web Browser",
+            l.status || "LOGGED_OUT"
+          );
+          synced++;
+        } else if (l.status === "LOGGED_OUT") {
+          db.prepare(`
+            UPDATE admin_audit_logs
+            SET status = 'LOGGED_OUT',
+                logout_time = COALESCE(logout_time, ?),
+                duration_seconds = COALESCE(duration_seconds, ?)
+            WHERE session_id = ? AND status = 'ACTIVE'
+          `).run(l.logout_time || new Date().toISOString(), l.duration_seconds || 1, l.session_id);
+        }
+      } catch {}
+    }
+  }
+  res.json({ ok: true, synced });
 });
 
 // ==========================================

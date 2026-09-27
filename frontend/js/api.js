@@ -199,6 +199,54 @@
     return null;
   }
 
+  const AUDIT_LOGS_STORAGE_KEY = "impactframe_audit_logs_cache_v3";
+
+  function getLocalAuditLogs() {
+    try {
+      const stored = localStorage.getItem(AUDIT_LOGS_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveLocalAuditLogs(logs) {
+    try {
+      localStorage.setItem(AUDIT_LOGS_STORAGE_KEY, JSON.stringify(logs.slice(0, 150)));
+    } catch {}
+  }
+
+  function recordLocalAuditLog(entry) {
+    if (!entry || !entry.session_id) return;
+    const logs = getLocalAuditLogs();
+    const idx = logs.findIndex((l) => l.session_id === entry.session_id);
+    if (idx >= 0) {
+      logs[idx] = { ...logs[idx], ...entry };
+    } else {
+      logs.unshift(entry);
+    }
+    saveLocalAuditLogs(logs);
+  }
+
+  function recordLocalAuditLogout(sessionId) {
+    if (!sessionId) return;
+    const logs = getLocalAuditLogs();
+    const idx = logs.findIndex((l) => l.session_id === sessionId);
+    if (idx >= 0) {
+      const now = new Date().toISOString().replace("T", " ").slice(0, 19);
+      const loginTime = logs[idx].login_time;
+      let duration = 1;
+      if (loginTime) {
+        duration = Math.max(1, Math.round((new Date(now) - new Date(loginTime)) / 1000));
+      }
+      logs[idx].status = "LOGGED_OUT";
+      logs[idx].logout_time = now;
+      logs[idx].duration_seconds = duration;
+      logs[idx].computed_duration = duration;
+      saveLocalAuditLogs(logs);
+    }
+  }
+
   let currentAdminSession = getStoredAdminSession();
 
   async function loginAdmin(username, password) {
@@ -248,13 +296,25 @@
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.ok) {
+        const loginTime = new Date().toISOString().replace("T", " ").slice(0, 19);
         currentAdminSession = {
           token: data.token,
           session_id: data.session_id,
           username: data.username,
           role: data.role,
           full_name: data.full_name,
+          login_time: loginTime,
         };
+        recordLocalAuditLog({
+          session_id: data.session_id,
+          token: data.token,
+          username: data.username,
+          role: data.role,
+          login_time: loginTime,
+          logout_time: null,
+          status: "ACTIVE",
+          computed_duration: 1,
+        });
         try {
           sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentAdminSession));
         } catch {}
@@ -264,13 +324,25 @@
     } catch (e) {
       // Offline fallback for master admin
       if ((norm === "ADMIN_MAIN" || norm === "ADMIN" || norm === "MAIN") && password === "impactframe2026") {
+        const loginTime = new Date().toISOString().replace("T", " ").slice(0, 19);
         currentAdminSession = {
           token: "impactframe2026",
           session_id: "IF-OFFLINE-" + Date.now().toString().slice(-6),
           username: "ADMIN_MAIN",
           role: "MAIN",
           full_name: "System Master Administrator (Offline)",
+          login_time: loginTime,
         };
+        recordLocalAuditLog({
+          session_id: currentAdminSession.session_id,
+          token: currentAdminSession.token,
+          username: currentAdminSession.username,
+          role: currentAdminSession.role,
+          login_time: loginTime,
+          logout_time: null,
+          status: "ACTIVE",
+          computed_duration: 1,
+        });
         try {
           sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentAdminSession));
         } catch {}
@@ -279,13 +351,25 @@
 
       // Offline fallback for cached crew members
       if (cachedUser) {
+        const loginTime = new Date().toISOString().replace("T", " ").slice(0, 19);
         currentAdminSession = {
           token: "impactframe2026",
           session_id: "IF-CREW-" + Date.now().toString().slice(-6),
           username: cachedUser.username,
           role: cachedUser.role || "CREW",
           full_name: cachedUser.full_name || cachedUser.username,
+          login_time: loginTime,
         };
+        recordLocalAuditLog({
+          session_id: currentAdminSession.session_id,
+          token: currentAdminSession.token,
+          username: currentAdminSession.username,
+          role: currentAdminSession.role,
+          login_time: loginTime,
+          logout_time: null,
+          status: "ACTIVE",
+          computed_duration: 1,
+        });
         try {
           sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentAdminSession));
         } catch {}
@@ -302,8 +386,14 @@
   }
 
   async function logoutAdmin(sessionId) {
-    const sid = sessionId || currentAdminSession?.session_id;
-    const token = currentAdminSession?.token;
+    const session = getCurrentSession();
+    const sid = sessionId || session?.session_id;
+    const token = session?.token;
+    const uname = session?.username;
+    const role = session?.role;
+    const loginTime = session?.login_time;
+
+    recordLocalAuditLogout(sid);
     clearAdminAuth();
     if (!sid && !token) return { success: true };
     const base = getApiBase();
@@ -311,24 +401,67 @@
       await fetch(`${base}/api/admin/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ session_id: sid, token }),
+        body: JSON.stringify({ session_id: sid, token, username: uname, role, login_time: loginTime }),
       });
     } catch {}
     return { success: true };
   }
 
   function logoutAdminBeacon(sessionId) {
-    const sid = sessionId || currentAdminSession?.session_id;
-    const token = currentAdminSession?.token;
+    const session = getCurrentSession();
+    const sid = sessionId || session?.session_id;
+    const token = session?.token;
+    const uname = session?.username;
+    const role = session?.role;
+    const loginTime = session?.login_time;
+
+    recordLocalAuditLogout(sid);
     clearAdminAuth();
     if (!sid && !token) return;
+
     const base = getApiBase();
+    const payload = JSON.stringify({
+      session_id: sid,
+      token,
+      username: uname,
+      role,
+      login_time: loginTime,
+    });
+
     try {
-      const payload = JSON.stringify({ session_id: sid, token });
+      // 1. fetch with keepalive: true (W3C standard for tab/browser close)
+      fetch(`${base}/api/admin/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    } catch {}
+
+    try {
+      // 2. Fallback to navigator.sendBeacon
       if (navigator.sendBeacon) {
         navigator.sendBeacon(`${base}/api/admin/logout`, new Blob([payload], { type: "text/plain" }));
       }
     } catch {}
+  }
+
+  function sendHeartbeat() {
+    const session = getCurrentSession();
+    if (!session || !session.token) return;
+    const base = getApiBase();
+    fetch(`${base}/api/admin/heartbeat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-session-token": session.token,
+        "x-session-id": session.session_id || "",
+      },
+      body: JSON.stringify({
+        token: session.token,
+        session_id: session.session_id,
+      }),
+    }).catch(() => {});
   }
 
   function getSavedAdminPassword() {
@@ -520,40 +653,87 @@
 
   async function getFormSettings() {
     const base = getApiBase();
+    let cached = null;
     try {
-      const res = await fetch(`${base}/api/form-settings`, { signal: AbortSignal.timeout(2500) });
+      const raw = localStorage.getItem(FORM_SETTINGS_STORAGE_KEY);
+      if (raw) cached = JSON.parse(raw);
+    } catch {}
+
+    try {
+      const res = await fetch(`${base}/api/form-settings`, { signal: AbortSignal.timeout(3000) });
       if (res.ok) {
-        const settings = await res.json();
-        localStorage.setItem(FORM_SETTINGS_STORAGE_KEY, JSON.stringify(settings));
-        return settings;
+        const serverSettings = await res.json();
+        // If the user has saved custom settings locally, and server has fresh default seeds (e.g. cold start):
+        // Do NOT overwrite local custom settings with defaults! Re-hydrate the server with the user's saved settings!
+        if (cached && cached.is_custom) {
+          const isServerDefault =
+            serverSettings.form_title === DEFAULT_FORM_SETTINGS.form_title &&
+            serverSettings.is_accepting_responses === DEFAULT_FORM_SETTINGS.is_accepting_responses &&
+            serverSettings.form_description === DEFAULT_FORM_SETTINGS.form_description &&
+            serverSettings.closed_message === DEFAULT_FORM_SETTINGS.closed_message;
+
+          if (isServerDefault) {
+            updateFormSettings(cached).catch(() => {});
+            return cached;
+          }
+        }
+
+        const merged = { ...DEFAULT_FORM_SETTINGS, ...cached, ...serverSettings };
+        if (cached?.is_custom) merged.is_custom = true;
+        localStorage.setItem(FORM_SETTINGS_STORAGE_KEY, JSON.stringify(merged));
+        return merged;
       }
-    } catch {}
-    try {
-      const cached = localStorage.getItem(FORM_SETTINGS_STORAGE_KEY);
-      if (cached) return JSON.parse(cached);
-    } catch {}
+    } catch (e) {
+      console.warn("Notice loading form-settings, using cached settings:", e);
+    }
+
+    if (cached) return { ...DEFAULT_FORM_SETTINGS, ...cached };
     return DEFAULT_FORM_SETTINGS;
   }
 
   async function updateFormSettings(settingsData, adminKey) {
     const base = getApiBase();
     const token = adminKey || getSavedAdminPassword();
-    const res = await fetch(`${base}/api/form-settings`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "x-session-token": token,
-        "x-admin-key": token,
-      },
-      body: JSON.stringify(settingsData),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || `Failed to update form settings (${res.status})`);
+
+    let current = null;
+    try {
+      const raw = localStorage.getItem(FORM_SETTINGS_STORAGE_KEY);
+      if (raw) current = JSON.parse(raw);
+    } catch {}
+
+    const payload = {
+      ...DEFAULT_FORM_SETTINGS,
+      ...current,
+      ...settingsData,
+      is_custom: true,
+      updated_at: new Date().toISOString(),
+    };
+
+    // Save to local cache immediately so settings NEVER reset
+    localStorage.setItem(FORM_SETTINGS_STORAGE_KEY, JSON.stringify(payload));
+
+    try {
+      const res = await fetch(`${base}/api/form-settings`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-session-token": token,
+          "x-admin-key": token,
+        },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(4500),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        const merged = { ...payload, ...updated, is_custom: true };
+        localStorage.setItem(FORM_SETTINGS_STORAGE_KEY, JSON.stringify(merged));
+        return merged;
+      }
+    } catch (err) {
+      console.warn("Notice updating server form-settings, persisted in local cache:", err);
     }
-    const updated = await res.json();
-    localStorage.setItem(FORM_SETTINGS_STORAGE_KEY, JSON.stringify(updated));
-    return updated;
+
+    return payload;
   }
 
   // ==========================================
@@ -819,12 +999,80 @@
     if (filters.q) params.set("q", filters.q);
 
     const token = getSavedAdminPassword();
-    const res = await fetch(`${base}/api/admin/audit-logs?${params.toString()}`, {
-      headers: { "x-session-token": token, "x-admin-key": token },
-      signal: AbortSignal.timeout(3500),
-    });
-    if (!res.ok) throw new Error(`Failed to load audit logs (${res.status})`);
-    return res.json();
+    let backendLogs = null;
+    try {
+      const res = await fetch(`${base}/api/admin/audit-logs?${params.toString()}`, {
+        headers: { "x-session-token": token, "x-admin-key": token },
+        signal: AbortSignal.timeout(4000),
+      });
+      if (res.ok) {
+        backendLogs = await res.json();
+      }
+    } catch (e) {
+      console.warn("Notice loading audit logs from server, using local access logs:", e);
+    }
+
+    const localLogs = getLocalAuditLogs();
+
+    // If backend succeeded, merge with localLogs
+    let combinedLogs = [];
+    if (Array.isArray(backendLogs)) {
+      const map = new Map();
+      backendLogs.forEach((l) => map.set(l.session_id, l));
+
+      const missingOnBackend = [];
+      localLogs.forEach((l) => {
+        if (!map.has(l.session_id)) {
+          map.set(l.session_id, l);
+          missingOnBackend.push(l);
+        } else {
+          // If local log was marked LOGGED_OUT on tab close, but backend container missed it
+          const bLog = map.get(l.session_id);
+          if (l.status === "LOGGED_OUT" && bLog.status === "ACTIVE") {
+            map.set(l.session_id, { ...bLog, ...l });
+          }
+        }
+      });
+
+      combinedLogs = Array.from(map.values()).sort(
+        (a, b) => new Date(b.login_time || 0) - new Date(a.login_time || 0)
+      );
+      saveLocalAuditLogs(combinedLogs);
+
+      // Hydrate serverless container with local logs if missing
+      if (missingOnBackend.length > 0) {
+        fetch(`${base}/api/admin/audit-logs/sync`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-session-token": token,
+            "x-admin-key": token,
+          },
+          body: JSON.stringify({ logs: missingOnBackend }),
+        }).catch(() => {});
+      }
+    } else {
+      combinedLogs = localLogs;
+    }
+
+    // Apply filters to combined logs
+    let filtered = combinedLogs;
+    if (filters.username && filters.username !== "All") {
+      filtered = filtered.filter((l) => l.username === filters.username);
+    }
+    if (filters.status && filters.status !== "All") {
+      filtered = filtered.filter((l) => l.status === filters.status);
+    }
+    if (filters.q && filters.q.trim()) {
+      const qLower = filters.q.trim().toLowerCase();
+      filtered = filtered.filter(
+        (l) =>
+          (l.username && l.username.toLowerCase().includes(qLower)) ||
+          (l.session_id && l.session_id.toLowerCase().includes(qLower))
+      );
+    }
+
+    return filtered;
   }
 
   function exportAuditLogsCsv(logs) {
@@ -1114,6 +1362,7 @@
     // Audit Logs & Crew Users
     getAuditLogs,
     exportAuditLogsCsv,
+    sendHeartbeat,
     getCrewUsers,
     createCrewUser,
     deleteCrewUser,
