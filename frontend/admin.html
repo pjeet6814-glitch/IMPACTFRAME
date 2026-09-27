@@ -165,7 +165,13 @@
     <section id="panel-datasheet" class="admin-tab-panel" role="tabpanel">
       <div class="datasheet-toolbar">
         <div class="datasheet-filters-group">
-          <input type="text" id="datasheet-search-input" class="input" placeholder="Search applicant, email, phone..." style="min-width: 240px; padding: 8px 12px; font-size: 0.88rem;" />
+          <input type="text" id="datasheet-search-input" class="input" placeholder="Search applicant, email, phone..." style="min-width: 220px; padding: 8px 12px; font-size: 0.88rem;" />
+          <select id="datasheet-form-type-filter" class="input" style="padding: 8px 12px; font-size: 0.88rem; background: var(--navy-dark); color: var(--paper); border: 1px solid var(--navy-mid); font-weight: 600;">
+            <option value="All">All Form Types</option>
+            <option value="auditions">🎭 Auditions (apply.html)</option>
+            <option value="join_crew">🎬 Join Crew (join.html)</option>
+            <option value="events">🎟️ Events & Workshops (events.html)</option>
+          </select>
           <select id="datasheet-role-filter" class="input" style="padding: 8px 12px; font-size: 0.88rem;">
             <option value="All">All Roles</option>
             <option value="Actor">Actors & Narrators</option>
@@ -202,17 +208,18 @@
           <thead>
             <tr>
               <th>Ref / ID</th>
+              <th>Form</th>
               <th>Date</th>
               <th>Applicant</th>
               <th>Contact Info</th>
-              <th>Role of Interest</th>
+              <th>Role / Event</th>
               <th>Status</th>
               <th style="text-align: right;">Actions</th>
             </tr>
           </thead>
           <tbody id="datasheet-table-body">
             <tr>
-              <td colspan="7" style="text-align: center; padding: 32px; color: var(--parchment-dim);">
+              <td colspan="8" style="text-align: center; padding: 32px; color: var(--parchment-dim);">
                 Loading submissions datasheet…
               </td>
             </tr>
@@ -223,12 +230,33 @@
 
     <!-- ================= TAB 3: FORM CUSTOMIZER ================= -->
     <section id="panel-forms" class="admin-tab-panel" role="tabpanel">
+      <!-- Universal Form Switcher Bar -->
+      <div class="form-selector-bar sprocket-frame" style="margin-bottom: 22px; background: rgba(22, 38, 32, 0.85); border: 1px solid var(--leaf); border-radius: var(--radius); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <label for="admin-active-form-select" style="font-weight: 700; color: var(--leaf-light); font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Select Form to Customize:
+          </label>
+          <select id="admin-active-form-select" class="input" style="min-width: 320px; padding: 10px 14px; font-size: 0.95rem; font-weight: 600; background: var(--navy-dark); color: var(--paper); border: 1px solid var(--navy-mid);">
+            <option value="auditions" selected>🎭 Auditions & Roles Form (apply.html)</option>
+            <option value="join_crew">🎬 Join Crew Application Form (join.html)</option>
+            <option value="events">🎟️ Events & Workshop Registration Form (events.html)</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <a id="admin-view-public-form-btn" href="apply.html" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open Live Form &nearr;
+          </a>
+        </div>
+      </div>
+
       <!-- Google Forms Settings & Header Controls Card -->
       <div class="form-settings-card sprocket-frame" style="margin-bottom: 28px; background: rgba(14, 26, 23, 0.7); border: 1px solid var(--navy-mid); border-radius: var(--radius); padding: 22px;">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--navy-mid); padding-bottom: 14px; margin-bottom: 18px; flex-wrap: wrap; gap: 14px;">
           <div>
-            <div class="viewfinder-tag" style="margin-bottom: 4px;">[ FORM SETTINGS // GOOGLE FORMS CONTROLS ]</div>
-            <h3 style="margin: 0; font-size: 1.25rem; color: var(--paper);">Form Configuration & Response Status</h3>
+            <div class="viewfinder-tag" style="margin-bottom: 4px;">[ FORM SETTINGS // CONFIGURATION CONTROLS ]</div>
+            <h3 id="form-settings-active-label" style="margin: 0; font-size: 1.25rem; color: var(--paper);">Auditions & Roles Form Configuration</h3>
           </div>
           <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             <!-- Real-time Accepting Responses Toggle -->
@@ -236,10 +264,6 @@
               <span id="accepting-status-label" style="font-size: 0.85rem; font-weight: 600; color: #86efac;">● Accepting Responses</span>
               <input type="checkbox" id="form-accepting-toggle" checked style="accent-color: var(--leaf); width: 18px; height: 18px; cursor: pointer;" />
             </label>
-            <a href="apply.html" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="display: inline-flex; align-items: center; gap: 6px;" title="Open live form in new tab">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              View Public Form
-            </a>
             <button type="button" class="btn btn-primary btn-sm" id="save-form-settings-btn">
               Save Settings
             </button>
@@ -271,6 +295,48 @@
             <div class="form-group flex-1">
               <label for="form-closed-msg-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">Closed Form Notice Message</label>
               <textarea id="form-closed-msg-input" rows="2" class="input" placeholder="Notice displayed to visitors when Accepting Responses is turned OFF..."></textarea>
+            </div>
+          </div>
+
+          <!-- QR Code Configuration Section -->
+          <div style="margin-top: 8px; padding-top: 14px; border-top: 1px dashed var(--navy-mid);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <strong style="color: var(--leaf-light); font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  Display QR Code Photo on Form (Payment UPI, WhatsApp Group, or Instructions)
+                </strong>
+                <p style="margin: 2px 0 0; color: var(--parchment-dim); font-size: 0.8rem;">
+                  Upload a photo of a QR code to display it prominently on the public form.
+                </p>
+              </div>
+              <div id="form-qr-preview-wrap" style="display: none; align-items: center; gap: 10px;">
+                <img id="form-qr-preview-img" src="" alt="QR Preview" style="width: 52px; height: 52px; object-fit: contain; background: #fff; padding: 2px; border-radius: 4px; border: 1px solid var(--leaf);" />
+                <button type="button" class="btn btn-ghost btn-sm" id="form-qr-remove-btn" style="color: #ff8888; padding: 3px 8px; font-size: 0.78rem;">Remove QR</button>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="form-qr-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">QR Code Image (Upload File or Enter Image URL)</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="form-qr-input" class="input" placeholder="Upload photo below or paste https://..." style="flex: 1;" />
+                  <label class="btn btn-ghost btn-sm" style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Upload QR Photo
+                    <input type="file" id="form-qr-file-input" accept="image/*" style="display: none;" />
+                  </label>
+                </div>
+              </div>
+              <div class="form-group flex-1">
+                <label for="form-qr-title-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">QR Card Title</label>
+                <input type="text" id="form-qr-title-input" class="input" placeholder="e.g. Scan to Pay Registration Fee (UPI)" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="form-qr-instruction-input" style="font-weight: 600; color: var(--paper); font-size: 0.88rem;">QR Card Instructions / Notes</label>
+              <textarea id="form-qr-instruction-input" rows="1" class="input" placeholder="e.g. Scan using GPay / PhonePe and attach payment screenshot below..."></textarea>
             </div>
           </div>
         </form>
@@ -505,7 +571,8 @@
               <optgroup label="Date, Time & Upload">
                 <option value="date">Date</option>
                 <option value="time">Time</option>
-                <option value="file">File / Drive Upload Link</option>
+                <option value="photo">📷 Photo / Image Upload (Screenshots, Headshots, IDs)</option>
+                <option value="file">File / Document Upload Link</option>
               </optgroup>
               <optgroup label="Layout">
                 <option value="section">Section Header & Divider</option>

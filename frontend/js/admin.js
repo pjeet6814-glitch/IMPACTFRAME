@@ -58,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Datasheet Elements
   const datasheetSearchInput = document.getElementById("datasheet-search-input");
+  const datasheetFormTypeFilter = document.getElementById("datasheet-form-type-filter");
   const datasheetRoleFilter = document.getElementById("datasheet-role-filter");
   const datasheetStatusFilter = document.getElementById("datasheet-status-filter");
   const refreshDatasheetBtn = document.getElementById("refresh-datasheet-btn");
@@ -72,6 +73,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const subDetailCloseBtn = document.getElementById("sub-detail-close-btn");
   const subDetailDismissBtn = document.getElementById("sub-detail-dismiss-btn");
 
+  // Form Switcher & Active Form State
+  let currentActiveForm = "auditions";
+  const adminActiveFormSelect = document.getElementById("admin-active-form-select");
+  const adminViewPublicFormBtn = document.getElementById("admin-view-public-form-btn");
+  const formSettingsActiveLabel = document.getElementById("form-settings-active-label");
+
   // Form Settings & Header Controls Elements
   const formSettingsForm = document.getElementById("form-settings-form");
   const formTitleInput = document.getElementById("form-title-input");
@@ -82,6 +89,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const formAcceptingToggle = document.getElementById("form-accepting-toggle");
   const acceptingStatusLabel = document.getElementById("accepting-status-label");
   const saveFormSettingsBtn = document.getElementById("save-form-settings-btn");
+
+  // Form QR Code Controls Elements
+  const formQrInput = document.getElementById("form-qr-input");
+  const formQrFileInput = document.getElementById("form-qr-file-input");
+  const formQrTitleInput = document.getElementById("form-qr-title-input");
+  const formQrInstructionInput = document.getElementById("form-qr-instruction-input");
+  const formQrPreviewWrap = document.getElementById("form-qr-preview-wrap");
+  const formQrPreviewImg = document.getElementById("form-qr-preview-img");
+  const formQrRemoveBtn = document.getElementById("form-qr-remove-btn");
 
   // Form Questions Elements
   const addSectionDividerBtn = document.getElementById("add-section-divider-btn");
@@ -546,13 +562,14 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadSubmissions() {
     datasheetTableBody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align: center; padding: 24px; color: var(--parchment-dim);">
+        <td colspan="8" style="text-align: center; padding: 24px; color: var(--parchment-dim);">
           Loading submissions datasheet…
         </td>
       </tr>
     `;
 
     const filters = {
+      form_type: datasheetFormTypeFilter && datasheetFormTypeFilter.value !== "All" ? datasheetFormTypeFilter.value : "",
       role: datasheetRoleFilter.value !== "All" ? datasheetRoleFilter.value : "",
       status: datasheetStatusFilter.value !== "All" ? datasheetStatusFilter.value : "",
       q: datasheetSearchInput.value.trim(),
@@ -568,7 +585,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Failed to load submissions:", err);
       datasheetTableBody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align: center; padding: 24px; color: #ff9999;">
+          <td colspan="8" style="text-align: center; padding: 24px; color: #ff9999;">
             Failed to load submissions: ${escapeHtml(err.message)}
           </td>
         </tr>
@@ -580,13 +597,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!submissionsList || submissionsList.length === 0) {
       datasheetTableBody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align: center; padding: 36px; color: var(--parchment-dim);">
-            No audition submissions match your search or filter criteria.
+          <td colspan="8" style="text-align: center; padding: 36px; color: var(--parchment-dim);">
+            No submissions match your search or filter criteria.
           </td>
         </tr>
       `;
       return;
     }
+
+    const formTypeBadges = {
+      auditions: '<span class="hud-pill" style="font-size: 0.72rem; color: #93c5fd; border-color: rgba(147,197,253,0.4);">🎭 Auditions</span>',
+      join_crew: '<span class="hud-pill" style="font-size: 0.72rem; color: #86efac; border-color: rgba(134,239,172,0.4);">🎬 Crew</span>',
+      events: '<span class="hud-pill" style="font-size: 0.72rem; color: #fde047; border-color: rgba(253,224,71,0.4);">🎟️ Event</span>',
+    };
 
     datasheetTableBody.innerHTML = submissionsList
       .map((sub) => {
@@ -600,11 +623,15 @@ document.addEventListener("DOMContentLoaded", () => {
           : "—";
 
         const statusClass = `status-${(sub.status || "new").toLowerCase().replace(/[^a-z]/g, "")}`;
+        const formBadge = formTypeBadges[sub.form_type] || `<span class="hud-pill" style="font-size: 0.72rem;">${escapeHtml(sub.form_type || "auditions")}</span>`;
 
         return `
         <tr data-sub-id="${sub.id}">
           <td style="font-family: monospace; font-weight: 600; color: var(--amber); font-size: 0.85rem;">
             #IF-${String(sub.id).padStart(3, "0")}
+          </td>
+          <td>
+            ${formBadge}
           </td>
           <td style="font-size: 0.85rem; color: var(--parchment-dim); white-space: nowrap;">
             ${formattedDate}
@@ -684,7 +711,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const sub = submissionsList.find((s) => String(s.id) === String(id));
     if (!sub) return;
 
-    subDetailTitle.textContent = `${sub.applicant_name} — Application Details`;
+    const formNameMap = {
+      auditions: "🎭 Auditions & Roles Form (apply.html)",
+      join_crew: "🎬 Join Crew Application (join.html)",
+      events: "🎟️ Events & Workshop Registration (events.html)",
+    };
+    const formDisplayName = formNameMap[sub.form_type] || (sub.form_type ? `Form: ${sub.form_type}` : "Auditions & Roles Form");
+
+    subDetailTitle.textContent = `${sub.applicant_name} — Details`;
 
     const subData = sub.data || {};
     subDetailSummary.innerHTML = `
@@ -696,9 +730,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="hud-pill"><span class="rec-dot"></span> ${escapeHtml(sub.status || "New")}</span>
       </div>
       <div style="display: flex; gap: 16px; margin-top: 10px; font-size: 0.88rem; flex-wrap: wrap;">
+        <div><strong>Source Form:</strong> <span style="color: var(--leaf-light); font-weight: 600;">${escapeHtml(formDisplayName)}</span></div>
         ${sub.applicant_email ? `<div><strong>Email:</strong> <a href="mailto:${escapeHtml(sub.applicant_email)}" style="color: var(--leaf-light);">${escapeHtml(sub.applicant_email)}</a></div>` : ""}
         ${sub.applicant_phone ? `<div><strong>Phone:</strong> <a href="tel:${escapeHtml(sub.applicant_phone)}" style="color: var(--parchment);">${escapeHtml(sub.applicant_phone)}</a></div>` : ""}
-        ${sub.role_interest ? `<div><strong>Role:</strong> <span style="color: var(--amber);">${escapeHtml(sub.role_interest)}</span></div>` : ""}
+        ${sub.role_interest ? `<div><strong>Role / Event:</strong> <span style="color: var(--amber);">${escapeHtml(sub.role_interest)}</span></div>` : ""}
       </div>
     `;
 
@@ -717,7 +752,19 @@ document.addEventListener("DOMContentLoaded", () => {
           : "—";
       } else {
         const strVal = String(val ?? "—");
-        if (strVal.startsWith("http://") || strVal.startsWith("https://")) {
+        if (strVal.startsWith("data:image/") || strVal.match(/^https?:\/\/.*\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i)) {
+          dd.innerHTML = `
+            <div style="margin-top: 6px;">
+              <a href="${escapeHtml(strVal)}" target="_blank" rel="noopener">
+                <img src="${escapeHtml(strVal)}" alt="Uploaded Photo" style="max-width: 260px; max-height: 220px; border-radius: 6px; border: 1px solid var(--leaf); object-fit: contain; background: #0b1512; display: block; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);" />
+              </a>
+              <a href="${escapeHtml(strVal)}" target="_blank" rel="noopener" download="applicant_photo_${sub.id}.png" class="btn btn-ghost btn-sm" style="font-size: 0.78rem; padding: 3px 10px; display: inline-flex; align-items: center; gap: 4px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                View / Download Full Image
+              </a>
+            </div>
+          `;
+        } else if (strVal.startsWith("http://") || strVal.startsWith("https://")) {
           dd.innerHTML = `<a href="${escapeHtml(strVal)}" target="_blank" rel="noopener" style="color: var(--leaf-light); text-decoration: underline;">${escapeHtml(strVal)} &nearr;</a>`;
         } else {
           dd.textContent = strVal;
@@ -760,6 +807,9 @@ document.addEventListener("DOMContentLoaded", () => {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(loadSubmissions, 300);
   });
+  if (datasheetFormTypeFilter) {
+    datasheetFormTypeFilter.addEventListener("change", loadSubmissions);
+  }
   datasheetRoleFilter.addEventListener("change", loadSubmissions);
   datasheetStatusFilter.addEventListener("change", loadSubmissions);
   refreshDatasheetBtn.addEventListener("click", loadSubmissions);
@@ -773,15 +823,90 @@ document.addEventListener("DOMContentLoaded", () => {
      TAB 3: GOOGLE FORMS CUSTOMIZER & SETTINGS
      ========================================================================== */
 
-  // Load and apply form-level settings (Title, Description, Accepting status, Closed msg)
-  async function loadFormSettings() {
+  // Universal Form Switcher Listener
+  if (adminActiveFormSelect) {
+    adminActiveFormSelect.addEventListener("change", () => {
+      currentActiveForm = adminActiveFormSelect.value;
+      const linkMap = {
+        auditions: "apply.html",
+        join_crew: "join.html",
+        events: "events.html",
+      };
+      const labelMap = {
+        auditions: "Auditions & Roles Form Configuration",
+        join_crew: "Join Crew Application Form Configuration",
+        events: "Events & Workshop Registration Form Configuration",
+      };
+      if (adminViewPublicFormBtn) {
+        adminViewPublicFormBtn.href = linkMap[currentActiveForm] || "apply.html";
+      }
+      if (formSettingsActiveLabel) {
+        formSettingsActiveLabel.textContent = labelMap[currentActiveForm] || "Form Configuration";
+      }
+      loadFormSettings(currentActiveForm);
+      loadFormFields(currentActiveForm);
+    });
+  }
+
+  // QR Code Preview Helper
+  function updateQrPreviewUI(url) {
+    if (!formQrPreviewWrap || !formQrPreviewImg) return;
+    const clean = (url || "").trim();
+    if (clean) {
+      formQrPreviewImg.src = clean;
+      formQrPreviewWrap.style.display = "flex";
+    } else {
+      formQrPreviewImg.src = "";
+      formQrPreviewWrap.style.display = "none";
+    }
+  }
+
+  // QR Code File Upload Listener
+  if (formQrFileInput) {
+    formQrFileInput.addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        showNotice("Processing QR photo...", "info");
+        const dataUrl = await window.impactframeApi.fileToDataUrl(file);
+        if (formQrInput) formQrInput.value = dataUrl;
+        updateQrPreviewUI(dataUrl);
+        showNotice("QR photo loaded! Click 'Save Settings' to apply.", "success");
+      } catch (err) {
+        showNotice("Failed to load QR image: " + err.message, "error");
+      }
+    });
+  }
+
+  if (formQrInput) {
+    formQrInput.addEventListener("input", () => {
+      updateQrPreviewUI(formQrInput.value);
+    });
+  }
+
+  if (formQrRemoveBtn) {
+    formQrRemoveBtn.addEventListener("click", () => {
+      if (formQrInput) formQrInput.value = "";
+      if (formQrFileInput) formQrFileInput.value = "";
+      updateQrPreviewUI("");
+      showNotice("QR code photo removed. Click 'Save Settings' to apply.", "info");
+    });
+  }
+
+  // Load and apply form-level settings (Title, Description, Accepting status, Closed msg, QR code)
+  async function loadFormSettings(formType = currentActiveForm) {
     try {
-      const settings = await window.impactframeApi.getFormSettings();
+      const settings = await window.impactframeApi.getFormSettings(formType);
       if (formTitleInput) formTitleInput.value = settings.form_title || "";
       if (formBannerInput) formBannerInput.value = settings.header_banner_url || "";
       if (formDescInput) formDescInput.value = settings.form_description || "";
       if (formConfirmMsgInput) formConfirmMsgInput.value = settings.confirmation_message || "";
       if (formClosedMsgInput) formClosedMsgInput.value = settings.closed_message || "";
+      if (formQrInput) formQrInput.value = settings.qr_code_image || "";
+      if (formQrTitleInput) formQrTitleInput.value = settings.qr_code_title || "";
+      if (formQrInstructionInput) formQrInstructionInput.value = settings.qr_code_instruction || "";
+
+      updateQrPreviewUI(settings.qr_code_image);
 
       const isAccepting = Boolean(settings.is_accepting_responses);
       if (formAcceptingToggle) formAcceptingToggle.checked = isAccepting;
@@ -815,12 +940,15 @@ document.addEventListener("DOMContentLoaded", () => {
           header_banner_url: formBannerInput ? formBannerInput.value.trim() : undefined,
           confirmation_message: formConfirmMsgInput ? formConfirmMsgInput.value.trim() : undefined,
           closed_message: formClosedMsgInput ? formClosedMsgInput.value.trim() : undefined,
+          qr_code_image: formQrInput ? formQrInput.value.trim() : undefined,
+          qr_code_title: formQrTitleInput ? formQrTitleInput.value.trim() : undefined,
+          qr_code_instruction: formQrInstructionInput ? formQrInstructionInput.value.trim() : undefined,
         };
-        await window.impactframeApi.updateFormSettings(payload);
+        await window.impactframeApi.updateFormSettings(payload, currentActiveForm);
         showNotice(
           isAccepting
-            ? "Form is now OPEN and accepting responses on apply.html."
-            : "Form is now CLOSED. Visitors will see the closed notice.",
+            ? `Form (${currentActiveForm}) is now OPEN and accepting responses.`
+            : `Form (${currentActiveForm}) is now CLOSED. Visitors will see the closed notice.`,
           isAccepting ? "success" : "info"
         );
       } catch (err) {
@@ -841,10 +969,13 @@ document.addEventListener("DOMContentLoaded", () => {
           header_banner_url: formBannerInput.value.trim(),
           confirmation_message: formConfirmMsgInput.value.trim(),
           closed_message: formClosedMsgInput.value.trim(),
+          qr_code_image: formQrInput ? formQrInput.value.trim() : "",
+          qr_code_title: formQrTitleInput ? formQrTitleInput.value.trim() : "",
+          qr_code_instruction: formQrInstructionInput ? formQrInstructionInput.value.trim() : "",
           is_accepting_responses: formAcceptingToggle ? formAcceptingToggle.checked : true,
         };
-        await window.impactframeApi.updateFormSettings(payload);
-        showNotice("Form settings saved successfully! Updated on live website.", "success");
+        await window.impactframeApi.updateFormSettings(payload, currentActiveForm);
+        showNotice(`Form settings for "${currentActiveForm}" saved successfully! Updated on live website.`, "success");
       } catch (err) {
         showNotice("Failed to save settings: " + err.message, "error");
       } finally {
@@ -855,10 +986,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Load and render question fields
-  async function loadFormFields() {
+  async function loadFormFields(formType = currentActiveForm) {
     formBuilderContainer.innerHTML = `<p class="state-msg">Loading question fields…</p>`;
     try {
-      formFieldsList = await window.impactframeApi.getAllFormFields();
+      formFieldsList = await window.impactframeApi.getAllFormFields(formType);
       renderFormFields();
     } catch (err) {
       formBuilderContainer.innerHTML = `<p class="state-msg">Failed to load fields (${escapeHtml(err.message)})</p>`;
@@ -879,6 +1010,7 @@ document.addEventListener("DOMContentLoaded", () => {
       email: { label: "Email", color: "#93c5fd" },
       tel: { label: "Phone", color: "#fde047" },
       url: { label: "Link / URL", color: "#5eead4" },
+      photo: { label: "Photo / Image Upload", color: "#f472b6" },
       file: { label: "File upload", color: "#cbd5e1" },
       section: { label: "Section divider", color: "#fbbf24" },
     };
@@ -1023,7 +1155,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           await window.impactframeApi.updateFormField(id, { is_active: !currentActive });
           showNotice(`Question visibility updated.`, "success");
-          loadFormFields();
+          loadFormFields(currentActiveForm);
         } catch (err) {
           showNotice(err.message, "error");
         }
@@ -1059,7 +1191,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showNotice("Question order updated.", "success");
     } catch (err) {
       showNotice("Failed to reorder: " + err.message, "error");
-      loadFormFields();
+      loadFormFields(currentActiveForm);
     }
   }
 
@@ -1068,7 +1200,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await window.impactframeApi.duplicateFormField(id);
       showNotice("Question duplicated with all options and configurations!", "success");
-      loadFormFields();
+      loadFormFields(currentActiveForm);
     } catch (err) {
       showNotice("Failed to duplicate: " + err.message, "error");
     }
@@ -1137,10 +1269,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Update modal input sections based on selected Question Type
   function updateModalTypeVisibility() {
     const type = fieldTypeSelect.value;
+    const isPhoto = type === "photo";
     const isChoice = ["radio", "checkbox", "select"].includes(type);
     const isScale = type === "scale";
     const isSection = type === "section";
-    const isTextLike = ["text", "textarea", "number", "email", "tel", "url"].includes(type);
+    const isTextLike = ["text", "textarea", "number", "email", "tel", "url"].includes(type) || isPhoto;
 
     if (fieldOptionsGroup) fieldOptionsGroup.style.display = isChoice ? "block" : "none";
     if (fieldScaleGroup) fieldScaleGroup.style.display = isScale ? "block" : "none";
@@ -1263,6 +1396,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const type = fieldTypeSelect.value;
 
     const payload = {
+      form_type: currentActiveForm,
       label: fieldLabelInput.value.trim(),
       description: fieldDescriptionInput.value.trim(),
       field_key: fieldKeyInput.value.trim().toLowerCase(),
@@ -1284,10 +1418,10 @@ document.addEventListener("DOMContentLoaded", () => {
         showNotice(`Question updated successfully!`, "success");
       } else {
         await window.impactframeApi.createFormField(payload);
-        showNotice(`New question added to audition sheet!`, "success");
+        showNotice(`New question added to "${currentActiveForm}" form!`, "success");
       }
       closeFieldModal();
-      loadFormFields();
+      loadFormFields(currentActiveForm);
     } catch (err) {
       showNotice(err.message, "error");
     }
@@ -1296,13 +1430,13 @@ document.addEventListener("DOMContentLoaded", () => {
   async function handleDeleteField(id) {
     const field = formFieldsList.find((f) => String(f.id) === String(id));
     const label = field ? field.label : "this question";
-    if (!confirm(`Are you sure you want to permanently remove "${label}" from the application form?`)) {
+    if (!confirm(`Are you sure you want to permanently remove "${label}" from the form?`)) {
       return;
     }
     try {
       await window.impactframeApi.deleteFormField(id);
-      showNotice(`Question deleted from application form.`, "success");
-      loadFormFields();
+      showNotice(`Question deleted from form.`, "success");
+      loadFormFields(currentActiveForm);
     } catch (err) {
       showNotice(err.message, "error");
     }

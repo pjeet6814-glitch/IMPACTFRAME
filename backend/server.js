@@ -11,9 +11,10 @@ const authRouter = require("./routes/auth");
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(express.json());
+app.use(express.json({ limit: "25mb" }));
+app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 // Allow text payloads for navigator.sendBeacon during page exit
-app.use(express.text({ type: ["text/plain", "application/octet-stream"] }));
+app.use(express.text({ type: ["text/plain", "application/octet-stream"], limit: "1mb" }));
 
 app.use(
   cors({

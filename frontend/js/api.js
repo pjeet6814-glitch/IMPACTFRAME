@@ -640,77 +640,127 @@
   }
 
   // ==========================================
-  // Form Settings & Google Forms Builder Controls
+  // Form Settings & Multi-Form Builder Controls
   // ==========================================
-  const DEFAULT_FORM_SETTINGS = {
-    form_title: "IMPACTFRAME 2026 Auditions & Roles Application",
-    form_description: "Audition for on-screen performance or apply for director, cinematographer, AI artist, sound, and editor positions in upcoming short films.",
-    is_accepting_responses: true,
-    closed_message: "This audition form is currently closed to new responses. Thank you for your interest in IMPACTFRAME!",
-    confirmation_message: "Thank you! Your response has been recorded. Our production directors will review your application and contact you soon via WhatsApp/Email.",
-    header_banner_url: "",
+  const DEFAULT_FORM_CONFIGS = {
+    auditions: {
+      id: 1,
+      form_type: "auditions",
+      form_title: "IMPACTFRAME 2026 Auditions & Roles Application",
+      form_description: "Audition for on-screen performance or apply for director, cinematographer, AI artist, sound, and editor positions in upcoming short films.",
+      is_accepting_responses: true,
+      closed_message: "This audition form is currently closed to new responses. Thank you for your interest in IMPACTFRAME!",
+      confirmation_message: "Thank you! Your response has been recorded. Our production directors will review your application and contact you soon via WhatsApp/Email.",
+      header_banner_url: "",
+      qr_code_image: "",
+      qr_code_title: "",
+      qr_code_instruction: "",
+    },
+    join_crew: {
+      id: 2,
+      form_type: "join_crew",
+      form_title: "IMPACTFRAME Crew Application & Project Pitch",
+      form_description: "Apply to join our camera, sound, AI lab, screenwriting, editing tracks or pitch a campus conservation project.",
+      is_accepting_responses: true,
+      closed_message: "Crew applications are currently closed. Follow our Instagram @impactframe.ee for the next recruitment cycle!",
+      confirmation_message: "Application received! We'll review your note and message you on Instagram/Email for the next studio screening session.",
+      header_banner_url: "",
+      qr_code_image: "",
+      qr_code_title: "",
+      qr_code_instruction: "",
+    },
+    events: {
+      id: 3,
+      form_type: "events",
+      form_title: "Screenings & Workshops — Seat Reservation",
+      form_description: "Reserve your seat for upcoming campus film showcases, hands-on production workshops, and AI colloquiums.",
+      is_accepting_responses: true,
+      closed_message: "Registrations for upcoming events are currently closed or at full capacity. Check back soon!",
+      confirmation_message: "Seat reserved successfully! Your booking confirmation code has been generated. Show this at the entrance.",
+      header_banner_url: "",
+      qr_code_image: "",
+      qr_code_title: "",
+      qr_code_instruction: "",
+    }
   };
 
-  async function getFormSettings() {
+  const DEFAULT_FORM_SETTINGS = DEFAULT_FORM_CONFIGS.auditions;
+
+  function getFormSettingsCacheKey(formType = "auditions") {
+    return `${FORM_SETTINGS_STORAGE_KEY}_${String(formType).toLowerCase().trim()}`;
+  }
+
+  function getFormFieldsCacheKey(formType = "auditions") {
+    return `${FORMS_STORAGE_KEY}_${String(formType).toLowerCase().trim()}`;
+  }
+
+  async function getFormSettings(formType = "auditions") {
+    const cleanType = String(formType).toLowerCase().trim() || "auditions";
     const base = getApiBase();
+    const cacheKey = getFormSettingsCacheKey(cleanType);
+    const defaultCfg = DEFAULT_FORM_CONFIGS[cleanType] || DEFAULT_FORM_CONFIGS.auditions;
+
     let cached = null;
     try {
-      const raw = localStorage.getItem(FORM_SETTINGS_STORAGE_KEY);
+      const raw = localStorage.getItem(cacheKey);
       if (raw) cached = JSON.parse(raw);
     } catch {}
 
     try {
-      const res = await fetch(`${base}/api/form-settings`, { signal: AbortSignal.timeout(3000) });
+      const res = await fetch(`${base}/api/form-settings?form_type=${encodeURIComponent(cleanType)}`, {
+        signal: AbortSignal.timeout(3000),
+      });
       if (res.ok) {
         const serverSettings = await res.json();
-        // If the user has saved custom settings locally, and server has fresh default seeds (e.g. cold start):
-        // Do NOT overwrite local custom settings with defaults! Re-hydrate the server with the user's saved settings!
         if (cached && cached.is_custom) {
           const isServerDefault =
-            serverSettings.form_title === DEFAULT_FORM_SETTINGS.form_title &&
-            serverSettings.is_accepting_responses === DEFAULT_FORM_SETTINGS.is_accepting_responses &&
-            serverSettings.form_description === DEFAULT_FORM_SETTINGS.form_description &&
-            serverSettings.closed_message === DEFAULT_FORM_SETTINGS.closed_message;
+            serverSettings.form_title === defaultCfg.form_title &&
+            serverSettings.is_accepting_responses === defaultCfg.is_accepting_responses &&
+            serverSettings.form_description === defaultCfg.form_description &&
+            serverSettings.closed_message === defaultCfg.closed_message;
 
           if (isServerDefault) {
-            updateFormSettings(cached).catch(() => {});
+            updateFormSettings(cached, cleanType).catch(() => {});
             return cached;
           }
         }
 
-        const merged = { ...DEFAULT_FORM_SETTINGS, ...cached, ...serverSettings };
+        const merged = { ...defaultCfg, ...cached, ...serverSettings };
         if (cached?.is_custom) merged.is_custom = true;
-        localStorage.setItem(FORM_SETTINGS_STORAGE_KEY, JSON.stringify(merged));
+        localStorage.setItem(cacheKey, JSON.stringify(merged));
         return merged;
       }
     } catch (e) {
       console.warn("Notice loading form-settings, using cached settings:", e);
     }
 
-    if (cached) return { ...DEFAULT_FORM_SETTINGS, ...cached };
-    return DEFAULT_FORM_SETTINGS;
+    if (cached) return { ...defaultCfg, ...cached };
+    return defaultCfg;
   }
 
-  async function updateFormSettings(settingsData, adminKey) {
+  async function updateFormSettings(settingsData, formType = "auditions", adminKey) {
+    const cleanType = String(formType || settingsData.form_type || "auditions").toLowerCase().trim();
     const base = getApiBase();
     const token = adminKey || getSavedAdminPassword();
+    const cacheKey = getFormSettingsCacheKey(cleanType);
+    const defaultCfg = DEFAULT_FORM_CONFIGS[cleanType] || DEFAULT_FORM_CONFIGS.auditions;
 
     let current = null;
     try {
-      const raw = localStorage.getItem(FORM_SETTINGS_STORAGE_KEY);
+      const raw = localStorage.getItem(cacheKey);
       if (raw) current = JSON.parse(raw);
     } catch {}
 
     const payload = {
-      ...DEFAULT_FORM_SETTINGS,
+      ...defaultCfg,
       ...current,
       ...settingsData,
+      form_type: cleanType,
       is_custom: true,
       updated_at: new Date().toISOString(),
     };
 
-    // Save to local cache immediately so settings NEVER reset
-    localStorage.setItem(FORM_SETTINGS_STORAGE_KEY, JSON.stringify(payload));
+    localStorage.setItem(cacheKey, JSON.stringify(payload));
 
     try {
       const res = await fetch(`${base}/api/form-settings`, {
@@ -726,7 +776,7 @@
       if (res.ok) {
         const updated = await res.json();
         const merged = { ...payload, ...updated, is_custom: true };
-        localStorage.setItem(FORM_SETTINGS_STORAGE_KEY, JSON.stringify(merged));
+        localStorage.setItem(cacheKey, JSON.stringify(merged));
         return merged;
       }
     } catch (err) {
@@ -739,34 +789,39 @@
   // ==========================================
   // Dynamic Form Fields & Form Builder
   // ==========================================
-  async function getFormFields() {
+  async function getFormFields(formType = "auditions") {
+    const cleanType = String(formType).toLowerCase().trim() || "auditions";
     const base = getApiBase();
+    const cacheKey = getFormFieldsCacheKey(cleanType);
     try {
-      const res = await fetch(`${base}/api/form-fields`, { signal: AbortSignal.timeout(2500) });
+      const res = await fetch(`${base}/api/form-fields?form_type=${encodeURIComponent(cleanType)}`, {
+        signal: AbortSignal.timeout(2500),
+      });
       if (res.ok) {
         const fields = await res.json();
-        localStorage.setItem(FORMS_STORAGE_KEY, JSON.stringify(fields));
+        localStorage.setItem(cacheKey, JSON.stringify(fields));
         return fields;
       }
     } catch {}
     try {
-      const cached = localStorage.getItem(FORMS_STORAGE_KEY);
+      const cached = localStorage.getItem(cacheKey);
       if (cached) return JSON.parse(cached);
     } catch {}
     return DEFAULT_FORM_FIELDS;
   }
 
-  async function getAllFormFields(adminKey) {
+  async function getAllFormFields(formType = "auditions", adminKey) {
+    const cleanType = String(formType).toLowerCase().trim() || "auditions";
     const base = getApiBase();
     const token = adminKey || getSavedAdminPassword();
     try {
-      const res = await fetch(`${base}/api/form-fields/all`, {
+      const res = await fetch(`${base}/api/form-fields/all?form_type=${encodeURIComponent(cleanType)}`, {
         headers: { "x-session-token": token, "x-admin-key": token },
-        signal: AbortSignal.timeout(2500)
+        signal: AbortSignal.timeout(2500),
       });
       if (res.ok) return await res.json();
     } catch {}
-    return getFormFields();
+    return getFormFields(cleanType);
   }
 
   async function createFormField(fieldData, adminKey) {
@@ -862,14 +917,16 @@
   // ==========================================
   // Submissions / Datasheet
   // ==========================================
-  async function submitApplication(formData) {
+  async function submitApplication(formData, formType = "auditions") {
+    const cleanType = String(formType || formData.form_type || "auditions").toLowerCase().trim();
+    const payload = { ...formData, form_type: cleanType };
     const base = getApiBase();
     try {
       const res = await fetch(`${base}/api/submissions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-        signal: AbortSignal.timeout(4500)
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(7000),
       });
       if (res.ok) {
         return await res.json();
@@ -891,31 +948,39 @@
       const fallbackId = subs.length + 1;
       const submission = {
         id: fallbackId,
-        applicant_name: formData.full_name || "Applicant",
+        form_type: cleanType,
+        applicant_name: formData.full_name || formData.name || "Applicant",
         applicant_email: formData.email || "",
-        applicant_phone: formData.phone || "",
-        role_interest: formData.role_interest || "General",
+        applicant_phone: formData.phone || formData.whatsapp || "",
+        role_interest: formData.role_interest || formData.track_interest || formData.event_selected || "General",
         data: formData,
         status: "New",
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
       subs.unshift(submission);
       localStorage.setItem(SUBMISSIONS_STORAGE_KEY, JSON.stringify(subs));
-      return { success: true, reference_id: `IF-OFFLINE-${fallbackId}`, confirmation_message: DEFAULT_FORM_SETTINGS.confirmation_message, submission };
+      const prefix = cleanType === "join_crew" ? "IF-CREW" : (cleanType === "events" ? "IF-EVT" : "IF-AUD");
+      return {
+        success: true,
+        reference_id: `${prefix}-OFFLINE-${fallbackId}`,
+        confirmation_message: "Thank you! Your response has been recorded.",
+        submission,
+      };
     }
   }
 
   async function getSubmissions(filters = {}, adminKey) {
     const base = getApiBase();
     const params = new URLSearchParams();
-    if (filters.role) params.set("role", filters.role);
-    if (filters.status) params.set("status", filters.status);
+    if (filters.form_type && filters.form_type !== "All") params.set("form_type", filters.form_type);
+    if (filters.role && filters.role !== "All") params.set("role", filters.role);
+    if (filters.status && filters.status !== "All") params.set("status", filters.status);
     if (filters.q) params.set("q", filters.q);
 
     try {
       const res = await fetch(`${base}/api/submissions?${params.toString()}`, {
         headers: { "x-admin-key": adminKey || getSavedAdminPassword() },
-        signal: AbortSignal.timeout(3000)
+        signal: AbortSignal.timeout(3000),
       });
       if (res.ok) return await res.json();
     } catch {}
@@ -923,6 +988,9 @@
     // Fallback to local storage
     try {
       let list = JSON.parse(localStorage.getItem(SUBMISSIONS_STORAGE_KEY) || "[]");
+      if (filters.form_type && filters.form_type !== "All") {
+        list = list.filter((s) => (s.form_type || "auditions") === filters.form_type.toLowerCase());
+      }
       if (filters.role && filters.role !== "All") {
         list = list.filter((s) => s.role_interest && s.role_interest.includes(filters.role));
       }
@@ -966,9 +1034,10 @@
       return;
     }
 
-    const headers = ["ID", "Date", "Name", "Email", "Phone", "Role / Interest", "Status", "Full Details"];
+    const headers = ["ID", "Form Type", "Date", "Name", "Email", "Phone", "Role / Event", "Status", "Full Details"];
     const rows = submissions.map((s) => [
       s.id,
+      `"${s.form_type || "auditions"}"`,
       `"${s.created_at || ""}"`,
       `"${(s.applicant_name || "").replace(/"/g, '""')}"`,
       `"${(s.applicant_email || "").replace(/"/g, '""')}"`,
@@ -986,6 +1055,151 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  // ==========================================
+  // Events & Workshops Calendar API
+  // ==========================================
+  async function getEvents() {
+    const base = getApiBase();
+    try {
+      const res = await fetch(`${base}/api/events`, { signal: AbortSignal.timeout(3000) });
+      if (res.ok) return await res.json();
+    } catch (e) {
+      console.warn("Notice loading events:", e);
+    }
+    return [
+      {
+        id: 1,
+        title: "Annual IMPACTFRAME Showcase & Production Kickoff",
+        category: "CLUB SHOWCASE & ORIENTATION",
+        date_day: "18",
+        date_month: "OCTOBER",
+        location: "Central Campus Amphitheater",
+        time_info: "7:00 PM",
+        entry_fee: "Free Entry",
+        description: "Open-air screening of upcoming student productions, introduction to club departments, and interactive Q&A for aspiring student filmmakers, actors, and editors.",
+        registration_open: 1,
+        sort_order: 1,
+      },
+      {
+        id: 2,
+        title: "Field Audio in Extreme Environments: Hydrophones & Foley",
+        category: "HANDS-ON WORKSHOP",
+        date_day: "04",
+        date_month: "NOVEMBER",
+        location: "Media Studio Lab B",
+        time_info: "3:00 PM",
+        entry_fee: "Equipment provided",
+        description: "Learn how to capture the sounds people normally ignore: subterranean water flow, wind resonance across solar farms, and wet clay acoustic mapping.",
+        registration_open: 1,
+        sort_order: 2,
+      },
+      {
+        id: 3,
+        title: "Prompt to Picture: Generative AI for Eco-Storytellers",
+        category: "AI LAB COLLOQUIUM",
+        date_day: "22",
+        date_month: "NOVEMBER",
+        location: "Auditorium Hall 2",
+        time_info: "5:00 PM",
+        entry_fee: "Open to all branches",
+        description: "How our AI Film department crafts speculative climate futures without relying on plastic clichés. Includes ComfyUI workflow walkthroughs.",
+        registration_open: 1,
+        sort_order: 3,
+      }
+    ];
+  }
+
+  async function createEvent(eventData, adminKey) {
+    const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
+    const res = await fetch(`${base}/api/events`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-session-token": token,
+        "x-admin-key": token,
+      },
+      body: JSON.stringify(eventData),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to create event");
+    }
+    return res.json();
+  }
+
+  async function updateEvent(id, eventData, adminKey) {
+    const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
+    const res = await fetch(`${base}/api/events/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-session-token": token,
+        "x-admin-key": token,
+      },
+      body: JSON.stringify(eventData),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to update event");
+    }
+    return res.json();
+  }
+
+  async function deleteEvent(id, adminKey) {
+    const base = getApiBase();
+    const token = adminKey || getSavedAdminPassword();
+    const res = await fetch(`${base}/api/events/${id}`, {
+      method: "DELETE",
+      headers: {
+        "x-session-token": token,
+        "x-admin-key": token,
+      },
+    });
+    if (!res.ok && res.status !== 204) throw new Error("Failed to delete event");
+    return true;
+  }
+
+  // File to Base64 with automatic client compression helper
+  function fileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) return resolve("");
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target.result;
+        if (file.size <= 1.5 * 1024 * 1024 || !file.type.startsWith("image/")) {
+          return resolve(result);
+        }
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1400;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", 0.85));
+        };
+        img.onerror = () => resolve(result);
+        img.src = result;
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
   }
 
   // ==========================================
@@ -1367,8 +1581,14 @@
     createCrewUser,
     deleteCrewUser,
     // Password Management
-    changeAdminPassword,
-    resetCrewPassword,
+    // Events & Workshops
+    getEvents,
+    createEvent,
+    updateEvent,
+    deleteEvent,
+    // File & Photo Helper
+    fileToDataUrl,
+    DEFAULT_FORM_CONFIGS,
     // Constants
     socialLinks: SOCIAL_LINKS,
     featuredReels: FEATURED_REELS,

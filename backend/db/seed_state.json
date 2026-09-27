@@ -1,10 +1,52 @@
 {
   "form_settings": {
+    "form_type": "auditions",
     "form_title": "IMPACTFRAME 2026 Auditions & Roles Application",
-    "form_description": "Audition for on-screen performance or apply for director, cinematographer, AI artist, sound, and editor positions in upcoming short films.",
+    "form_description": "Auditions are open across all departments for CHARUSAT students. Fill out your details, selected craft, and portfolio links below.",
     "is_accepting_responses": 1,
-    "closed_message": "This audition form is currently closed to new responses. Thank you for your interest in IMPACTFRAME!",
-    "confirmation_message": "Thank you! Your response has been recorded. Our production directors will review your application and contact you soon via WhatsApp/Email.",
-    "header_banner_url": ""
+    "closed_message": "Auditions are currently closed for the active production cycle. Follow @impactframe for the next casting call.",
+    "confirmation_message": "Thank you! Your response has been recorded. Our production directors will review your audition sheet and contact you via WhatsApp/Email.",
+    "header_banner_url": "",
+    "qr_code_image": "",
+    "qr_code_title": "",
+    "qr_code_instruction": ""
+  },
+  "forms": {
+    "auditions": {
+      "form_type": "auditions",
+      "form_title": "IMPACTFRAME 2026 Auditions & Roles Application",
+      "form_description": "Auditions are open across all departments for CHARUSAT students. Fill out your details, selected craft, and portfolio links below.",
+      "is_accepting_responses": 1,
+      "closed_message": "Auditions are currently closed for the active production cycle. Follow @impactframe for the next casting call.",
+      "confirmation_message": "Thank you! Your response has been recorded. Our production directors will review your audition sheet and contact you via WhatsApp/Email.",
+      "header_banner_url": "",
+      "qr_code_image": "",
+      "qr_code_title": "",
+      "qr_code_instruction": ""
+    },
+    "join_crew": {
+      "form_type": "join_crew",
+      "form_title": "IMPACTFRAME Crew Application & Project Pitch",
+      "form_description": "Join our student film collective. Apply across our active tracks: Field Cinematography, Spatial Foley, AI Generative Visuals, Screenwriting, or pitch a story.",
+      "is_accepting_responses": 1,
+      "closed_message": "Crew intake is currently on pause for active shoots. Check back soon for the next intake cycle.",
+      "confirmation_message": "Crew application received! Our department leads review pitches weekly. We will be in touch via WhatsApp.",
+      "header_banner_url": "",
+      "qr_code_image": "",
+      "qr_code_title": "",
+      "qr_code_instruction": ""
+    },
+    "events": {
+      "form_type": "events",
+      "form_title": "Screenings & Workshops — Seat Reservation",
+      "form_description": "Reserve seats for upcoming film showcases, audio masterclasses, and AI storytelling colloquiums. Admission is free for registered attendees.",
+      "is_accepting_responses": 1,
+      "closed_message": "Registrations for upcoming events are currently closed or at full venue capacity.",
+      "confirmation_message": "Your seat reservation is confirmed! Bring your CHARUSAT ID or digital confirmation to the venue check-in.",
+      "header_banner_url": "",
+      "qr_code_image": "",
+      "qr_code_title": "",
+      "qr_code_instruction": ""
+    }
   }
 }

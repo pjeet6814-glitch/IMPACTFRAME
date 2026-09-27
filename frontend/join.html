@@ -106,46 +106,48 @@
       <a href="apply.html" class="btn btn-primary" style="white-space: nowrap;">Open Audition Sheet &rarr;</a>
     </div>
 
-    <!-- Application Form Sheet -->
-    <div class="form-sheet sprocket-frame">
-      <h3 style="margin: 0 0 8px; font-size: 1.4rem; color: var(--paper);">Crew Application & Project Pitch</h3>
-      <p style="color: var(--parchment-dim); font-size: 0.92rem; margin-bottom: 24px;">
-        Fill out this note and our student directors will get back to you for an informal chat over chai.
-      </p>
+    <!-- Dynamic Application Form Sheet (Managed via Admin Panel) -->
+    <div class="form-sheet sprocket-frame" id="crew-form-sheet" data-form-type="join_crew">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 1px solid var(--navy-mid); padding-bottom: 18px; flex-wrap: wrap; gap: 14px;">
+        <div style="flex: 1; min-width: 260px;">
+          <h3 id="form-display-title" style="margin: 0 0 6px; font-size: 1.55rem; color: var(--paper); line-height: 1.3;">Crew Application & Project Pitch</h3>
+          <p id="form-display-desc" style="margin: 0; color: var(--parchment-dim); font-size: 0.95rem; line-height: 1.5;">Fill out this note and our student directors will get back to you for an informal chat over chai.</p>
+        </div>
+        <div id="form-status-indicator" class="hud-pill"><span class="rec-dot"></span> LIVE APPLICATION FORM</div>
+      </div>
 
-      <form id="join-form" onsubmit="event.preventDefault(); document.getElementById('join-success-msg').style.display='block'; this.reset();">
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label for="applicant-name">Your Full Name *</label>
-            <input type="text" id="applicant-name" required placeholder="e.g. Maya Rao" />
-          </div>
-          <div class="form-group flex-1">
-            <label for="applicant-email">Email Address *</label>
-            <input type="email" id="applicant-email" required placeholder="student@charusat.ac.in" />
-          </div>
+      <!-- QR Code Banner (Rendered dynamically if set in Admin) -->
+      <div id="form-qr-container" style="display: none;"></div>
+
+      <!-- Closed Form Notice (Displayed when Accepting Responses is OFF) -->
+      <div id="form-closed-notice" style="display: none; text-align: center; padding: 48px 24px; background: rgba(36, 16, 16, 0.7); border: 2px dashed #fca5a5; border-radius: var(--radius); margin: 20px 0;">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 12px; display: block;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <h3 style="color: #fca5a5; margin: 0 0 8px; font-size: 1.35rem;">Applications Currently Closed</h3>
+        <p id="form-closed-message-text" style="color: var(--parchment-dim); max-width: 540px; margin: 0 auto 18px; font-size: 0.95rem; line-height: 1.6;">
+          Crew applications are currently closed. Follow our Instagram @impactframe.ee for the next recruitment cycle!
+        </p>
+        <a href="index.html" class="btn btn-ghost btn-sm">&larr; Return to Homepage</a>
+      </div>
+
+      <!-- Live dynamically generated form -->
+      <form id="dynamic-form" class="modal-form">
+        <div id="dynamic-fields-container" style="display: flex; flex-direction: column; gap: 22px;">
+          <p class="state-msg" style="color: var(--parchment-dim);">Loading crew application fields…</p>
         </div>
 
-        <div class="form-row">
-          <div class="form-group flex-1">
-            <label for="applicant-branch">Department / Semester *</label>
-            <input type="text" id="applicant-branch" required placeholder="e.g. Electrical Engg, 4th Sem" />
-          </div>
-          <div class="form-group flex-1">
-            <label for="applicant-social">Instagram / Portfolio Handle (optional)</label>
-            <input type="text" id="applicant-social" placeholder="@yourhandle" />
-          </div>
+        <div id="form-success-alert" style="display: none; background: #e5f0dc; color: #33481f; padding: 22px; border-radius: var(--radius); margin-top: 24px; border-left: 5px solid var(--leaf);">
+          <strong style="font-size: 1.2rem; display: block; margin-bottom: 6px;">&#10003; Application Received Successfully!</strong>
+          <span id="form-ref-code" style="font-family: monospace; font-weight: 700; color: #2f4820; display: block; margin-bottom: 8px;"></span>
+          <p id="form-success-message" style="margin: 6px 0 0; font-size: 0.95rem; line-height: 1.6;">Our production directors will review your application and contact you soon via WhatsApp/Email.</p>
         </div>
 
-        <div class="form-group">
-          <label for="applicant-note">What conservation story or image makes you want to pick up a camera? *</label>
-          <textarea id="applicant-note" required rows="4" placeholder="Tell us about a local creek, a wasted resource on campus, or why you want to tell conservation stories..."></textarea>
-        </div>
+        <div id="form-error-alert" style="display: none; background: #fde8e8; color: #921c1c; padding: 14px; border-radius: var(--radius); margin-top: 16px; border-left: 4px solid #ef4444;"></div>
 
-        <div id="join-success-msg" style="display: none; background: #e5f0dc; color: #33481f; padding: 14px; border-radius: 4px; margin-bottom: 16px; font-weight: 500;">
-          &#10003; Application received! We'll review your note and message you on Instagram/email for the next studio screening session.
+        <div id="form-submit-row" style="margin-top: 28px;">
+          <button type="submit" class="btn btn-primary" id="form-submit-btn" style="min-width: 240px; font-size: 1rem; padding: 12px 28px;">
+            Submit Application &rarr;
+          </button>
         </div>
-
-        <button type="submit" class="btn btn-primary">Submit Application &rarr;</button>
       </form>
     </div>
 
@@ -204,5 +206,6 @@
 
   <script src="js/api.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/form-engine.js"></script>
 </body>
 </html>
