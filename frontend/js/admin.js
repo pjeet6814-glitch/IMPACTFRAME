@@ -33,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     films: document.getElementById("panel-films"),
     datasheet: document.getElementById("panel-datasheet"),
     forms: document.getElementById("panel-forms"),
+    events: document.getElementById("panel-events"),
     audit: document.getElementById("panel-audit"),
     users: document.getElementById("panel-users"),
   };
@@ -100,6 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const formQrRemoveBtn = document.getElementById("form-qr-remove-btn");
 
   // Form Questions Elements
+  const addPhotoCardBtn = document.getElementById("add-photo-card-btn");
   const addSectionDividerBtn = document.getElementById("add-section-divider-btn");
   const openAddFieldModalBtn = document.getElementById("open-add-field-modal-btn");
   const formBuilderContainer = document.getElementById("form-builder-container");
@@ -112,6 +114,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const fieldLabelInput = document.getElementById("field-label");
   const fieldTypeSelect = document.getElementById("field-type");
   const fieldDescriptionInput = document.getElementById("field-description");
+  const fieldImageUrlInput = document.getElementById("field-image-url");
+  const fieldImageFileInput = document.getElementById("field-image-file-input");
+  const fieldImagePreviewWrap = document.getElementById("field-image-preview-wrap");
+  const fieldImagePreviewImg = document.getElementById("field-image-preview-img");
+  const fieldImageRemoveBtn = document.getElementById("field-image-remove-btn");
   const fieldPlaceholderGroup = document.getElementById("field-placeholder-group");
   const fieldPlaceholderInput = document.getElementById("field-placeholder");
   const fieldOptionsGroup = document.getElementById("field-options-group");
@@ -129,6 +136,32 @@ document.addEventListener("DOMContentLoaded", () => {
   const fieldRequiredWrap = document.getElementById("field-required-wrap");
   const fieldRequiredInput = document.getElementById("field-required");
   let currentModalOptions = [];
+
+  // Events & Schedule Elements
+  const eventsCountBadge = document.getElementById("events-count-badge");
+  const eventsSearchInput = document.getElementById("events-search-input");
+  const eventsStatusFilter = document.getElementById("events-status-filter");
+  const refreshEventsBtn = document.getElementById("refresh-events-btn");
+  const openAddEventModalBtn = document.getElementById("open-add-event-modal-btn");
+  const adminEventsContainer = document.getElementById("admin-events-container");
+  const eventModal = document.getElementById("event-modal");
+  const eventModalTitle = document.getElementById("event-modal-title");
+  const eventModalCloseBtn = document.getElementById("event-modal-close-btn");
+  const eventModalCancelBtn = document.getElementById("event-modal-cancel-btn");
+  const eventForm = document.getElementById("event-form");
+  const eventIdInput = document.getElementById("event-id");
+  const eventTitleInput = document.getElementById("event-title");
+  const eventCategoryInput = document.getElementById("event-category");
+  const eventDateDayInput = document.getElementById("event-date-day");
+  const eventDateMonthInput = document.getElementById("event-date-month");
+  const eventTimeInput = document.getElementById("event-time");
+  const eventLocationInput = document.getElementById("event-location");
+  const eventEntryFeeInput = document.getElementById("event-entry-fee");
+  const eventDescriptionInput = document.getElementById("event-description");
+  const eventStatusSelect = document.getElementById("event-status-select");
+  const eventRegOpenInput = document.getElementById("event-reg-open");
+  const eventSortOrderInput = document.getElementById("event-sort-order");
+  let adminEventsList = [];
 
   // Access Logs Datasheet Elements
   const auditSearchInput = document.getElementById("audit-search-input");
@@ -268,6 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadSubmissions();
     loadFormSettings();
     loadFormFields();
+    loadAdminEvents();
     loadAuditLogs();
     if (session && session.role === "MAIN") {
       loadCrewUsers();
@@ -359,6 +393,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadFormSettings();
         loadFormFields();
       }
+      if (tab === "events") loadAdminEvents();
       if (tab === "audit") loadAuditLogs();
       if (tab === "users") loadCrewUsers();
     });
@@ -823,28 +858,122 @@ document.addEventListener("DOMContentLoaded", () => {
      TAB 3: GOOGLE FORMS CUSTOMIZER & SETTINGS
      ========================================================================== */
 
-  // Universal Form Switcher Listener
+  // Universal Form Switcher Function
+  function switchActiveForm(formType) {
+    currentActiveForm = formType;
+
+    // Update pill buttons active styling
+    const pills = document.querySelectorAll(".form-pill-btn");
+    pills.forEach((p) => {
+      const isTarget = p.dataset.form === formType;
+      if (isTarget) {
+        p.classList.add("active");
+        p.style.border = "2px solid var(--leaf)";
+        p.style.background = "rgba(82, 183, 136, 0.25)";
+        p.style.color = "var(--paper)";
+      } else {
+        p.classList.remove("active");
+        p.style.border = "1px solid var(--navy-mid)";
+        p.style.background = "var(--navy-dark)";
+        p.style.color = "var(--parchment-dim)";
+      }
+    });
+
+    if (adminActiveFormSelect) {
+      adminActiveFormSelect.value = formType;
+    }
+
+    const linkMap = {
+      auditions: "apply.html",
+      join_crew: "join.html",
+      events: "events.html",
+    };
+    const labelMap = {
+      auditions: "🎭 Auditions & Roles Form Configuration (apply.html)",
+      join_crew: "🎬 Join Crew Application Form Configuration (join.html)",
+      events: "🎟️ Events & Workshop Registration Form Configuration (events.html)",
+    };
+
+    if (adminViewPublicFormBtn) {
+      adminViewPublicFormBtn.href = linkMap[currentActiveForm] || "apply.html";
+    }
+    if (formSettingsActiveLabel) {
+      formSettingsActiveLabel.textContent = labelMap[currentActiveForm] || "Form Configuration";
+    }
+
+    loadFormSettings(currentActiveForm);
+    loadFormFields(currentActiveForm);
+  }
+
+  // Wire pill button click events
+  document.querySelectorAll(".form-pill-btn").forEach((pill) => {
+    pill.addEventListener("click", () => {
+      const targetForm = pill.dataset.form;
+      if (targetForm) {
+        switchActiveForm(targetForm);
+        showNotice(`Editing: ${targetForm === 'join_crew' ? 'Join Crew Form' : (targetForm === 'events' ? 'Events Form' : 'Auditions Form')}`, "info");
+      }
+    });
+  });
+
   if (adminActiveFormSelect) {
     adminActiveFormSelect.addEventListener("change", () => {
-      currentActiveForm = adminActiveFormSelect.value;
-      const linkMap = {
-        auditions: "apply.html",
-        join_crew: "join.html",
-        events: "events.html",
-      };
-      const labelMap = {
-        auditions: "Auditions & Roles Form Configuration",
-        join_crew: "Join Crew Application Form Configuration",
-        events: "Events & Workshop Registration Form Configuration",
-      };
-      if (adminViewPublicFormBtn) {
-        adminViewPublicFormBtn.href = linkMap[currentActiveForm] || "apply.html";
+      switchActiveForm(adminActiveFormSelect.value);
+    });
+  }
+
+  // Question Photo Preview Helper
+  function updateFieldImagePreviewUI(url) {
+    if (!fieldImagePreviewWrap || !fieldImagePreviewImg) return;
+    const clean = (url || "").trim();
+    if (clean) {
+      fieldImagePreviewImg.src = clean;
+      fieldImagePreviewWrap.style.display = "flex";
+    } else {
+      fieldImagePreviewImg.src = "";
+      fieldImagePreviewWrap.style.display = "none";
+    }
+  }
+
+  if (fieldImageFileInput) {
+    fieldImageFileInput.addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        showNotice("Processing question photo...", "info");
+        const dataUrl = await window.impactframeApi.fileToDataUrl(file);
+        if (fieldImageUrlInput) fieldImageUrlInput.value = dataUrl;
+        updateFieldImagePreviewUI(dataUrl);
+        showNotice("Question photo attached!", "success");
+      } catch (err) {
+        showNotice("Failed to load question photo: " + err.message, "error");
       }
-      if (formSettingsActiveLabel) {
-        formSettingsActiveLabel.textContent = labelMap[currentActiveForm] || "Form Configuration";
-      }
-      loadFormSettings(currentActiveForm);
-      loadFormFields(currentActiveForm);
+    });
+  }
+
+  if (fieldImageUrlInput) {
+    fieldImageUrlInput.addEventListener("input", () => {
+      updateFieldImagePreviewUI(fieldImageUrlInput.value);
+    });
+  }
+
+  if (fieldImageRemoveBtn) {
+    fieldImageRemoveBtn.addEventListener("click", () => {
+      if (fieldImageUrlInput) fieldImageUrlInput.value = "";
+      if (fieldImageFileInput) fieldImageFileInput.value = "";
+      updateFieldImagePreviewUI("");
+      showNotice("Question photo removed.", "info");
+    });
+  }
+
+  if (addPhotoCardBtn) {
+    addPhotoCardBtn.addEventListener("click", () => {
+      openAddFieldModal(false);
+      fieldModalTitle.textContent = "Add Photo Question / Image Card";
+      fieldTypeSelect.value = "photo";
+      fieldLabelInput.value = "Photo / Reference Picture";
+      fieldPlaceholderInput.value = "Attach image or provide reference link...";
+      updateModalTypeVisibility();
     });
   }
 
@@ -1011,6 +1140,8 @@ document.addEventListener("DOMContentLoaded", () => {
       tel: { label: "Phone", color: "#fde047" },
       url: { label: "Link / URL", color: "#5eead4" },
       photo: { label: "Photo / Image Upload", color: "#f472b6" },
+      image_card: { label: "🖼️ Standalone Image Card", color: "#f472b6" },
+      image: { label: "🖼️ Standalone Image Card", color: "#f472b6" },
       file: { label: "File upload", color: "#cbd5e1" },
       section: { label: "Section divider", color: "#fbbf24" },
     };
@@ -1098,6 +1229,15 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
 
               ${field.description ? `<p style="margin: 4px 0 0; color: var(--parchment-dim); font-size: 0.85rem;">${escapeHtml(field.description)}</p>` : ""}
+
+              ${field.image_url ? `
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                  <a href="${escapeHtml(field.image_url)}" target="_blank" rel="noopener">
+                    <img src="${escapeHtml(field.image_url)}" alt="Question photo" style="width: 48px; height: 38px; object-fit: contain; background: #0b1512; border-radius: 4px; border: 1px solid var(--leaf); display: block;" />
+                  </a>
+                  <span class="hud-pill" style="font-size: 0.72rem; color: #86efac; border-color: rgba(134,239,172,0.4);">📷 Photo Attached</span>
+                </div>
+              ` : ""}
 
               <div class="form-field-meta" style="margin-top: 6px;">
                 <span>Type: <strong style="color: ${typeInfo.color};">${typeInfo.label}</strong> ${previewInfo}</span>
@@ -1318,6 +1458,10 @@ document.addEventListener("DOMContentLoaded", () => {
     fieldKeyInput.readOnly = false;
     fieldTypeSelect.value = isSection ? "section" : "text";
 
+    if (fieldImageUrlInput) fieldImageUrlInput.value = "";
+    if (fieldImageFileInput) fieldImageFileInput.value = "";
+    updateFieldImagePreviewUI("");
+
     currentModalOptions = isSection ? [] : ["Option 1", "Option 2"];
     renderModalOptions();
 
@@ -1347,6 +1491,10 @@ document.addEventListener("DOMContentLoaded", () => {
     fieldKeyInput.value = field.field_key;
     fieldKeyInput.readOnly = true;
     fieldTypeSelect.value = field.type || "text";
+
+    if (fieldImageUrlInput) fieldImageUrlInput.value = field.image_url || "";
+    if (fieldImageFileInput) fieldImageFileInput.value = "";
+    updateFieldImagePreviewUI(field.image_url || "");
 
     let opts = [];
     if (Array.isArray(field.options)) {
@@ -1401,6 +1549,7 @@ document.addEventListener("DOMContentLoaded", () => {
       description: fieldDescriptionInput.value.trim(),
       field_key: fieldKeyInput.value.trim().toLowerCase(),
       type: type,
+      image_url: fieldImageUrlInput ? fieldImageUrlInput.value.trim() : "",
       placeholder: fieldPlaceholderInput.value.trim(),
       options: currentModalOptions.filter((s) => Boolean(s && s.trim())),
       allow_other: fieldAllowOther && fieldAllowOther.checked ? 1 : 0,
@@ -1440,6 +1589,254 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       showNotice(err.message, "error");
     }
+  }
+
+  /* ==========================================================================
+     TAB: EVENTS & SCHEDULE MANAGEMENT (events.html)
+     ========================================================================== */
+  async function loadAdminEvents() {
+    if (!adminEventsContainer) return;
+    adminEventsContainer.innerHTML = '<p class="state-msg">Loading events catalog…</p>';
+    try {
+      adminEventsList = await window.impactframeApi.getEvents();
+      if (eventsCountBadge) {
+        eventsCountBadge.textContent = adminEventsList.length;
+      }
+      renderAdminEvents();
+    } catch (err) {
+      adminEventsContainer.innerHTML = `<p class="state-msg error">Failed to load events: ${escapeHtml(err.message)}</p>`;
+    }
+  }
+
+  function renderAdminEvents() {
+    if (!adminEventsContainer) return;
+    const filterQuery = (eventsSearchInput?.value || "").toLowerCase().trim();
+    const filterStatus = eventsStatusFilter?.value || "All";
+
+    const filtered = adminEventsList.filter((evt) => {
+      const isPast = Boolean(evt.is_past);
+      if (filterStatus === "upcoming" && isPast) return false;
+      if (filterStatus === "past" && !isPast) return false;
+
+      if (filterQuery) {
+        const text = `${evt.title || ""} ${evt.category || ""} ${evt.location || ""} ${evt.description || ""}`.toLowerCase();
+        if (!text.includes(filterQuery)) return false;
+      }
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      adminEventsContainer.innerHTML = `
+        <div style="text-align: center; padding: 48px; border: 1px dashed var(--navy-mid); border-radius: var(--radius);">
+          <p class="state-msg" style="margin-bottom: 14px;">No events found matching your filter criteria.</p>
+          <button type="button" class="btn btn-primary" onclick="document.getElementById('open-add-event-modal-btn').click()">
+            + Create New Event
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    adminEventsContainer.innerHTML = filtered
+      .map((evt) => {
+        const isPast = Boolean(evt.is_past);
+        const isRegOpen = Boolean(evt.registration_open !== 0 && evt.registration_open !== false);
+
+        return `
+          <div class="form-field-card sprocket-frame ${isPast ? "is-disabled" : ""}" data-event-id="${evt.id}" style="${isPast ? "border-color: #555; background: rgba(20,20,20,0.6);" : "border-color: var(--leaf-dark); background: rgba(14,26,23,0.85);"} padding: 18px 20px;">
+            <div style="display: flex; gap: 18px; align-items: flex-start; flex: 1; min-width: 280px; flex-wrap: wrap;">
+              <!-- Date Badge -->
+              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 68px; height: 68px; background: ${isPast ? "#2a2a2a" : "var(--leaf-dark)"}; border: 2px solid ${isPast ? "#555" : "var(--leaf)"}; border-radius: 8px; flex-shrink: 0; text-align: center;">
+                <span style="font-size: 1.45rem; font-weight: 800; line-height: 1; color: var(--paper);">${escapeHtml(evt.date_day || "01")}</span>
+                <span style="font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: ${isPast ? "#aaa" : "var(--leaf-light)"}; letter-spacing: 0.05em; margin-top: 3px;">${escapeHtml(evt.date_month || "OCT")}</span>
+              </div>
+
+              <!-- Event Details -->
+              <div style="flex: 1; min-width: 220px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap;">
+                  <span class="hud-pill" style="font-size: 0.72rem; ${isPast ? "color: #aaa; border-color: #555;" : "color: var(--leaf-light); border-color: var(--leaf);"}">${escapeHtml(evt.category || "WORKSHOP")}</span>
+                  ${
+                    isPast
+                      ? '<span class="hud-pill" style="background: rgba(100,100,100,0.3); color: #cbd5e1; font-weight: 700; font-size: 0.72rem; border-color: #666;">⚪ PAST / CONCLUDED</span>'
+                      : '<span class="hud-pill" style="background: rgba(82, 183, 136, 0.2); color: #86efac; font-weight: 700; font-size: 0.72rem; border-color: var(--leaf);">🟢 UPCOMING EVENT</span>'
+                  }
+                  ${
+                    !isPast && !isRegOpen
+                      ? '<span class="hud-pill" style="color: #f87171; border-color: rgba(248,113,113,0.4); font-size: 0.72rem;">Registrations Closed</span>'
+                      : ''
+                  }
+                </div>
+
+                <h4 style="margin: 0 0 6px; font-size: 1.18rem; color: var(--paper);">${escapeHtml(evt.title)}</h4>
+
+                <div style="display: flex; align-items: center; gap: 14px; font-size: 0.85rem; color: var(--parchment-dim); margin-bottom: 8px; flex-wrap: wrap;">
+                  <span>📍 ${escapeHtml(evt.location || "Campus")}</span>
+                  ${evt.time_info ? `<span>⏰ ${escapeHtml(evt.time_info)}</span>` : ""}
+                  ${evt.entry_fee ? `<span>🎟️ ${escapeHtml(evt.entry_fee)}</span>` : ""}
+                </div>
+
+                ${evt.description ? `<p style="margin: 0; font-size: 0.88rem; color: var(--parchment-dim); line-height: 1.45;">${escapeHtml(evt.description)}</p>` : ""}
+              </div>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div class="field-actions-row" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-ghost btn-sm toggle-event-past-btn" data-event-id="${evt.id}" data-is-past="${isPast ? "1" : "0"}" title="${isPast ? "Mark as Upcoming Event" : "Mark as Past / Gone Event"}">
+                ${isPast ? "Mark Upcoming" : "Mark as Gone"}
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm edit-event-btn" data-event-id="${evt.id}">
+                Edit
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm delete-event-btn" data-event-id="${evt.id}" style="color: #ff8888;">
+                Delete
+              </button>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    // Wire buttons
+    adminEventsContainer.querySelectorAll(".toggle-event-past-btn").forEach((btn) => {
+      btn.addEventListener("click", () => handleToggleEventPast(btn.dataset.eventId, btn.dataset.isPast === "1"));
+    });
+
+    adminEventsContainer.querySelectorAll(".edit-event-btn").forEach((btn) => {
+      btn.addEventListener("click", () => openEditEventModal(btn.dataset.eventId));
+    });
+
+    adminEventsContainer.querySelectorAll(".delete-event-btn").forEach((btn) => {
+      btn.addEventListener("click", () => handleDeleteEvent(btn.dataset.eventId));
+    });
+  }
+
+  async function handleToggleEventPast(id, currentlyPast) {
+    try {
+      const newStatus = currentlyPast ? 0 : 1;
+      await window.impactframeApi.updateEvent(id, { is_past: newStatus });
+      showNotice(currentlyPast ? "Event marked as Upcoming!" : "Event marked as Past / Concluded!", "success");
+      loadAdminEvents();
+    } catch (err) {
+      showNotice("Failed to update event status: " + err.message, "error");
+    }
+  }
+
+  function openAddEventModal() {
+    eventModalTitle.textContent = "Add Calendar Event";
+    eventIdInput.value = "";
+    eventTitleInput.value = "";
+    eventCategoryInput.value = "WORKSHOP";
+    eventDateDayInput.value = "15";
+    eventDateMonthInput.value = "OCTOBER";
+    eventTimeInput.value = "6:00 PM";
+    eventLocationInput.value = "Central Campus Amphitheater";
+    eventEntryFeeInput.value = "Free Entry";
+    eventDescriptionInput.value = "";
+    eventStatusSelect.value = "0";
+    eventRegOpenInput.checked = true;
+    eventSortOrderInput.value = (adminEventsList.length + 1) * 10;
+    eventModal.style.display = "flex";
+    eventTitleInput.focus();
+  }
+
+  function openEditEventModal(id) {
+    const evt = adminEventsList.find((e) => String(e.id) === String(id));
+    if (!evt) return;
+
+    eventModalTitle.textContent = `Edit Event: ${evt.title}`;
+    eventIdInput.value = evt.id;
+    eventTitleInput.value = evt.title || "";
+    eventCategoryInput.value = evt.category || "";
+    eventDateDayInput.value = evt.date_day || "";
+    eventDateMonthInput.value = evt.date_month || "";
+    eventTimeInput.value = evt.time_info || "";
+    eventLocationInput.value = evt.location || "";
+    eventEntryFeeInput.value = evt.entry_fee || "";
+    eventDescriptionInput.value = evt.description || "";
+    eventStatusSelect.value = String(evt.is_past ? 1 : 0);
+    eventRegOpenInput.checked = Boolean(evt.registration_open !== 0 && evt.registration_open !== false);
+    eventSortOrderInput.value = evt.sort_order || 10;
+    eventModal.style.display = "flex";
+  }
+
+  function closeEventModal() {
+    if (eventModal) eventModal.style.display = "none";
+  }
+
+  async function handleDeleteEvent(id) {
+    const evt = adminEventsList.find((e) => String(e.id) === String(id));
+    const title = evt ? `"${evt.title}"` : "this event";
+    if (!confirm(`Are you sure you want to permanently delete ${title}?`)) return;
+
+    try {
+      await window.impactframeApi.deleteEvent(id);
+      showNotice("Event removed from schedule.", "info");
+      loadAdminEvents();
+    } catch (err) {
+      showNotice("Failed to delete event: " + err.message, "error");
+    }
+  }
+
+  if (openAddEventModalBtn) {
+    openAddEventModalBtn.addEventListener("click", openAddEventModal);
+  }
+  if (eventModalCloseBtn) {
+    eventModalCloseBtn.addEventListener("click", closeEventModal);
+  }
+  if (eventModalCancelBtn) {
+    eventModalCancelBtn.addEventListener("click", closeEventModal);
+  }
+  if (eventModal) {
+    eventModal.addEventListener("click", (e) => {
+      if (e.target === eventModal) closeEventModal();
+    });
+  }
+
+  if (eventForm) {
+    eventForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = eventIdInput.value;
+      const payload = {
+        title: eventTitleInput.value.trim(),
+        category: eventCategoryInput.value.trim().toUpperCase(),
+        date_day: eventDateDayInput.value.trim(),
+        date_month: eventDateMonthInput.value.trim().toUpperCase(),
+        time_info: eventTimeInput.value.trim(),
+        location: eventLocationInput.value.trim(),
+        entry_fee: eventEntryFeeInput.value.trim(),
+        description: eventDescriptionInput.value.trim(),
+        is_past: parseInt(eventStatusSelect.value, 10) || 0,
+        registration_open: eventRegOpenInput.checked ? 1 : 0,
+        sort_order: parseInt(eventSortOrderInput.value, 10) || 10,
+      };
+
+      try {
+        if (id) {
+          await window.impactframeApi.updateEvent(id, payload);
+          showNotice("Event updated successfully!", "success");
+        } else {
+          await window.impactframeApi.createEvent(payload);
+          showNotice("New event created and added to schedule!", "success");
+        }
+        closeEventModal();
+        loadAdminEvents();
+      } catch (err) {
+        showNotice("Failed to save event: " + err.message, "error");
+      }
+    });
+  }
+
+  if (eventsSearchInput) {
+    eventsSearchInput.addEventListener("input", renderAdminEvents);
+  }
+  if (eventsStatusFilter) {
+    eventsStatusFilter.addEventListener("change", renderAdminEvents);
+  }
+  if (refreshEventsBtn) {
+    refreshEventsBtn.addEventListener("click", () => {
+      loadAdminEvents();
+      showNotice("Events list refreshed.", "info");
+    });
   }
 
   /* ==========================================================================

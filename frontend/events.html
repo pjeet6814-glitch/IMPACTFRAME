@@ -57,69 +57,30 @@
       <p>Films should not stay inside hard drives. Join us on campus lawns, engineering auditoriums, and weekend field workshops.</p>
     </div>
 
-    <!-- Upcoming Screenings Timeline -->
-    <div class="events-timeline">
-      <div class="event-card sprocket-frame">
-        <div class="event-date-col">
-          <span class="day">18</span>
-          <span class="month">OCTOBER</span>
-        </div>
-        <div class="event-info-col">
-          <div class="viewfinder-tag">CLUB SHOWCASE & ORIENTATION</div>
-          <h3>Annual IMPACTFRAME Showcase & Production Kickoff</h3>
-          <div class="event-location">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            Central Campus Amphitheater • 7:00 PM • Free Entry
-          </div>
-          <p class="event-desc">
-            Open-air screening of upcoming student productions, introduction to club departments, and interactive Q&A for aspiring student filmmakers, actors, and editors.
-          </p>
-        </div>
-        <div>
-          <a class="btn btn-primary btn-sm event-register-btn" href="#event-registration-section" data-event-name="Annual Showcase & Kickoff (Oct 18, Amphitheater)">Reserve Seat &rarr;</a>
-        </div>
-      </div>
+    <!-- Upcoming Screenings & Workshops Section -->
+    <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px;">
+      <h3 style="margin: 0; font-size: 1.35rem; color: var(--paper); display: flex; align-items: center; gap: 8px;">
+        <span style="display: inline-block; width: 10px; height: 10px; background: #86efac; border-radius: 50%;"></span>
+        Upcoming Screenings &amp; Workshops
+      </h3>
+      <span class="hud-pill" style="font-size: 0.75rem;">LIVE SCHEDULE</span>
+    </div>
 
-      <div class="event-card sprocket-frame">
-        <div class="event-date-col">
-          <span class="day">04</span>
-          <span class="month">NOVEMBER</span>
-        </div>
-        <div class="event-info-col">
-          <div class="viewfinder-tag">HANDS-ON WORKSHOP</div>
-          <h3>Field Audio in Extreme Environments: Hydrophones & Foley</h3>
-          <div class="event-location">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            Media Studio Lab B • 3:00 PM • Equipment provided
-          </div>
-          <p class="event-desc">
-            Learn how to capture the sounds people normally ignore: subterranean water flow, wind resonance across solar farms, and wet clay acoustic mapping.
-          </p>
-        </div>
-        <div>
-          <a class="btn btn-ghost btn-sm event-register-btn" href="#event-registration-section" data-event-name="Field Audio: Hydrophones & Foley (Nov 04, Studio Lab B)">Register Workshop &rarr;</a>
-        </div>
-      </div>
+    <!-- Container for dynamic upcoming events -->
+    <div id="upcoming-events-container" class="events-timeline">
+      <p class="state-msg" style="color: var(--parchment-dim); text-align: center; padding: 32px;">Loading upcoming schedule…</p>
+    </div>
 
-      <div class="event-card sprocket-frame">
-        <div class="event-date-col">
-          <span class="day">22</span>
-          <span class="month">NOVEMBER</span>
-        </div>
-        <div class="event-info-col">
-          <div class="viewfinder-tag">AI LAB COLLOQUIUM</div>
-          <h3>Prompt to Picture: Generative AI for Eco-Storytellers</h3>
-          <div class="event-location">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            Auditorium Hall 2 • 5:00 PM • Open to all branches
-          </div>
-          <p class="event-desc">
-            How our AI Film department crafts speculative climate futures without relying on plastic clichés. Includes ComfyUI workflow walkthroughs.
-          </p>
-        </div>
-        <div>
-          <a class="btn btn-ghost btn-sm event-register-btn" href="#event-registration-section" data-event-name="Prompt to Picture: Generative AI (Nov 22, Auditorium 2)">Register &rarr;</a>
-        </div>
+    <!-- Past / Gone Events Section (Rendered dynamically when concluded events exist) -->
+    <div id="past-events-wrapper" style="display: none; margin-top: 50px;">
+      <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px;">
+        <h3 style="margin: 0; font-size: 1.25rem; color: var(--parchment-dim); display: flex; align-items: center; gap: 8px;">
+          <span style="display: inline-block; width: 10px; height: 10px; background: #94a3b8; border-radius: 50%;"></span>
+          Past &amp; Concluded Events Archive
+        </h3>
+        <span class="hud-pill" style="font-size: 0.75rem; color: var(--parchment-dim);">CONCLUDED SESSIONS</span>
+      </div>
+      <div id="past-events-container" class="events-timeline">
       </div>
     </div>
 
@@ -199,24 +160,120 @@
     </div>
   </footer>
 
-  <script src="js/api.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/form-engine.js"></script>
+  <script src="js/api.js?v=2.2"></script>
+  <script src="js/main.js?v=2.2"></script>
+  <script src="js/form-engine.js?v=2.2"></script>
   <script>
-    // Smooth scroll and auto-select event on register button click
-    document.querySelectorAll(".event-register-btn").forEach(function(btn) {
-      btn.addEventListener("click", function(e) {
-        var eventName = btn.getAttribute("data-event-name");
-        var selectEl = document.querySelector('[name="event_selected"]') || document.querySelector("#field-event_selected");
-        if (selectEl && eventName) {
-          Array.from(selectEl.options).forEach(function(opt) {
-            if (opt.text.toLowerCase().includes(eventName.toLowerCase().slice(0, 15)) || opt.value.toLowerCase().includes(eventName.toLowerCase().slice(0, 15))) {
-              selectEl.value = opt.value;
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    async function loadEventsCalendar() {
+      const upcomingContainer = document.getElementById("upcoming-events-container");
+      const pastContainer = document.getElementById("past-events-container");
+      const pastWrapper = document.getElementById("past-events-wrapper");
+
+      try {
+        const events = await window.impactframeApi.getEvents();
+        const upcoming = events.filter(function(e) { return !e.is_past; });
+        const past = events.filter(function(e) { return Boolean(e.is_past); });
+
+        // Render upcoming
+        if (upcoming.length === 0) {
+          upcomingContainer.innerHTML = `
+            <div style="text-align: center; padding: 48px 20px; border: 1px dashed var(--navy-mid); border-radius: var(--radius); background: rgba(14,26,23,0.5);">
+              <p style="color: var(--paper); font-size: 1.05rem; font-weight: 600; margin: 0 0 6px;">No upcoming sessions scheduled right now.</p>
+              <p style="color: var(--parchment-dim); font-size: 0.9rem; margin: 0;">Stay tuned! We announce workshops, field audio sessions, and screenings regularly.</p>
+            </div>
+          `;
+        } else {
+          upcomingContainer.innerHTML = upcoming.map(function(evt) {
+            const isRegOpen = Boolean(evt.registration_open !== 0 && evt.registration_open !== false);
+            return `
+              <div class="event-card sprocket-frame">
+                <div class="event-date-col">
+                  <span class="day">${escapeHtml(evt.date_day || "01")}</span>
+                  <span class="month">${escapeHtml(evt.date_month || "OCT")}</span>
+                </div>
+                <div class="event-info-col">
+                  <div class="viewfinder-tag">${escapeHtml(evt.category || "WORKSHOP")}</div>
+                  <h3>${escapeHtml(evt.title)}</h3>
+                  <div class="event-location">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    ${escapeHtml(evt.location || "Campus")} ${evt.time_info ? "• " + escapeHtml(evt.time_info) : ""} ${evt.entry_fee ? "• " + escapeHtml(evt.entry_fee) : ""}
+                  </div>
+                  ${evt.description ? `<p class="event-desc">${escapeHtml(evt.description)}</p>` : ""}
+                </div>
+                <div>
+                  ${
+                    isRegOpen
+                      ? `<a class="btn btn-primary btn-sm event-register-btn" href="#event-registration-section" data-event-name="${escapeHtml(evt.title)}">Reserve Seat &rarr;</a>`
+                      : `<span class="hud-pill" style="color: #f87171; border-color: rgba(248,113,113,0.4); font-size: 0.78rem;">Full / Closed</span>`
+                  }
+                </div>
+              </div>
+            `;
+          }).join("");
+        }
+
+        // Render past
+        if (past.length > 0) {
+          pastWrapper.style.display = "block";
+          pastContainer.innerHTML = past.map(function(evt) {
+            return `
+              <div class="event-card sprocket-frame" style="opacity: 0.82; border-color: #444; background: rgba(14,26,23,0.45);">
+                <div class="event-date-col" style="background: #1c2b26; border-right: 1px solid #33483f;">
+                  <span class="day" style="color: #94a3b8;">${escapeHtml(evt.date_day || "01")}</span>
+                  <span class="month" style="color: #64748b;">${escapeHtml(evt.date_month || "OCT")}</span>
+                </div>
+                <div class="event-info-col">
+                  <div class="viewfinder-tag" style="color: #94a3b8; border-color: #475569;">${escapeHtml(evt.category || "PAST EVENT")}</div>
+                  <h3 style="color: var(--paper);">${escapeHtml(evt.title)}</h3>
+                  <div class="event-location" style="color: #94a3b8;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    ${escapeHtml(evt.location || "Campus")} ${evt.time_info ? "• " + escapeHtml(evt.time_info) : ""}
+                  </div>
+                  ${evt.description ? `<p class="event-desc" style="color: var(--parchment-dim);">${escapeHtml(evt.description)}</p>` : ""}
+                </div>
+                <div>
+                  <span class="hud-pill" style="background: rgba(148,163,184,0.15); color: #94a3b8; border-color: #475569; font-size: 0.78rem;">⚪ Concluded</span>
+                </div>
+              </div>
+            `;
+          }).join("");
+        } else {
+          pastWrapper.style.display = "none";
+        }
+
+        // Wire smooth scroll and auto-selection
+        document.querySelectorAll(".event-register-btn").forEach(function(btn) {
+          btn.addEventListener("click", function() {
+            var eventName = btn.getAttribute("data-event-name");
+            var selectEl = document.querySelector('[name="event_selected"]') || document.querySelector("#field-event_selected");
+            if (selectEl && eventName) {
+              Array.from(selectEl.options).forEach(function(opt) {
+                if (opt.text.toLowerCase().includes(eventName.toLowerCase().slice(0, 15)) || opt.value.toLowerCase().includes(eventName.toLowerCase().slice(0, 15))) {
+                  selectEl.value = opt.value;
+                }
+              });
             }
           });
+        });
+
+      } catch (err) {
+        if (upcomingContainer) {
+          upcomingContainer.innerHTML = `<p class="state-msg error">Could not load schedule: ${escapeHtml(err.message)}</p>`;
         }
-      });
-    });
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadEventsCalendar);
   </script>
 </body>
 </html>

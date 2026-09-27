@@ -328,10 +328,21 @@ db.exec(`
     entry_fee TEXT DEFAULT 'Free Entry',
     description TEXT NOT NULL,
     registration_open INTEGER NOT NULL DEFAULT 1,
+    is_past INTEGER NOT NULL DEFAULT 0,
     sort_order INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 `);
+
+// Auto-migrate events if is_past missing
+try {
+  const eventCols = db.prepare("PRAGMA table_info(events)").all().map(c => c.name);
+  if (!eventCols.includes("is_past")) {
+    db.exec("ALTER TABLE events ADD COLUMN is_past INTEGER DEFAULT 0;");
+  }
+} catch (e) {
+  console.warn("[DB] events is_past migration check:", e.message);
+}
 
 // Seed default events if empty
 try {

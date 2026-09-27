@@ -202,6 +202,22 @@
         }
 
         // ==========================================
+        // STANDALONE IMAGE CARD
+        // ==========================================
+        if (fType === "image" || fType === "image_card") {
+          const imgCard = document.createElement("div");
+          imgCard.className = "form-image-card sprocket-frame";
+          imgCard.style.cssText = "background: rgba(14, 26, 23, 0.6); border: 1px solid var(--navy-mid); border-radius: var(--radius); padding: 18px; text-align: center; margin: 10px 0;";
+          imgCard.innerHTML = `
+            ${field.label ? `<h4 style="margin: 0 0 8px; color: var(--paper); font-size: 1.15rem;">${escapeHtml(field.label)}</h4>` : ""}
+            ${field.image_url ? `<a href="${escapeHtml(field.image_url)}" target="_blank" rel="noopener"><img src="${escapeHtml(field.image_url)}" alt="${escapeHtml(field.label)}" style="max-width: 100%; max-height: 420px; object-fit: contain; border-radius: var(--radius); border: 1px solid var(--leaf); display: block; margin: 0 auto 8px;" /></a>` : ""}
+            ${field.description ? `<p style="margin: 6px 0 0; color: var(--parchment-dim); font-size: 0.88rem;">${escapeHtml(field.description)}</p>` : ""}
+          `;
+          fieldsContainer.appendChild(imgCard);
+          return;
+        }
+
+        // ==========================================
         // QUESTION CARD
         // ==========================================
         const group = document.createElement("div");
@@ -234,6 +250,19 @@
           descEl.style.cssText = "margin: -2px 0 6px; font-size: 0.85rem; color: var(--parchment-dim); line-height: 1.5;";
           descEl.textContent = field.description.trim();
           group.appendChild(descEl);
+        }
+
+        // Attached Question Photo / Image (if present)
+        if (field.image_url && field.image_url.trim()) {
+          const imgWrap = document.createElement("div");
+          imgWrap.className = "question-attached-photo-wrap";
+          imgWrap.style.cssText = "margin: 6px 0 12px; max-width: 100%; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--navy-mid); background: #0b1512;";
+          imgWrap.innerHTML = `
+            <a href="${escapeHtml(field.image_url)}" target="_blank" rel="noopener">
+              <img src="${escapeHtml(field.image_url)}" alt="${escapeHtml(field.label)}" style="max-width: 100%; max-height: 380px; object-fit: contain; display: block; margin: 0 auto; padding: 4px;" />
+            </a>
+          `;
+          group.appendChild(imgWrap);
         }
 
         // Parse options

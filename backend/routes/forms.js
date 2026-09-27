@@ -661,10 +661,10 @@ router.delete("/submissions/:id", adminAuth, (req, res) => {
 // 4. Events & Workshops Calendar Management
 // ==========================================
 
-// GET /api/events — Public: Get all upcoming events
+// GET /api/events — Public: Get all upcoming events (ordered with upcoming first)
 router.get("/events", (req, res) => {
   try {
-    const rows = db.prepare("SELECT * FROM events ORDER BY sort_order ASC, id ASC").all();
+    const rows = db.prepare("SELECT * FROM events ORDER BY is_past ASC, sort_order ASC, id ASC").all();
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: "Failed to load events: " + err.message });
@@ -684,6 +684,7 @@ router.post("/events", adminAuth, (req, res) => {
       entry_fee = "Free Entry",
       description = "",
       registration_open = 1,
+      is_past = 0,
       sort_order = 0,
     } = req.body;
 
@@ -692,8 +693,8 @@ router.post("/events", adminAuth, (req, res) => {
     }
 
     const result = db.prepare(`
-      INSERT INTO events (title, category, date_day, date_month, location, time_info, entry_fee, description, registration_open, sort_order)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO events (title, category, date_day, date_month, location, time_info, entry_fee, description, registration_open, is_past, sort_order)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       title.trim(),
       category.trim(),
@@ -704,6 +705,7 @@ router.post("/events", adminAuth, (req, res) => {
       entry_fee.trim(),
       description.trim(),
       registration_open ? 1 : 0,
+      is_past ? 1 : 0,
       Number(sort_order) || 0
     );
 
@@ -730,12 +732,13 @@ router.put("/events/:id", adminAuth, (req, res) => {
       entry_fee,
       description,
       registration_open,
+      is_past,
       sort_order,
     } = req.body;
 
     db.prepare(`
       UPDATE events
-      SET title = ?, category = ?, date_day = ?, date_month = ?, location = ?, time_info = ?, entry_fee = ?, description = ?, registration_open = ?, sort_order = ?
+      SET title = ?, category = ?, date_day = ?, date_month = ?, location = ?, time_info = ?, entry_fee = ?, description = ?, registration_open = ?, is_past = ?, sort_order = ?
       WHERE id = ?
     `).run(
       title !== undefined ? title.trim() : existing.title,
@@ -747,6 +750,7 @@ router.put("/events/:id", adminAuth, (req, res) => {
       entry_fee !== undefined ? entry_fee.trim() : existing.entry_fee,
       description !== undefined ? description.trim() : existing.description,
       registration_open !== undefined ? (registration_open ? 1 : 0) : existing.registration_open,
+      is_past !== undefined ? (is_past ? 1 : 0) : (existing.is_past || 0),
       sort_order !== undefined ? Number(sort_order) : existing.sort_order,
       req.params.id
     );
