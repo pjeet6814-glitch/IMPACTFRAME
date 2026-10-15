@@ -257,6 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (typeof window.impactframeApi.sendHeartbeat === "function") {
         window.impactframeApi.sendHeartbeat();
       }
+      updateStatusBadge();
     }
   }, 40000);
 
@@ -360,10 +361,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const isOnline = await window.impactframeApi.checkBackendOnline();
     if (isOnline) {
       statusBadge.className = "status-badge online";
-      statusBadge.querySelector(".text").textContent = "Connected to Express Backend (Port 4000)";
+      const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      statusBadge.querySelector(".text").textContent = isLocal
+        ? "Connected to Local Express Backend (Port 4000)"
+        : "Connected to Live Vercel Backend";
     } else {
       statusBadge.className = "status-badge offline";
-      statusBadge.querySelector(".text").textContent = "Offline Mode (Local Storage fallback)";
+      statusBadge.querySelector(".text").textContent = "Offline Mode (Server Waking Up / Local fallback)";
+      if (!updateStatusBadge._retryTimer) {
+        updateStatusBadge._retryTimer = setTimeout(() => {
+          updateStatusBadge._retryTimer = null;
+          updateStatusBadge();
+        }, 3500);
+      }
     }
   }
 

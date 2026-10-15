@@ -1,10 +1,9 @@
 const crypto = require("node:crypto");
 
-// Cryptographic secret: prioritize environment variables, fallback to high-entropy per-process secret
-const FALLBACK_SECRET = crypto.randomBytes(32).toString("hex");
+// Cryptographic secret: prioritize environment variables, fallback to stable cluster secret for serverless
 const SECRET = (process.env.SESSION_SECRET && process.env.SESSION_SECRET.trim()) || 
                (process.env.ADMIN_KEY && process.env.ADMIN_KEY.trim()) || 
-               FALLBACK_SECRET;
+               "impactframe-vault-sign-key-charusat-2026-prod";
 
 function signSessionToken(payload) {
   const data = Buffer.from(JSON.stringify(payload)).toString("base64url");

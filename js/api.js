@@ -186,14 +186,24 @@
     return url;
   }
 
-  async function checkBackendOnline() {
+  async function checkBackendOnline(retries = 1) {
     const base = getApiBase();
-    try {
-      const res = await fetch(`${base}/api/health`, { method: "GET", signal: AbortSignal.timeout(2000) });
-      return res.ok;
-    } catch {
-      return false;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const timeoutMs = attempt === 0 ? 6000 : 9000;
+        const res = await fetch(`${base}/api/health`, {
+          method: "GET",
+          signal: AbortSignal.timeout(timeoutMs),
+          headers: { "Cache-Control": "no-cache" },
+        });
+        if (res.ok) return true;
+      } catch {
+        if (attempt < retries) {
+          await new Promise((r) => setTimeout(r, 800));
+        }
+      }
     }
+    return false;
   }
 
   function getStoredAdminSession() {
@@ -452,7 +462,7 @@
     const endpoint = `${base}/api/films` + (category && category !== "All" ? `?category=${encodeURIComponent(category)}` : "");
 
     try {
-      const res = await fetch(endpoint, { signal: AbortSignal.timeout(2500) });
+      const res = await fetch(endpoint, { signal: AbortSignal.timeout(8000) });
       if (res.ok) {
         const films = await res.json();
         if (!category || category === "All") {
@@ -473,7 +483,7 @@
   async function getFilm(id) {
     const base = getApiBase();
     try {
-      const res = await fetch(`${base}/api/films/${id}`, { signal: AbortSignal.timeout(2500) });
+      const res = await fetch(`${base}/api/films/${id}`, { signal: AbortSignal.timeout(8000) });
       if (res.ok) return await res.json();
     } catch {}
     const local = getLocalFilms();
@@ -659,7 +669,7 @@
 
     try {
       const res = await fetch(`${base}/api/form-settings?form_type=${encodeURIComponent(cleanType)}`, {
-        signal: AbortSignal.timeout(3000),
+        signal: AbortSignal.timeout(8000),
       });
       if (res.ok) {
         const serverSettings = await res.json();
@@ -746,7 +756,7 @@
     const cacheKey = getFormFieldsCacheKey(cleanType);
     try {
       const res = await fetch(`${base}/api/form-fields?form_type=${encodeURIComponent(cleanType)}`, {
-        signal: AbortSignal.timeout(2500),
+        signal: AbortSignal.timeout(8000),
       });
       if (res.ok) {
         const fields = await res.json();
@@ -768,7 +778,7 @@
     try {
       const res = await fetch(`${base}/api/form-fields/all?form_type=${encodeURIComponent(cleanType)}`, {
         headers: { "x-session-token": token, "x-admin-key": token },
-        signal: AbortSignal.timeout(2500),
+        signal: AbortSignal.timeout(8000),
       });
       if (res.ok) return await res.json();
     } catch {}
@@ -1014,7 +1024,7 @@
   async function getEvents() {
     const base = getApiBase();
     try {
-      const res = await fetch(`${base}/api/events`, { signal: AbortSignal.timeout(3000) });
+      const res = await fetch(`${base}/api/events`, { signal: AbortSignal.timeout(8000) });
       if (res.ok) return await res.json();
     } catch (e) {
       console.warn("Notice loading events:", e);

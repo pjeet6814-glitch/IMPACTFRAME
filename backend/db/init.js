@@ -539,18 +539,22 @@ function seed() {
     }
   }
 
-  // Provision ADMIN_MAIN master account only if ADMIN_KEY environment variable is configured
+  // Provision ADMIN_MAIN master account (uses ADMIN_KEY env var or defaults to impactframe2026)
   const mainUserRow = db.prepare("SELECT * FROM admin_users WHERE username = 'ADMIN_MAIN'").get();
+  const adminPass = (process.env.ADMIN_KEY && process.env.ADMIN_KEY.trim()) || "impactframe2026";
   if (!mainUserRow) {
-    const adminPass = process.env.ADMIN_KEY ? process.env.ADMIN_KEY.trim() : null;
-    if (adminPass) {
-      const { hash, salt } = hashPassword(adminPass);
-      db.prepare(`
-        INSERT INTO admin_users (username, password_hash, salt, role, full_name, created_by)
-        VALUES (?, ?, ?, 'MAIN', 'System Master Administrator', 'SYSTEM')
-      `).run("ADMIN_MAIN", hash, salt);
-      console.log("Provisioned default ADMIN_MAIN master account from environment ADMIN_KEY.");
-    }
+    const { hash, salt } = hashPassword(adminPass);
+    db.prepare(`
+      INSERT INTO admin_users (username, password_hash, salt, role, full_name, created_by)
+      VALUES (?, ?, ?, 'MAIN', 'System Master Administrator', 'SYSTEM')
+    `).run("ADMIN_MAIN", hash, salt);
+    console.log("Provisioned default ADMIN_MAIN master account.");
+  } else if (process.env.ADMIN_KEY) {
+    // If ADMIN_KEY env var was explicitly updated in deployment, update ADMIN_MAIN hash
+    const { hash, salt } = hashPassword(adminPass);
+    db.prepare(`
+      UPDATE admin_users SET password_hash = ?, salt = ? WHERE username = 'ADMIN_MAIN'
+    `).run(hash, salt);
   }
 }
 
