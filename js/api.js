@@ -10,21 +10,88 @@
   const FORM_SETTINGS_STORAGE_KEY = "impactframe_form_settings_cache";
   const ADMIN_SESSION_KEY = "impactframe_crew_auth";
 
-  const DEFAULT_SAMPLE_FILMS = [];
-
-  // Purge any legacy cached demo films from browser localStorage
-  try {
-    const cachedFilms = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (cachedFilms && (
-      cachedFilms.includes("dQw4w9WgXcQ") ||
-      cachedFilms.includes("Aquifer") ||
-      cachedFilms.includes("Canopy") ||
-      cachedFilms.includes("Kilowatt") ||
-      cachedFilms.includes("film-")
-    )) {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-    }
-  } catch {}
+  const DEFAULT_SAMPLE_FILMS = [
+    {
+      id: 1,
+      title: "THE LAST PERCENT",
+      category: "Short Film",
+      synopsis: "A nocturnal exploration of campus energy habits, tracing the last percentage of wasted power through solitary university labs and rooftop circuits.",
+      duration_minutes: 4,
+      video_url: "https://www.youtube.com/embed/KRswc96WY7I",
+      thumbnail_url: "assets/film-kilowatt.jpg",
+      release_year: 2026,
+    },
+    {
+      id: 2,
+      title: "SOLAR HORIZON: AERIAL SURVEY",
+      category: "Documentary",
+      synopsis: "Autonomous solar drones map migratory wetlands and solar marshlands across Gujarat, documenting ecological corridors from an avian perspective.",
+      duration_minutes: 8,
+      video_url: "https://www.youtube.com/embed/1la4UrUs9xQ",
+      thumbnail_url: "assets/film-solardrone.jpg",
+      release_year: 2026,
+    },
+    {
+      id: 3,
+      title: "MIDNIGHT LUMINESCENCE",
+      category: "AI Film",
+      synopsis: "Generative AI visualization synthesizing oceanic plankton bioluminescence, tidal currents, and nocturnal marine biodiversity into a hypnotic visual poem.",
+      duration_minutes: 5,
+      video_url: "https://www.youtube.com/embed/0pXYp72dwl0",
+      thumbnail_url: "assets/film-bioluminescence.jpg",
+      release_year: 2026,
+    },
+    {
+      id: 4,
+      title: "CRANES OF THE MIST",
+      category: "Documentary",
+      synopsis: "Behind the lens with student wildlife cinematographers waiting through chilly dawn mist to capture the first winter flight of vulnerable migratory cranes.",
+      duration_minutes: 12,
+      video_url: "https://www.youtube.com/embed/eXbwsC1w95g",
+      thumbnail_url: "assets/film-rewilding.jpg",
+      release_year: 2026,
+    },
+    {
+      id: 5,
+      title: "GEOTHERMAL RHYTHMS",
+      category: "Documentary",
+      synopsis: "Recording the subterranean acoustic resonance of geothermal steam vents and natural hot springs using custom-engineered geological hydrophones.",
+      duration_minutes: 9,
+      video_url: "https://www.youtube.com/embed/3mfnCgQfIis",
+      thumbnail_url: "assets/film-geothermal.jpg",
+      release_year: 2026,
+    },
+    {
+      id: 6,
+      title: "CANOPY RESONANCE",
+      category: "AI Film",
+      synopsis: "An experimental synthesis fusing organic forest drone footage with generative digital foliage, exploring how digital art can interpret botanical communication.",
+      duration_minutes: 6,
+      video_url: "https://www.youtube.com/embed/6V2y_r7_f6g",
+      thumbnail_url: "assets/film-canopy.jpg",
+      release_year: 2026,
+    },
+    {
+      id: 7,
+      title: "THE MONSOON HYDROPHONE",
+      category: "Documentary",
+      synopsis: "Immersive field recording capturing the acoustic frequency shifts when monsoon storms strike freshwater reservoirs and lotus wetland ecosystems.",
+      duration_minutes: 7,
+      video_url: "https://www.youtube.com/embed/xPplFp9Y3oQ",
+      thumbnail_url: "assets/film-monsoon.jpg",
+      release_year: 2026,
+    },
+    {
+      id: 8,
+      title: "AQUIFER MEMORY",
+      category: "Short Film",
+      synopsis: "A narrative short following two university hydrology researchers tracking an underground spring that dried up twenty years ago, searching for signs of subterranean recharge.",
+      duration_minutes: 11,
+      video_url: "https://www.youtube.com/embed/0G3_kGz7uZE",
+      thumbnail_url: "assets/film-aquifer.jpg",
+      release_year: 2026,
+    },
+  ];
 
   // Official Social & Email Contact
   const SOCIAL_LINKS = {
@@ -127,10 +194,13 @@
   function getLocalFilms() {
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
-      return [];
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return DEFAULT_SAMPLE_FILMS;
     } catch {
-      return [];
+      return DEFAULT_SAMPLE_FILMS;
     }
   }
 

@@ -59,8 +59,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (featuredGrid && window.impactframeApi) {
     try {
       const films = await window.impactframeApi.getFilms("All");
-      const top3 = films.slice(0, 3);
-      if (top3.length === 0) {
+      const featuredFilms = films.slice(0, 6);
+      if (featuredFilms.length === 0) {
         featuredGrid.innerHTML = `
           <div style="grid-column: 1/-1; text-align: center; padding: 48px 20px; background: var(--bg-card); border: 1px dashed var(--border-subtle); border-radius: var(--radius);">
             <p style="color: var(--text-primary); font-size: 1.1rem; margin: 0 0 6px;">New films currently in post-production.</p>
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           </div>
         `;
       } else {
-        featuredGrid.innerHTML = top3
+        featuredGrid.innerHTML = featuredFilms
           .map((film) => renderFeaturedFilmCard(film))
           .join("");
 
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         featuredGrid.querySelectorAll(".open-theater-btn, .film-thumb-wrap").forEach((el) => {
           el.addEventListener("click", (e) => {
             const filmId = el.dataset.id || el.closest("[data-id]")?.dataset.id;
-            const targetFilm = top3.find((f) => String(f.id) === String(filmId));
+            const targetFilm = featuredFilms.find((f) => String(f.id) === String(filmId));
             if (targetFilm) openTheaterModal(targetFilm);
           });
         });
@@ -169,6 +169,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (e.key === "Escape" && theaterModal.style.display === "flex") {
         closeTheaterModal();
       }
+    });
+  }
+
+  // 7. Hero Showreel Trailer Button Handler
+  const heroTrailerBtn = document.getElementById("hero-trailer-btn");
+  if (heroTrailerBtn) {
+    heroTrailerBtn.addEventListener("click", () => {
+      openTheaterModal({
+        title: "IMPACTFRAME: 2026 CINEMATIC SHOWREEL",
+        category: "Showcase Reel",
+        duration_minutes: 4,
+        release_year: 2026,
+        video_url: "https://www.youtube.com/embed/KRswc96WY7I",
+        synopsis: "Official 2026 cinematic showcase of the IMPACTFRAME Student Media Collective at CHARUSAT. Highlighting student cinematography, ecological research documentaries, and generative AI visual experiments."
+      });
     });
   }
 

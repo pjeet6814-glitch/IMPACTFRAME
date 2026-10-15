@@ -399,6 +399,107 @@ function seed() {
     console.warn("Notice cleaning legacy demo films:", err.message);
   }
 
+  // Seed dynamic films catalog with Gemini cinematic stills if catalog is empty or has only 1 sample
+  const filmCount = db.prepare("SELECT COUNT(*) AS n FROM films").get()?.n || 0;
+  if (filmCount <= 1) {
+    const defaultFilms = [
+      {
+        title: "THE LAST PERCENT",
+        category: "Short Film",
+        synopsis: "A nocturnal exploration of campus energy habits, tracing the last percentage of wasted power through solitary university labs and rooftop circuits.",
+        duration_minutes: 4,
+        video_url: "https://www.youtube.com/embed/KRswc96WY7I",
+        thumbnail_url: "assets/film-kilowatt.jpg",
+        release_year: 2026,
+      },
+      {
+        title: "SOLAR HORIZON: AERIAL SURVEY",
+        category: "Documentary",
+        synopsis: "Autonomous solar drones map migratory wetlands and solar marshlands across Gujarat, documenting ecological corridors from an avian perspective.",
+        duration_minutes: 8,
+        video_url: "https://www.youtube.com/embed/1la4UrUs9xQ",
+        thumbnail_url: "assets/film-solardrone.jpg",
+        release_year: 2026,
+      },
+      {
+        title: "MIDNIGHT LUMINESCENCE",
+        category: "AI Film",
+        synopsis: "Generative AI visualization synthesizing oceanic plankton bioluminescence, tidal currents, and nocturnal marine biodiversity into a hypnotic visual poem.",
+        duration_minutes: 5,
+        video_url: "https://www.youtube.com/embed/0pXYp72dwl0",
+        thumbnail_url: "assets/film-bioluminescence.jpg",
+        release_year: 2026,
+      },
+      {
+        title: "CRANES OF THE MIST",
+        category: "Documentary",
+        synopsis: "Behind the lens with student wildlife cinematographers waiting through chilly dawn mist to capture the first winter flight of vulnerable migratory cranes.",
+        duration_minutes: 12,
+        video_url: "https://www.youtube.com/embed/eXbwsC1w95g",
+        thumbnail_url: "assets/film-rewilding.jpg",
+        release_year: 2026,
+      },
+      {
+        title: "GEOTHERMAL RHYTHMS",
+        category: "Documentary",
+        synopsis: "Recording the subterranean acoustic resonance of geothermal steam vents and natural hot springs using custom-engineered geological hydrophones.",
+        duration_minutes: 9,
+        video_url: "https://www.youtube.com/embed/3mfnCgQfIis",
+        thumbnail_url: "assets/film-geothermal.jpg",
+        release_year: 2026,
+      },
+      {
+        title: "CANOPY RESONANCE",
+        category: "AI Film",
+        synopsis: "An experimental synthesis fusing organic forest drone footage with generative digital foliage, exploring how digital art can interpret botanical communication.",
+        duration_minutes: 6,
+        video_url: "https://www.youtube.com/embed/6V2y_r7_f6g",
+        thumbnail_url: "assets/film-canopy.jpg",
+        release_year: 2026,
+      },
+      {
+        title: "THE MONSOON HYDROPHONE",
+        category: "Documentary",
+        synopsis: "Immersive field recording capturing the acoustic frequency shifts when monsoon storms strike freshwater reservoirs and lotus wetland ecosystems.",
+        duration_minutes: 7,
+        video_url: "https://www.youtube.com/embed/xPplFp9Y3oQ",
+        thumbnail_url: "assets/film-monsoon.jpg",
+        release_year: 2026,
+      },
+      {
+        title: "AQUIFER MEMORY",
+        category: "Short Film",
+        synopsis: "A narrative short following two university hydrology researchers tracking an underground spring that dried up twenty years ago, searching for signs of subterranean recharge.",
+        duration_minutes: 11,
+        video_url: "https://www.youtube.com/embed/0G3_kGz7uZE",
+        thumbnail_url: "assets/film-aquifer.jpg",
+        release_year: 2026,
+      },
+    ];
+
+    const insertFilm = db.prepare(`
+      INSERT INTO films (title, category, synopsis, duration_minutes, video_url, thumbnail_url, release_year)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    db.exec("BEGIN TRANSACTION;");
+    try {
+      for (const f of defaultFilms) {
+        const existing = db.prepare("SELECT id FROM films WHERE title = ?").get(f.title);
+        if (!existing) {
+          insertFilm.run(f.title, f.category, f.synopsis, f.duration_minutes, f.video_url, f.thumbnail_url, f.release_year);
+        } else {
+          db.prepare("UPDATE films SET thumbnail_url = ?, video_url = ?, synopsis = ? WHERE id = ?").run(f.thumbnail_url, f.video_url, f.synopsis, existing.id);
+        }
+      }
+      db.exec("COMMIT;");
+      console.log(`Seeded dynamic film catalog with ${defaultFilms.length} cinematic works.`);
+    } catch (err) {
+      db.exec("ROLLBACK;");
+      console.warn("Notice seeding dynamic films:", err.message);
+    }
+  }
+
   // Seed default form questions for all forms if empty
   const insertField = db.prepare(`
     INSERT INTO form_fields (form_type, field_key, label, type, required, options_json, sort_order, active, placeholder)
