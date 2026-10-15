@@ -2,45 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Screenings & Workshops — IMPACTFRAME</title>
-  <meta name="description" content="Join upcoming campus film screenings, eco-documentary festivals, and hands-on production workshops." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Screenings, Masterclasses &amp; Workshops — IMPACTFRAME</title>
+  <meta name="description" content="Reserve seats for upcoming campus film showcases, hands-on field cinematography workshops, foley masterclasses, and AI storytelling colloquiums." />
   <link rel="icon" href="assets/favicon.png" type="image/png" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body data-page="events">
 
-  <header class="site-header">
+  <!-- ================= SITE HEADER ================= -->
+  <header class="site-header" id="site-header">
     <div class="wrap nav-row">
-      <a class="brand" href="index.html">
-        <img src="assets/logo-mark.png" alt="" width="40" height="40" />
+      <a class="brand" href="index.html" aria-label="IMPACTFRAME Home">
+        <img src="assets/logo-mark.png" alt="IMPACTFRAME emblem" width="40" height="40" />
         IMPACT<span>FRAME</span>
       </a>
-      <nav class="primary-nav">
+
+      <!-- Mobile Hamburger Button -->
+      <button class="mobile-nav-toggle" aria-label="Toggle Navigation Menu" aria-expanded="false" id="mobile-toggle">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <nav class="primary-nav" id="primary-nav" aria-label="Main Navigation">
         <ul>
           <li><a href="index.html" data-page="home">Home</a></li>
-          <li><a href="gallery.html" data-page="gallery">Gallery</a></li>
-          <li><a href="about.html" data-page="about">About</a></li>
-          <li><a href="events.html" data-page="events">Events</a></li>
+          <li><a href="gallery.html" data-page="gallery">Film Archive</a></li>
+          <li><a href="about.html" data-page="about">The Collective</a></li>
+          <li><a href="events.html" data-page="events">Screenings & Events</a></li>
           <li><a href="apply.html" data-page="apply">Auditions & Roles</a></li>
           <li><a href="join.html" data-page="join">Join Crew</a></li>
         </ul>
       </nav>
+
       <div class="header-right-actions">
         <div class="social-links">
-          <a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener" class="social-icon-yt" aria-label="IMPACTFRAME on YouTube">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener" class="social-icon-yt" aria-label="IMPACTFRAME on YouTube" title="YouTube Channel">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" clip-rule="evenodd" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
           </a>
-          <a href="https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="social-icon-ig" aria-label="IMPACTFRAME on Instagram">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <a href="https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="social-icon-ig" aria-label="IMPACTFRAME on Instagram" title="Instagram Profile">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 2 .25 2.5.42.6.24 1 .5 1.5 1s.75.9 1 1.5c.17.5.36 1.3.42 2.5.06 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.25 2-.42 2.5-.24.6-.5 1-1 1.5s-.9.75-1.5 1c-.5.17-1.3.36-2.5.42-1.3.06-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-2-.25-2.5-.42-.6-.24-1-.5-1.5-1s-.75-.9-1-1.5c-.17-.5-.36-1.3-.42-2.5C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.25-2 .42-2.5.24-.6.5-1 1-1.5s.9-.75 1.5-1c.5-.17 1.3-.36 2.5-.42C8.4 2.2 8.8 2.2 12 2.2Zm0 1.8c-3.15 0-3.52 0-4.76.07-1 .04-1.5.2-1.86.34-.47.18-.8.4-1.15.75s-.57.68-.75 1.15c-.14.36-.3.86-.34 1.86C3.02 8.4 3 8.77 3 12s0 3.6.07 4.84c.04 1 .2 1.5.34 1.86.18.47.4.8.75 1.15s.68.57 1.15.75c.36.14.86.3 1.86.34C8.4 21 8.77 21 12 21s3.6 0 4.84-.07c1-.04 1.5-.2 1.86-.34.47-.18.8-.4 1.15-.75s.57-.68.75-1.15c.14-.36.3-.86.34-1.86.06-1.24.07-1.6.07-4.84s0-3.6-.07-4.84c-.04-1-.2-1.5-.34-1.86a3.1 3.1 0 0 0-.75-1.15 3.1 3.1 0 0 0-1.15-.75c-.36-.14-.86-.3-1.86-.34C15.6 4 15.23 4 12 4Zm0 3.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1.8a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Zm4.7-2a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Z"/>
             </svg>
           </a>
         </div>
-        <a href="admin.html" class="crew-portal-trigger" title="Crew Portal" aria-label="Crew Portal Access">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <a href="admin.html" class="crew-portal-trigger" title="Crew Portal Access" aria-label="Crew Portal Access">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
@@ -50,61 +62,67 @@
     <div class="sprocket-rule"></div>
   </header>
 
+  <!-- ================= EVENTS CALENDAR MAIN ================= -->
   <main class="section wrap">
     <div class="section-head">
-      <div class="viewfinder-tag">[ CALENDAR & FIELD LABS ]</div>
-      <h2>Screenings, Festivals & Workshops</h2>
-      <p>Films should not stay inside hard drives. Join us on campus lawns, engineering auditoriums, and weekend field workshops.</p>
+      <div class="viewfinder-tag">EVENTS &amp; WORKSHOPS</div>
+      <h2>Screenings, Festivals &amp; Workshops</h2>
+      <p>Join us for open campus screenings, film discussions, and hands-on media production workshops.</p>
     </div>
 
     <!-- Upcoming Screenings & Workshops Section -->
-    <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px;">
-      <h3 style="margin: 0; font-size: 1.35rem; color: var(--paper); display: flex; align-items: center; gap: 8px;">
-        <span style="display: inline-block; width: 10px; height: 10px; background: #86efac; border-radius: 50%;"></span>
-        Upcoming Screenings &amp; Workshops
+    <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 12px;">
+      <h3 style="margin: 0; font-size: 1.45rem; color: var(--text-primary); display: flex; align-items: center; gap: 10px;">
+        <span style="display: inline-block; width: 10px; height: 10px; background: var(--emerald-mint); border-radius: 50%; box-shadow: 0 0 10px var(--emerald-mint);"></span>
+        Active Schedule
       </h3>
-      <span class="hud-pill" style="font-size: 0.75rem;">LIVE SCHEDULE</span>
+      <span class="hud-pill">SCHEDULE</span>
     </div>
 
     <!-- Container for dynamic upcoming events -->
     <div id="upcoming-events-container" class="events-timeline">
-      <p class="state-msg" style="color: var(--parchment-dim); text-align: center; padding: 32px;">Loading upcoming schedule…</p>
+      <div style="text-align: center; padding: 48px; color: var(--text-muted); font-family: var(--font-mono);">
+        <span class="hud-pill">LOADING CALENDAR…</span>
+      </div>
     </div>
 
-    <!-- Past / Gone Events Section (Rendered dynamically when concluded events exist) -->
-    <div id="past-events-wrapper" style="display: none; margin-top: 50px;">
+    <!-- Past / Gone Events Section -->
+    <div id="past-events-wrapper" style="display: none; margin-top: 60px;">
       <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px;">
-        <h3 style="margin: 0; font-size: 1.25rem; color: var(--parchment-dim); display: flex; align-items: center; gap: 8px;">
-          <span style="display: inline-block; width: 10px; height: 10px; background: #94a3b8; border-radius: 50%;"></span>
-          Past &amp; Concluded Events Archive
+        <h3 style="margin: 0; font-size: 1.3rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+          <span style="display: inline-block; width: 8px; height: 8px; background: #64748b; border-radius: 50%;"></span>
+          Past Events Archive
         </h3>
-        <span class="hud-pill" style="font-size: 0.75rem; color: var(--parchment-dim);">CONCLUDED SESSIONS</span>
+        <span class="hud-pill" style="font-size: 0.72rem; color: var(--text-muted); border-color: rgba(255, 255, 255, 0.1);">CONCLUDED</span>
       </div>
-      <div id="past-events-container" class="events-timeline">
-      </div>
+      <div id="past-events-container" class="events-timeline"></div>
     </div>
 
     <!-- ============================================================== -->
     <!-- DYNAMIC EVENT & WORKSHOP SEAT RESERVATION FORM (ADMIN MANAGED) -->
     <!-- ============================================================== -->
-    <div id="event-registration-section" class="form-sheet sprocket-frame" style="margin-top: 60px;" data-form-type="events">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 1px solid var(--navy-mid); padding-bottom: 18px; flex-wrap: wrap; gap: 14px;">
+    <div id="event-registration-section" class="form-sheet" style="margin-top: 70px;" data-form-type="events">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 20px; flex-wrap: wrap; gap: 16px;">
         <div style="flex: 1; min-width: 260px;">
-          <div class="viewfinder-tag" style="margin-bottom: 4px;">[ CALENDAR REGISTRATION & SEAT RESERVATION ]</div>
-          <h3 id="form-display-title" style="margin: 0 0 6px; font-size: 1.55rem; color: var(--paper); line-height: 1.3;">Screenings & Workshops — Seat Reservation</h3>
-          <p id="form-display-desc" style="margin: 0; color: var(--parchment-dim); font-size: 0.95rem; line-height: 1.5;">Reserve your seat for upcoming campus film showcases, hands-on production workshops, and AI colloquiums.</p>
+          <div class="viewfinder-tag" style="margin-bottom: 6px;">REGISTRATION</div>
+          <h3 id="form-display-title" style="margin: 0 0 8px; font-size: 1.7rem; color: var(--text-primary); line-height: 1.25;">
+            Screenings &amp; Workshops — Seat Reservation
+          </h3>
+          <p id="form-display-desc" style="margin: 0; color: var(--text-secondary); font-size: 0.98rem; line-height: 1.6;">
+            Reserve your seat for upcoming campus film showcases and student production workshops.
+          </p>
         </div>
-        <div id="form-status-indicator" class="hud-pill"><span class="rec-dot"></span> LIVE REGISTRATION FORM</div>
+        <div id="form-status-indicator" class="hud-pill">REGISTRATION OPEN</div>
       </div>
 
-      <!-- QR Code Banner (Rendered dynamically if set in Admin, e.g. workshop fee or WhatsApp link) -->
+      <!-- QR Code Banner -->
       <div id="form-qr-container" style="display: none;"></div>
 
-      <!-- Closed Form Notice (Displayed when Accepting Responses is OFF) -->
+      <!-- Closed Form Notice -->
       <div id="form-closed-notice" style="display: none; text-align: center; padding: 48px 24px; background: rgba(36, 16, 16, 0.7); border: 2px dashed #fca5a5; border-radius: var(--radius); margin: 20px 0;">
         <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 12px; display: block;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         <h3 style="color: #fca5a5; margin: 0 0 8px; font-size: 1.35rem;">Event Registrations Currently Closed</h3>
-        <p id="form-closed-message-text" style="color: var(--parchment-dim); max-width: 540px; margin: 0 auto 18px; font-size: 0.95rem; line-height: 1.6;">
+        <p id="form-closed-message-text" style="color: var(--text-secondary); max-width: 540px; margin: 0 auto 18px; font-size: 0.95rem; line-height: 1.6;">
           Registrations for upcoming events are currently closed or at full capacity. Check back soon!
         </p>
         <a href="index.html" class="btn btn-ghost btn-sm">&larr; Return to Homepage</a>
@@ -113,56 +131,86 @@
       <!-- Live dynamically generated form -->
       <form id="dynamic-form" class="modal-form">
         <div id="dynamic-fields-container" style="display: flex; flex-direction: column; gap: 22px;">
-          <p class="state-msg" style="color: var(--parchment-dim);">Loading event reservation fields…</p>
+          <p class="state-msg" style="color: var(--text-muted); font-family: var(--font-mono);">Loading event reservation fields…</p>
         </div>
 
-        <div id="form-success-alert" style="display: none; background: #e5f0dc; color: #33481f; padding: 22px; border-radius: var(--radius); margin-top: 24px; border-left: 5px solid var(--leaf);">
-          <strong style="font-size: 1.2rem; display: block; margin-bottom: 6px;">&#10003; Seat Reserved Successfully!</strong>
-          <span id="form-ref-code" style="font-family: monospace; font-weight: 700; color: #2f4820; display: block; margin-bottom: 8px;"></span>
-          <p id="form-success-message" style="margin: 6px 0 0; font-size: 0.95rem; line-height: 1.6;">Your seat confirmation code has been generated. Show this at the auditorium/studio entrance.</p>
+        <div id="form-success-alert" class="alert-box alert-success" style="display: none;">
+          <div>
+            <strong style="font-size: 1.15rem; display: block; margin-bottom: 6px;">&#10003; Seat Reserved Successfully!</strong>
+            <span id="form-ref-code" class="ref-code-tag"></span>
+            <p id="form-success-message" style="margin: 8px 0 0; font-size: 0.95rem; line-height: 1.6;">
+              Your seat confirmation code has been generated. Show this at the auditorium/studio entrance.
+            </p>
+          </div>
         </div>
 
-        <div id="form-error-alert" style="display: none; background: #fde8e8; color: #921c1c; padding: 14px; border-radius: var(--radius); margin-top: 16px; border-left: 4px solid #ef4444;"></div>
+        <div id="form-error-alert" class="alert-box alert-error" style="display: none;"></div>
 
         <div id="form-submit-row" style="margin-top: 28px;">
-          <button type="submit" class="btn btn-primary" id="form-submit-btn" style="min-width: 240px; font-size: 1rem; padding: 12px 28px;">
-            Reserve Seat &rarr;
+          <button type="submit" class="btn btn-primary" id="form-submit-btn" style="min-width: 240px; font-size: 1rem; padding: 14px 28px;">
+            Confirm Reservation &rarr;
           </button>
+          <span style="margin-left: 16px; font-size: 0.82rem; color: var(--text-muted);">
+            Instant confirmation &amp; digital pass code generated.
+          </span>
         </div>
       </form>
     </div>
   </main>
 
+  <!-- ================= SITE FOOTER ================= -->
   <footer class="site-footer">
-    <div class="wrap foot-row">
-      <div>
-        <div class="brand">
-          <img src="assets/logo-mark.png" alt="" width="36" height="36" />
-          IMPACT<span>FRAME</span>
+    <div class="wrap">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="brand" style="margin-bottom: 12px;">
+            <img src="assets/logo-mark.png" alt="" width="36" height="36" />
+            IMPACT<span>FRAME</span>
+          </div>
+          <p>
+            An official student media collective at CHARUSAT University turning regional conservation, energy research, 
+            and climate reality into cinema people actually feel.
+          </p>
+          <div style="margin-top: 18px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--emerald-mint);">
+            impactframe.ee@charusat.ac.in
+          </div>
         </div>
-        <p class="motto">Create. Conserve. Inspire.</p>
+
+        <div class="footer-col">
+          <h5>Navigate</h5>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="gallery.html">Film Archive</a></li>
+            <li><a href="about.html">About Collective</a></li>
+            <li><a href="events.html">Screenings &amp; Events</a></li>
+            <li><a href="apply.html">Auditions &amp; Roles</a></li>
+            <li><a href="join.html">Join the Crew</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Channels &amp; Crew</h5>
+          <ul>
+            <li><a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener">YouTube Channel</a></li>
+            <li><a href="https://www.instagram.com/impactframe.ee" target="_blank" rel="noopener">Instagram BTS</a></li>
+            <li><a href="#event-registration-section">Reserve Seat</a></li>
+            <li><a href="admin.html" style="color: var(--amber-bright);">Crew Portal (Staff)</a></li>
+          </ul>
+        </div>
       </div>
-      <div class="contact">
-        <a href="mailto:impactframe.ee@charusat.ac.in">impactframe.ee@charusat.ac.in</a>
-        <div class="social-links">
-          <a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener" class="social-icon-yt" aria-label="IMPACTFRAME on YouTube">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
-          </a>
-          <a href="https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="social-icon-ig" aria-label="IMPACTFRAME on Instagram">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 2 .25 2.5.42.6.24 1 .5 1.5 1s.75.9 1 1.5c.17.5.36 1.3.42 2.5.06 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.25 2-.42 2.5-.24.6-.5 1-1 1.5s-.9.75-1.5 1c-.5.17-1.3.36-2.5.42-1.3.06-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-2-.25-2.5-.42-.6-.24-1-.5-1.5-1s-.75-.9-1-1.5c-.17-.5-.36-1.3-.42-2.5C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.25-2 .42-2.5.24-.6.5-1 1-1.5s.9-.75 1.5-1c.5-.17 1.3-.36 2.5-.42C8.4 2.2 8.8 2.2 12 2.2Zm0 1.8c-3.15 0-3.52 0-4.76.07-1 .04-1.5.2-1.86.34-.47.18-.8.4-1.15.75s-.57.68-.75 1.15c-.14.36-.3.86-.34 1.86C3.02 8.4 3 8.77 3 12s0 3.6.07 4.84c.04 1 .2 1.5.34 1.86.18.47.4.8.75 1.15s.68.57 1.15.75c.36.14.86.3 1.86.34C8.4 21 8.77 21 12 21s3.6 0 4.84-.07c1-.04 1.5-.2 1.86-.34.47-.18.8-.4 1.15-.75s.57-.68.75-1.15c.14-.36.3-.86.34-1.86.06-1.24.07-1.6.07-4.84s0-3.6-.07-4.84c-.04-1-.2-1.5-.34-1.86a3.1 3.1 0 0 0-.75-1.15 3.1 3.1 0 0 0-1.15-.75c-.36-.14-.86-.3-1.86-.34C15.6 4 15.23 4 12 4Zm0 3.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1.8a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Zm4.7-2a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Z"/>
-            </svg>
-          </a>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 IMPACTFRAME Media Club. All rights reserved. CHARUSAT University.</div>
+        <div style="font-family: var(--font-mono); font-size: 0.78rem;">
+          <span style="color: var(--emerald-mint);">●</span> CHARUSAT • Create. Conserve. Inspire.
         </div>
       </div>
     </div>
   </footer>
 
-  <script src="js/api.js?v=2.2"></script>
-  <script src="js/main.js?v=2.2"></script>
-  <script src="js/form-engine.js?v=2.2"></script>
+  <script src="js/api.js?v=3.0"></script>
+  <script src="js/main.js?v=3.0"></script>
+  <script src="js/form-engine.js?v=3.0"></script>
   <script>
     function escapeHtml(str) {
       if (str === null || str === undefined) return "";
@@ -187,25 +235,25 @@
         // Render upcoming
         if (upcoming.length === 0) {
           upcomingContainer.innerHTML = `
-            <div style="text-align: center; padding: 48px 20px; border: 1px dashed var(--navy-mid); border-radius: var(--radius); background: rgba(14,26,23,0.5);">
-              <p style="color: var(--paper); font-size: 1.05rem; font-weight: 600; margin: 0 0 6px;">No upcoming sessions scheduled right now.</p>
-              <p style="color: var(--parchment-dim); font-size: 0.9rem; margin: 0;">Stay tuned! We announce workshops, field audio sessions, and screenings regularly.</p>
+            <div style="text-align: center; padding: 48px 20px; border: 1px dashed var(--border-subtle); border-radius: var(--radius); background: var(--bg-card);">
+              <p style="color: var(--text-primary); font-size: 1.1rem; font-weight: 600; margin: 0 0 6px;">No upcoming public sessions scheduled right now.</p>
+              <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">Stay tuned! We announce workshops, field audio expeditions, and screenings regularly.</p>
             </div>
           `;
         } else {
           upcomingContainer.innerHTML = upcoming.map(function(evt) {
             const isRegOpen = Boolean(evt.registration_open !== 0 && evt.registration_open !== false);
             return `
-              <div class="event-card sprocket-frame">
+              <div class="event-card">
                 <div class="event-date-col">
                   <span class="day">${escapeHtml(evt.date_day || "01")}</span>
                   <span class="month">${escapeHtml(evt.date_month || "OCT")}</span>
                 </div>
                 <div class="event-info-col">
-                  <div class="viewfinder-tag">${escapeHtml(evt.category || "WORKSHOP")}</div>
+                  <div class="viewfinder-tag">[ ${escapeHtml(evt.category || "WORKSHOP")} ]</div>
                   <h3>${escapeHtml(evt.title)}</h3>
                   <div class="event-location">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                     ${escapeHtml(evt.location || "Campus")} ${evt.time_info ? "• " + escapeHtml(evt.time_info) : ""} ${evt.entry_fee ? "• " + escapeHtml(evt.entry_fee) : ""}
                   </div>
                   ${evt.description ? `<p class="event-desc">${escapeHtml(evt.description)}</p>` : ""}
@@ -227,22 +275,22 @@
           pastWrapper.style.display = "block";
           pastContainer.innerHTML = past.map(function(evt) {
             return `
-              <div class="event-card sprocket-frame" style="opacity: 0.82; border-color: #444; background: rgba(14,26,23,0.45);">
-                <div class="event-date-col" style="background: #1c2b26; border-right: 1px solid #33483f;">
+              <div class="event-card" style="opacity: 0.7; background: rgba(10, 16, 24, 0.5);">
+                <div class="event-date-col" style="background: rgba(15, 23, 36, 0.7); border-color: rgba(255, 255, 255, 0.1);">
                   <span class="day" style="color: #94a3b8;">${escapeHtml(evt.date_day || "01")}</span>
                   <span class="month" style="color: #64748b;">${escapeHtml(evt.date_month || "OCT")}</span>
                 </div>
                 <div class="event-info-col">
-                  <div class="viewfinder-tag" style="color: #94a3b8; border-color: #475569;">${escapeHtml(evt.category || "PAST EVENT")}</div>
-                  <h3 style="color: var(--paper);">${escapeHtml(evt.title)}</h3>
-                  <div class="event-location" style="color: #94a3b8;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  <div class="viewfinder-tag" style="color: #94a3b8;">[ ${escapeHtml(evt.category || "PAST SESSION")} ]</div>
+                  <h3 style="color: var(--text-primary);">${escapeHtml(evt.title)}</h3>
+                  <div class="event-location" style="color: #64748b;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                     ${escapeHtml(evt.location || "Campus")} ${evt.time_info ? "• " + escapeHtml(evt.time_info) : ""}
                   </div>
-                  ${evt.description ? `<p class="event-desc" style="color: var(--parchment-dim);">${escapeHtml(evt.description)}</p>` : ""}
+                  ${evt.description ? `<p class="event-desc" style="color: var(--text-muted);">${escapeHtml(evt.description)}</p>` : ""}
                 </div>
                 <div>
-                  <span class="hud-pill" style="background: rgba(148,163,184,0.15); color: #94a3b8; border-color: #475569; font-size: 0.78rem;">⚪ Concluded</span>
+                  <span class="hud-pill" style="color: #94a3b8; border-color: rgba(255, 255, 255, 0.1); font-size: 0.78rem;">Concluded</span>
                 </div>
               </div>
             `;
@@ -258,8 +306,8 @@
             var selectEl = document.querySelector('[name="event_selected"]') || document.querySelector("#field-event_selected");
             if (selectEl && eventName) {
               Array.from(selectEl.options).forEach(function(opt) {
-                if (opt.text.toLowerCase().includes(eventName.toLowerCase().slice(0, 15)) || opt.value.toLowerCase().includes(eventName.toLowerCase().slice(0, 15))) {
-                  selectEl.value = opt.value;
+                if (opt.text.toLowerCase().includes(eventName.toLowerCase()) || opt.value.toLowerCase().includes(eventName.toLowerCase())) {
+                  opt.selected = true;
                 }
               });
             }
@@ -267,13 +315,14 @@
         });
 
       } catch (err) {
-        if (upcomingContainer) {
-          upcomingContainer.innerHTML = `<p class="state-msg error">Could not load schedule: ${escapeHtml(err.message)}</p>`;
-        }
+        console.warn("Could not load events calendar:", err);
+        upcomingContainer.innerHTML = `<p class="state-msg" style="color: var(--red-rec); text-align: center; padding: 24px;">Failed to load events schedule.</p>`;
       }
     }
 
-    document.addEventListener("DOMContentLoaded", loadEventsCalendar);
+    document.addEventListener("DOMContentLoaded", function() {
+      loadEventsCalendar();
+    });
   </script>
 </body>
 </html>

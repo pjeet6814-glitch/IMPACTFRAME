@@ -2,46 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IMPACTFRAME — Create. Conserve. Inspire.</title>
-  <meta name="description" content="IMPACTFRAME is a student media club turning environmental conservation and energy research into short films, AI visuals, and documentaries." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IMPACTFRAME — Cinematic Media Collective | Create. Conserve. Inspire.</title>
+  <meta name="description" content="IMPACTFRAME is a student cinema collective transforming environmental realities and scientific research into award-winning short films, AI visual poems, and investigative documentaries." />
+  <meta property="og:title" content="IMPACTFRAME — Create. Conserve. Inspire." />
+  <meta property="og:description" content="College media collective creating 4K films, AI visuals, and eco-documentaries at CHARUSAT." />
+  <meta property="og:type" content="website" />
   <link rel="icon" href="assets/favicon.png" type="image/png" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body data-page="home">
 
-  <header class="site-header">
+  <!-- ================= SITE HEADER ================= -->
+  <header class="site-header" id="site-header">
     <div class="wrap nav-row">
-      <a class="brand" href="index.html">
-        <img src="assets/logo-mark.png" alt="" width="40" height="40" />
+      <a class="brand" href="index.html" aria-label="IMPACTFRAME Home">
+        <img src="assets/logo-mark.png" alt="IMPACTFRAME emblem" width="40" height="40" />
         IMPACT<span>FRAME</span>
       </a>
-      <nav class="primary-nav">
+
+      <!-- Mobile Hamburger Button -->
+      <button class="mobile-nav-toggle" aria-label="Toggle Navigation Menu" aria-expanded="false" id="mobile-toggle">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <nav class="primary-nav" id="primary-nav" aria-label="Main Navigation">
         <ul>
           <li><a href="index.html" data-page="home">Home</a></li>
-          <li><a href="gallery.html" data-page="gallery">Gallery</a></li>
-          <li><a href="about.html" data-page="about">About</a></li>
-          <li><a href="events.html" data-page="events">Events</a></li>
+          <li><a href="gallery.html" data-page="gallery">Film Archive</a></li>
+          <li><a href="about.html" data-page="about">The Collective</a></li>
+          <li><a href="events.html" data-page="events">Screenings & Events</a></li>
           <li><a href="apply.html" data-page="apply">Auditions & Roles</a></li>
           <li><a href="join.html" data-page="join">Join Crew</a></li>
         </ul>
       </nav>
+
       <div class="header-right-actions">
         <div class="social-links">
-          <a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener" class="social-icon-yt" aria-label="IMPACTFRAME on YouTube">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener" class="social-icon-yt" aria-label="IMPACTFRAME on YouTube" title="YouTube Channel">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" clip-rule="evenodd" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
           </a>
-          <a href="https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="social-icon-ig" aria-label="IMPACTFRAME on Instagram">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <a href="https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="social-icon-ig" aria-label="IMPACTFRAME on Instagram" title="Instagram Profile">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 2 .25 2.5.42.6.24 1 .5 1.5 1s.75.9 1 1.5c.17.5.36 1.3.42 2.5.06 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.25 2-.42 2.5-.24.6-.5 1-1 1.5s-.9.75-1.5 1c-.5.17-1.3.36-2.5.42-1.3.06-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-2-.25-2.5-.42-.6-.24-1-.5-1.5-1s-.75-.9-1-1.5c-.17-.5-.36-1.3-.42-2.5C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.25-2 .42-2.5.24-.6.5-1 1-1.5s.9-.75 1.5-1c.5-.17 1.3-.36 2.5-.42C8.4 2.2 8.8 2.2 12 2.2Zm0 1.8c-3.15 0-3.52 0-4.76.07-1 .04-1.5.2-1.86.34-.47.18-.8.4-1.15.75s-.57.68-.75 1.15c-.14.36-.3.86-.34 1.86C3.02 8.4 3 8.77 3 12s0 3.6.07 4.84c.04 1 .2 1.5.34 1.86.18.47.4.8.75 1.15s.68.57 1.15.75c.36.14.86.3 1.86.34C8.4 21 8.77 21 12 21s3.6 0 4.84-.07c1-.04 1.5-.2 1.86-.34.47-.18.8-.4 1.15-.75s.57-.68.75-1.15c.14-.36.3-.86.34-1.86.06-1.24.07-1.6.07-4.84s0-3.6-.07-4.84c-.04-1-.2-1.5-.34-1.86a3.1 3.1 0 0 0-.75-1.15 3.1 3.1 0 0 0-1.15-.75c-.36-.14-.86-.3-1.86-.34C15.6 4 15.23 4 12 4Zm0 3.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1.8a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Zm4.7-2a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Z"/>
             </svg>
           </a>
         </div>
         <!-- Discreet Crew Portal Entry -->
-        <a href="admin.html" class="crew-portal-trigger" title="Crew Portal (Restricted)" aria-label="Crew Portal Access">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <a href="admin.html" class="crew-portal-trigger" title="Crew Portal Access (Authorized Personnel)" aria-label="Crew Portal Access">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
@@ -52,147 +67,249 @@
   </header>
 
   <main>
-    <section class="hero wrap">
-      <div>
-        <div class="hud-pill"><span class="rec-dot"></span> REC ● 24 FPS // 4K RAW</div>
-        <h1>Create. Conserve.<br /><em>Inspire.</em></h1>
-        <p class="lede">
-          IMPACTFRAME is a student media club that turns environmental conservation
-          into short films, AI-made visual poems, and investigative documentaries — made by students,
-          for anyone who still wants to save something.
-        </p>
-        <div class="actions">
-          <a class="btn btn-primary" href="gallery.html">Watch the films</a>
-          <a class="btn btn-ghost" href="join.html">Join the crew</a>
+    <!-- ================= HERO SECTION ================= -->
+    <div class="wrap">
+      <section class="hero" id="hero">
+        <div class="hero-overlay-streak"></div>
+        <div class="hero-content">
+          <div class="hud-pill">
+            <span class="status-indicator"></span>
+            CHARUSAT Student Media Collective
+          </div>
+          <h1>
+            Create. Conserve.<br />
+            <em>Inspire.</em>
+          </h1>
+          <p class="lede">
+            An independent student media collective at CHARUSAT University dedicated to visual storytelling, 
+            environmental awareness, and community cinema.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="gallery.html" id="hero-watch-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              Explore Film Archive
+            </a>
+            <a class="btn btn-ghost" href="join.html">
+              Join Our Crew &rarr;
+            </a>
+          </div>
         </div>
-      </div>
-      <div class="hero-logo">
-        <img src="assets/logo-full.jpg" alt="IMPACTFRAME emblem: camera aperture wrapped in olive laurel leaves" />
+      </section>
+    </div>
+
+    <!-- ================= CORE PILLARS SECTION ================= -->
+    <section class="pillars wrap" id="ethos">
+      <div class="grid">
+        <div class="pillar-card">
+          <div class="viewfinder-tag">STORYTELLING</div>
+          <h3>Student Cinema</h3>
+          <p>
+            Bringing together filmmakers, screenwriters, actors, and editors to produce authentic student shorts, 
+            documentaries, and creative visual projects.
+          </p>
+        </div>
+        <div class="pillar-card">
+          <div class="viewfinder-tag">CONSERVATION</div>
+          <h3>Environmental Focus</h3>
+          <p>
+            Documenting campus sustainability, local water resources, and ecological challenges through 
+            thoughtful, student-led reporting and cinematography.
+          </p>
+        </div>
+        <div class="pillar-card">
+          <div class="viewfinder-tag">COMMUNITY</div>
+          <h3>Campus Engagement</h3>
+          <p>
+            Hosting open screenings, hands-on media workshops, and creative discussions that connect 
+            students across all departments and faculties.
+          </p>
+        </div>
       </div>
     </section>
 
-    <!-- Pillars Section -->
-    <section class="pillars" id="about">
-      <div class="wrap grid">
-        <div>
-          <div class="viewfinder-tag">[ 01 // PRODUCTION ]</div>
-          <h3>Create</h3>
-          <p>We pick up cinema rigs, parabolic mics, and generative AI tools to turn complex environmental research into films people actually feel.</p>
-        </div>
-        <div>
-          <div class="viewfinder-tag">[ 02 // ETHOS ]</div>
-          <h3>Conserve</h3>
-          <p>Every single shoot starts from an ecological reality — campus borewells drying out, rooftop heat islands, or local river degradation.</p>
-        </div>
-        <div>
-          <div class="viewfinder-tag">[ 03 // ACTION ]</div>
-          <h3>Inspire</h3>
-          <p>We screen on campus lawns, submit to international eco-film festivals, and distribute online so our stories lead to tangible action.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Featured Works Showcase (from API / DB) -->
+    <!-- ================= FEATURED WORKS SHOWCASE ================= -->
     <section class="section wrap" id="featured">
       <div class="section-head">
-        <div class="viewfinder-tag">[ NOW SCREENING ]</div>
-        <h2>Featured Works</h2>
-        <p>Stories of our water, forests, and future — crafted by our student directors and field cinematographers.</p>
+        <div class="viewfinder-tag">CATALOG ARCHIVE</div>
+        <h2>Featured Productions</h2>
+        <p>Short films and documentaries produced by our student members.</p>
       </div>
+
       <div class="film-grid" id="featured-film-grid">
-        <p class="state-msg">Loading featured films…</p>
+        <!-- Rendered dynamically by main.js -->
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted); font-family: var(--font-mono);">
+          <span class="hud-pill">LOADING PRODUCTIONS…</span>
+        </div>
       </div>
-      <div style="margin-top: 36px; text-align: center;">
-        <a class="btn btn-primary" href="gallery.html">Explore Complete Gallery &rarr;</a>
+
+      <div style="margin-top: 44px; text-align: center;">
+        <a class="btn btn-ghost" href="gallery.html">
+          Browse Complete Catalog &rarr;
+        </a>
       </div>
     </section>
 
-    <!-- Field Reels & Shorts Section -->
-    <section class="reels-section">
+    <!-- ================= ABOUT / MISSION BANNER ================= -->
+    <section class="section wrap">
+      <div class="manifesto-banner">
+        <div class="viewfinder-tag">OUR MISSION</div>
+        <p>
+          "We believe that compelling visual storytelling inspires genuine conservation and creative passion. 
+          IMPACTFRAME provides students of all academic backgrounds with the community, resources, and platform 
+          to tell stories that matter."
+        </p>
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          <span style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--emerald-mint);">
+            — IMPACTFRAME Student Collective
+          </span>
+          <span class="hud-pill" style="font-size: 0.72rem;">CHARUSAT UNIVERSITY</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= OFFICIAL CHANNELS & BTS ================= -->
+    <section class="reels-section" id="channels">
       <div class="wrap">
         <div class="section-head">
-          <div class="viewfinder-tag">[ OFFICIAL CHANNELS ]</div>
+          <div class="viewfinder-tag">[ OFFICIAL DISPATCHES &amp; BTS ]</div>
           <h2>Follow Our Channels</h2>
-          <p>Watch student-made shorts, field dispatches, and behind-the-scenes reels on our official YouTube and Instagram.</p>
+          <p>Behind-the-scenes field recordings, cinematography breakdown reels, and film releases direct from our team.</p>
         </div>
 
-        <div class="reels-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-          <!-- YouTube Channel Card -->
-          <article class="reel-card" style="padding: 28px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;">
-            <div class="platform-pill youtube">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-              </svg>
-              YouTube
+        <div class="reels-grid">
+          <!-- YouTube Card -->
+          <article class="reel-card">
+            <div class="reel-top-bar">
+              <div class="platform-pill youtube">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+                YouTube Premieres
+              </div>
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">4K MASTER</span>
             </div>
-            <h4 style="margin: 0; font-size: 1.25rem; color: var(--paper);">IMPACTFRAME Official</h4>
-            <p style="margin: 0; font-size: 0.95rem; color: var(--slate-muted); max-width: 320px;">
-              Full film releases, student spotlights, and mini-documentaries produced by the IMPACTFRAME crew.
-            </p>
-            <a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top: 10px;">
-              Open YouTube Channel &rarr;
-            </a>
+            <div class="reel-content">
+              <h4>@ImpactFrameEE</h4>
+              <p>Full film releases, student spotlights, high-fidelity documentaries, and filmmaker panel recordings.</p>
+              <a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+                Subscribe on YouTube &rarr;
+              </a>
+            </div>
           </article>
 
           <!-- Instagram Card -->
-          <article class="reel-card" style="padding: 28px 24px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;">
-            <div class="platform-pill instagram">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 2 .25 2.5.42.6.24 1 .5 1.5 1s.75.9 1 1.5c.17.5.36 1.3.42 2.5.06 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.25 2-.42 2.5-.24.6-.5 1-1 1.5s-.9.75-1.5 1c-.5.17-1.3.36-2.5.42-1.3.06-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-2-.25-2.5-.42-.6-.24-1-.5-1.5-1s-.75-.9-1-1.5c-.17-.5-.36-1.3-.42-2.5C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.25-2 .42-2.5.24-.6.5-1 1-1.5s.9-.75 1.5-1c.5-.17 1.3-.36 2.5-.42C8.4 2.2 8.8 2.2 12 2.2Zm0 1.8c-3.15 0-3.52 0-4.76.07-1 .04-1.5.2-1.86.34-.47.18-.8.4-1.15.75s-.57.68-.75 1.15c-.14.36-.3.86-.34 1.86C3.02 8.4 3 8.77 3 12s0 3.6.07 4.84c.04 1 .2 1.5.34 1.86.18.47.4.8.75 1.15s.68.57 1.15.75c.36.14.86.3 1.86.34C8.4 21 8.77 21 12 21s3.6 0 4.84-.07c1-.04 1.5-.2 1.86-.34.47-.18.8-.4 1.15-.75s.57-.68.75-1.15c.14-.36.3-.86.34-1.86.06-1.24.07-1.6.07-4.84s0-3.6-.07-4.84c-.04-1-.2-1.5-.34-1.86a3.1 3.1 0 0 0-.75-1.15 3.1 3.1 0 0 0-1.15-.75c-.36-.14-.86-.3-1.86-.34C15.6 4 15.23 4 12 4Zm0 3.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1.8a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Zm4.7-2a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Z"/></svg>
-              Instagram
+          <article class="reel-card">
+            <div class="reel-top-bar">
+              <div class="platform-pill instagram">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 2 .25 2.5.42.6.24 1 .5 1.5 1s.75.9 1 1.5c.17.5.36 1.3.42 2.5.06 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.25 2-.42 2.5-.24.6-.5 1-1 1.5s-.9.75-1.5 1c-.5.17-1.3.36-2.5.42-1.3.06-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-2-.25-2.5-.42-.6-.24-1-.5-1.5-1s-.75-.9-1-1.5c-.17-.5-.36-1.3-.42-2.5C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.25-2 .42-2.5.24-.6.5-1 1-1.5s.9-.75 1.5-1c.5-.17 1.3-.36 2.5-.42C8.4 2.2 8.8 2.2 12 2.2Zm0 1.8c-3.15 0-3.52 0-4.76.07-1 .04-1.5.2-1.86.34-.47.18-.8.4-1.15.75s-.57.68-.75 1.15c-.14.36-.3.86-.34 1.86C3.02 8.4 3 8.77 3 12s0 3.6.07 4.84c.04 1 .2 1.5.34 1.86.18.47.4.8.75 1.15s.68.57 1.15.75c.36.14.86.3 1.86.34C8.4 21 8.77 21 12 21s3.6 0 4.84-.07c1-.04 1.5-.2 1.86-.34.47-.18.8-.4 1.15-.75s.57-.68.75-1.15c.14-.36.3-.86.34-1.86.06-1.24.07-1.6.07-4.84s0-3.6-.07-4.84c-.04-1-.2-1.5-.34-1.86a3.1 3.1 0 0 0-.75-1.15 3.1 3.1 0 0 0-1.15-.75c-.36-.14-.86-.3-1.86-.34C15.6 4 15.23 4 12 4Zm0 3.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1.8a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Zm4.7-2a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Z"/>
+                </svg>
+                Instagram Reels &amp; BTS
+              </div>
+              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">DAILY</span>
             </div>
-            <h4 style="margin: 0; font-size: 1.25rem; color: var(--paper);">@impactframe.ee</h4>
-            <p style="margin: 0; font-size: 0.95rem; color: var(--slate-muted); max-width: 320px;">
-              Reels, on-set photos, production stories, and club updates straight from the team.
-            </p>
-            <a href="https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="btn btn-outline" style="margin-top: 10px;">
-              Open Instagram &rarr;
-            </a>
+            <div class="reel-content">
+              <h4>@impactframe.ee</h4>
+              <p>Field dispatches, on-set cinematography rigs, audition calls, and spontaneous campus interviews.</p>
+              <a href="https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
+                Follow on Instagram &rarr;
+              </a>
+            </div>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- Upcoming Screening Banner -->
+    <!-- ================= UPCOMING CALL FOR CREW & AUDITIONS ================= -->
     <section class="section wrap">
-      <div class="manifesto-banner sprocket-frame">
-        <div class="viewfinder-tag">[ AUDITIONS & OPEN ROLES ]</div>
-        <h3 style="color: var(--paper); font-size: 1.5rem; margin: 6px 0 10px;">Join Upcoming Club Productions</h3>
-        <p style="font-size: 1rem; margin-bottom: 20px;">
-          Audition for on-screen performance or apply for director, cinematographer, sound, and editor positions in our student films.
-        </p>
-        <a class="btn btn-primary" href="apply.html">Submit Application &rarr;</a>
+      <div class="sprocket-frame" style="padding: 44px 36px; display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 280px;">
+          <div class="viewfinder-tag">[ 2026 INTAKE &amp; AUDITIONS ]</div>
+          <h2 style="font-size: 2rem; margin-bottom: 8px;">Ready to Pick Up a Camera or Perform?</h2>
+          <p style="margin: 0; font-size: 1.05rem; max-width: 58ch;">
+            We are recruiting across all tracks: Directors, Actors, Foley Artists, Drone Pilots, and AI Generative Artists. 
+            No previous cinema degree required.
+          </p>
+        </div>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+          <a class="btn btn-primary" href="apply.html">Submit Audition Sheet &rarr;</a>
+          <a class="btn btn-ghost" href="events.html">Upcoming Screenings</a>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="wrap foot-row">
-      <div>
-        <div class="brand">
-          <img src="assets/logo-mark.png" alt="" width="36" height="36" />
-          IMPACT<span>FRAME</span>
-        </div>
-        <p class="motto">Create. Conserve. Inspire.</p>
+  <!-- ================= UNIVERSAL THEATER MODAL ================= -->
+  <div id="theater-modal" class="theater-modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="theater-title">
+    <div class="theater-modal-box">
+      <div class="theater-screen-bar">
+        <div class="hud-pill">THEATER MODE</div>
+        <button type="button" class="modal-close-btn" id="theater-close-btn" aria-label="Close Theater Modal">&times;</button>
       </div>
-      <div class="contact">
-        <a href="mailto:impactframe.ee@charusat.ac.in">impactframe.ee@charusat.ac.in</a>
-        <div class="social-links">
-          <a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener" class="social-icon-yt" aria-label="IMPACTFRAME on YouTube">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
-          </a>
-          <a href="https://www.instagram.com/impactframe.ee?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" class="social-icon-ig" aria-label="IMPACTFRAME on Instagram">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.06 2 .25 2.5.42.6.24 1 .5 1.5 1s.75.9 1 1.5c.17.5.36 1.3.42 2.5.06 1.3.07 1.7.07 4.9s0 3.6-.07 4.9c-.06 1.2-.25 2-.42 2.5-.24.6-.5 1-1 1.5s-.9.75-1.5 1c-.5.17-1.3.36-2.5.42-1.3.06-1.7.07-4.9.07s-3.6 0-4.9-.07c-1.2-.06-2-.25-2.5-.42-.6-.24-1-.5-1.5-1s-.75-.9-1-1.5c-.17-.5-.36-1.3-.42-2.5C2.2 15.6 2.2 15.2 2.2 12s0-3.6.07-4.9c.06-1.2.25-2 .42-2.5.24-.6.5-1 1-1.5s.9-.75 1.5-1c.5-.17 1.3-.36 2.5-.42C8.4 2.2 8.8 2.2 12 2.2Zm0 1.8c-3.15 0-3.52 0-4.76.07-1 .04-1.5.2-1.86.34-.47.18-.8.4-1.15.75s-.57.68-.75 1.15c-.14.36-.3.86-.34 1.86C3.02 8.4 3 8.77 3 12s0 3.6.07 4.84c.04 1 .2 1.5.34 1.86.18.47.4.8.75 1.15s.68.57 1.15.75c.36.14.86.3 1.86.34C8.4 21 8.77 21 12 21s3.6 0 4.84-.07c1-.04 1.5-.2 1.86-.34.47-.18.8-.4 1.15-.75s.57-.68.75-1.15c.14-.36.3-.86.34-1.86.06-1.24.07-1.6.07-4.84s0-3.6-.07-4.84c-.04-1-.2-1.5-.34-1.86a3.1 3.1 0 0 0-.75-1.15 3.1 3.1 0 0 0-1.15-.75c-.36-.14-.86-.3-1.86-.34C15.6 4 15.23 4 12 4Zm0 3.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 1.8a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Zm4.7-2a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1Z"/>
-            </svg>
-          </a>
+      <div class="theater-video-frame">
+        <iframe id="theater-iframe" src="" title="IMPACTFRAME Film Player" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+      </div>
+      <div class="theater-meta-body">
+        <h3 id="theater-title">Film Title</h3>
+        <div class="meta" id="theater-meta">Category • Duration • Year</div>
+        <p class="synopsis" id="theater-synopsis">Film synopsis description will appear here.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SITE FOOTER ================= -->
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="brand" style="margin-bottom: 12px;">
+            <img src="assets/logo-mark.png" alt="" width="36" height="36" />
+            IMPACT<span>FRAME</span>
+          </div>
+          <p>
+            An official student media collective at CHARUSAT University turning regional conservation, energy research, 
+            and climate reality into cinema people actually feel.
+          </p>
+          <div style="margin-top: 18px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--emerald-mint);">
+            impactframe.ee@charusat.ac.in
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h5>Navigate</h5>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="gallery.html">Film Archive</a></li>
+            <li><a href="about.html">About Collective</a></li>
+            <li><a href="events.html">Screenings &amp; Events</a></li>
+            <li><a href="apply.html">Auditions &amp; Roles</a></li>
+            <li><a href="join.html">Join the Crew</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5>Channels &amp; Crew</h5>
+          <ul>
+            <li><a href="https://www.youtube.com/@ImpactFrameEE" target="_blank" rel="noopener">YouTube Channel</a></li>
+            <li><a href="https://www.instagram.com/impactframe.ee" target="_blank" rel="noopener">Instagram BTS</a></li>
+            <li><a href="events.html#event-registration-section">Reserve Seat</a></li>
+            <li><a href="admin.html" style="color: var(--amber-bright);">Crew Portal (Staff)</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 IMPACTFRAME Media Club. All rights reserved. CHARUSAT University.</div>
+        <div style="font-family: var(--font-mono); font-size: 0.78rem;">
+          <span style="color: var(--emerald-mint);">●</span> CHARUSAT • Create. Conserve. Inspire.
         </div>
       </div>
     </div>
   </footer>
 
-  <script src="js/api.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/api.js?v=3.0"></script>
+  <script src="js/main.js?v=3.0"></script>
 </body>
 </html>

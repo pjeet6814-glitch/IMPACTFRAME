@@ -78,6 +78,7 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 `);
+// 1. Films Table - No mock or AI seeded data
 
 // 2. Dynamic Form Fields Configuration Table (Google Forms Compatible)
 db.exec(`
@@ -344,54 +345,7 @@ try {
   console.warn("[DB] events is_past migration check:", e.message);
 }
 
-// Seed default events if empty
-try {
-  const eventsCount = db.prepare("SELECT COUNT(*) as n FROM events").get()?.n || 0;
-  if (eventsCount === 0) {
-    const insertEvent = db.prepare(`
-      INSERT INTO events (title, category, date_day, date_month, location, time_info, entry_fee, description, registration_open, sort_order)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    insertEvent.run(
-      "Annual IMPACTFRAME Showcase & Production Kickoff",
-      "CLUB SHOWCASE & ORIENTATION",
-      "18",
-      "OCTOBER",
-      "Central Campus Amphitheater",
-      "7:00 PM",
-      "Free Entry",
-      "Open-air screening of upcoming student productions, introduction to club departments, and interactive Q&A for aspiring student filmmakers, actors, and editors.",
-      1,
-      1
-    );
-    insertEvent.run(
-      "Field Audio in Extreme Environments: Hydrophones & Foley",
-      "HANDS-ON WORKSHOP",
-      "04",
-      "NOVEMBER",
-      "Media Studio Lab B",
-      "3:00 PM",
-      "Equipment provided",
-      "Learn how to capture the sounds people normally ignore: subterranean water flow, wind resonance across solar farms, and wet clay acoustic mapping.",
-      1,
-      2
-    );
-    insertEvent.run(
-      "Prompt to Picture: Generative AI for Eco-Storytellers",
-      "AI LAB COLLOQUIUM",
-      "22",
-      "NOVEMBER",
-      "Auditorium Hall 2",
-      "5:00 PM",
-      "Open to all branches",
-      "How our AI Film department crafts speculative climate futures without relying on plastic clichés. Includes ComfyUI workflow walkthroughs.",
-      1,
-      3
-    );
-  }
-} catch (e) {
-  console.warn("[DB] events seed check:", e.message);
-}
+// Events table initialization complete - No mock seed data
 
 // 4. Admin Users Table (Multi-User Hierarchy)
 db.exec(`
@@ -585,15 +539,18 @@ function seed() {
     }
   }
 
-  // Seed default ADMIN_MAIN user if not exists
+  // Provision ADMIN_MAIN master account only if ADMIN_KEY environment variable is configured
   const mainUserRow = db.prepare("SELECT * FROM admin_users WHERE username = 'ADMIN_MAIN'").get();
   if (!mainUserRow) {
-    const { hash, salt } = hashPassword("impactframe2026");
-    db.prepare(`
-      INSERT INTO admin_users (username, password_hash, salt, role, full_name, created_by)
-      VALUES (?, ?, ?, 'MAIN', 'System Master Administrator', 'SYSTEM')
-    `).run("ADMIN_MAIN", hash, salt);
-    console.log("Seeded default ADMIN_MAIN master account successfully.");
+    const adminPass = process.env.ADMIN_KEY ? process.env.ADMIN_KEY.trim() : null;
+    if (adminPass) {
+      const { hash, salt } = hashPassword(adminPass);
+      db.prepare(`
+        INSERT INTO admin_users (username, password_hash, salt, role, full_name, created_by)
+        VALUES (?, ?, ?, 'MAIN', 'System Master Administrator', 'SYSTEM')
+      `).run("ADMIN_MAIN", hash, salt);
+      console.log("Provisioned default ADMIN_MAIN master account from environment ADMIN_KEY.");
+    }
   }
 }
 

@@ -16,13 +16,22 @@
         <img src="assets/logo-mark.png" alt="" width="40" height="40" />
         IMPACT<span>FRAME</span>
       </a>
-      <nav class="primary-nav">
+      <!-- Mobile Hamburger Button -->
+      <button class="mobile-nav-toggle" aria-label="Toggle Navigation Menu" aria-expanded="false" id="mobile-toggle">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+
+      <nav class="primary-nav" id="primary-nav" aria-label="Main Navigation">
         <ul>
           <li><a href="index.html" data-page="home">Home</a></li>
-          <li><a href="gallery.html" data-page="gallery">Gallery</a></li>
-          <li><a href="about.html" data-page="about">About</a></li>
-          <li><a href="events.html" data-page="events">Events</a></li>
-          <li><a href="apply.html" data-page="apply">Auditions & Roles</a></li>
+          <li><a href="gallery.html" data-page="gallery">Film Archive</a></li>
+          <li><a href="about.html" data-page="about">The Collective</a></li>
+          <li><a href="events.html" data-page="events">Screenings &amp; Events</a></li>
+          <li><a href="apply.html" data-page="apply">Auditions &amp; Roles</a></li>
           <li><a href="join.html" data-page="join">Join Crew</a></li>
         </ul>
       </nav>
@@ -59,8 +68,8 @@
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
       </div>
-      <div class="viewfinder-tag">[ RESTRICTED // CREW VAULT ]</div>
-      <h2>Projectionist & Admin Booth</h2>
+      <div class="viewfinder-tag">CREW PORTAL</div>
+      <h2>Club Administration Portal</h2>
       <p class="lock-gate-desc">
         Authentication required. For security, your session strictly locks whenever you navigate away or leave this page.
       </p>
@@ -84,7 +93,7 @@
 
         <div id="lock-error-msg" class="lock-error" style="display: none;"></div>
         <button type="submit" class="btn btn-primary btn-block" id="vault-unlock-btn">
-          Authenticate & Unlock Booth &rarr;
+          Log In to Portal &rarr;
         </button>
       </form>
     </div>

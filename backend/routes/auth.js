@@ -6,12 +6,56 @@ const { signSessionToken } = require("../utils/tokens");
 
 const router = express.Router();
 
+function safeCompare(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+// In-memory rate limiting for login attempts
+const loginAttempts = new Map(); // ip -> { count, firstAttempt }
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+  if (!record) return true;
+  if (now - record.firstAttempt > LOCKOUT_WINDOW_MS) {
+    loginAttempts.delete(ip);
+    return true;
+  }
+  return record.count < MAX_ATTEMPTS;
+}
+
+function recordFailedAttempt(ip) {
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+  if (!record || (now - record.firstAttempt > LOCKOUT_WINDOW_MS)) {
+    loginAttempts.set(ip, { count: 1, firstAttempt: now });
+  } else {
+    record.count++;
+  }
+}
+
+function clearAttempts(ip) {
+  loginAttempts.delete(ip);
+}
+
 // ==========================================
 // 1. Crew & Admin Authentication Endpoints
 // ==========================================
 
 // POST /api/admin/login — Authenticate crew member (ADMIN_MAIN or ADMIN_[NAME])
 router.post("/login", (req, res) => {
+  const ipAddress = req.ip || req.socket.remoteAddress || "127.0.0.1";
+
+  if (!checkRateLimit(ipAddress)) {
+    return res.status(429).json({ ok: false, error: "Too many login attempts. Please wait 5 minutes before trying again." });
+  }
+
   const { username, password } = req.body || {};
 
   if (!username || !password) {
@@ -33,10 +77,10 @@ router.post("/login", (req, res) => {
     ) AND is_active = 1
   `).get(upper, slug, adminSlug, plainSlug, upper, trimmed.toUpperCase());
 
-  // Fallback for default ADMIN_MAIN if not yet in database
+  // Bootstrap initialization for default ADMIN_MAIN if configured via environment ADMIN_KEY
   if (!user && (upper === "ADMIN_MAIN" || upper === "MAIN" || upper === "ADMIN" || slug === "ADMIN_MAIN" || slug === "MAIN" || slug === "ADMIN")) {
-    const masterKey = process.env.ADMIN_KEY || "impactframe2026";
-    if (password === masterKey) {
+    const masterKey = process.env.ADMIN_KEY ? process.env.ADMIN_KEY.trim() : null;
+    if (masterKey && safeCompare(password, masterKey)) {
       const { hash, salt } = hashPassword(masterKey);
       db.prepare(`
         INSERT OR REPLACE INTO admin_users (username, password_hash, salt, role, full_name, created_by)
@@ -66,6 +110,7 @@ router.post("/login", (req, res) => {
   }
 
   if (!user) {
+    recordFailedAttempt(ipAddress);
     return res.status(401).json({ ok: false, error: "Invalid username or account not found." });
   }
 
@@ -76,13 +121,17 @@ router.post("/login", (req, res) => {
   }
 
   // Backup check against env master key for ADMIN_MAIN only if explicitly configured in environment
-  if (!isPasswordValid && (user.username === "ADMIN_MAIN" || normalizedUser === "ADMIN_MAIN") && process.env.ADMIN_KEY && password === process.env.ADMIN_KEY) {
+  if (!isPasswordValid && (user.username === "ADMIN_MAIN" || upper === "ADMIN_MAIN") && process.env.ADMIN_KEY && safeCompare(password, process.env.ADMIN_KEY.trim())) {
     isPasswordValid = true;
   }
 
   if (!isPasswordValid) {
+    recordFailedAttempt(ipAddress);
     return res.status(401).json({ ok: false, error: "Incorrect password. Access denied." });
   }
+
+  // Success: clear rate limit counter
+  clearAttempts(ipAddress);
 
   // Generate session credentials
   const sessionId = "IF-SES-" + crypto.randomUUID().slice(0, 8).toUpperCase();
@@ -93,7 +142,6 @@ router.post("/login", (req, res) => {
     full_name: user.full_name || user.username,
     exp: Date.now() + 7 * 24 * 60 * 60 * 1000,
   });
-  const ipAddress = req.ip || req.socket.remoteAddress || "127.0.0.1";
   const userAgent = (req.headers["user-agent"] || "").slice(0, 150);
 
   // Record login event in admin_audit_logs (best-effort)
@@ -200,8 +248,8 @@ router.post("/heartbeat", (req, res) => {
 // Legacy backward-compatibility endpoint for verify
 router.post("/verify", (req, res) => {
   const { password } = req.body || {};
-  const expected = process.env.ADMIN_KEY || "impactframe2026";
-  if (password && password === expected) {
+  const expected = process.env.ADMIN_KEY ? process.env.ADMIN_KEY.trim() : null;
+  if (expected && password && safeCompare(password, expected)) {
     return res.json({ ok: true, message: "Authorized" });
   }
   return res.status(401).json({ ok: false, error: "Incorrect admin password." });
@@ -444,11 +492,7 @@ router.post("/change-password", adminAuth, (req, res) => {
   if (user.password_hash && user.salt) {
     isCurrentValid = verifyPassword(current_password, user.password_hash, user.salt);
   }
-  if (!isCurrentValid && username === "ADMIN_MAIN" && process.env.ADMIN_KEY && current_password === process.env.ADMIN_KEY) {
-    isCurrentValid = true;
-  }
-  // Also check default fallback if never changed before
-  if (!isCurrentValid && username === "ADMIN_MAIN" && !user.password_hash && current_password === "impactframe2026") {
+  if (!isCurrentValid && username === "ADMIN_MAIN" && process.env.ADMIN_KEY && safeCompare(current_password, process.env.ADMIN_KEY.trim())) {
     isCurrentValid = true;
   }
 

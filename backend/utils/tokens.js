@@ -1,7 +1,10 @@
-// Cryptographic stateless token signer and verifier for serverless compatibility
 const crypto = require("node:crypto");
 
-const SECRET = process.env.SESSION_SECRET || process.env.ADMIN_KEY || "impactframe_auth_secret_token_2026";
+// Cryptographic secret: prioritize environment variables, fallback to high-entropy per-process secret
+const FALLBACK_SECRET = crypto.randomBytes(32).toString("hex");
+const SECRET = (process.env.SESSION_SECRET && process.env.SESSION_SECRET.trim()) || 
+               (process.env.ADMIN_KEY && process.env.ADMIN_KEY.trim()) || 
+               FALLBACK_SECRET;
 
 function signSessionToken(payload) {
   const data = Buffer.from(JSON.stringify(payload)).toString("base64url");

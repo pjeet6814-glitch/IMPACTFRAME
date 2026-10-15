@@ -1,8 +1,14 @@
-// Multi-user authentication guard for Admin endpoints.
-// Verifies master admin key, cryptographically signed token, or an active crew session.
-
+const crypto = require("node:crypto");
 const { db } = require("../db/init");
 const { verifySessionToken } = require("../utils/tokens");
+
+function safeCompare(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 function adminAuth(req, res, next) {
   let token = req.header("x-session-token") || req.header("x-admin-key");
@@ -11,19 +17,18 @@ function adminAuth(req, res, next) {
     token = req.headers.authorization.slice(7).trim();
   }
 
-  const masterKey = process.env.ADMIN_KEY || "impactframe2026";
-
-  // 1. Check master key override
-  if (token && (token === masterKey || token === "impactframe2026")) {
-    req.adminUser = { username: "ADMIN_MAIN", role: "MAIN", session_id: "MASTER_OVERRIDE" };
-    return next();
-  }
-
   if (!token) {
     return res.status(401).json({ error: "Authentication required. Please log in." });
   }
 
-  // 2. Stateless signed session token (seamless across all serverless containers)
+  // 1. Check environment ADMIN_KEY if set (constant-time comparison)
+  const masterKey = process.env.ADMIN_KEY ? process.env.ADMIN_KEY.trim() : null;
+  if (masterKey && safeCompare(token, masterKey)) {
+    req.adminUser = { username: "ADMIN_MAIN", role: "MAIN", session_id: "MASTER_OVERRIDE" };
+    return next();
+  }
+
+  // 2. Stateless cryptographically signed session token
   const verified = verifySessionToken(token);
   if (verified) {
     req.adminUser = {
@@ -34,7 +39,7 @@ function adminAuth(req, res, next) {
     return next();
   }
 
-  // 3. Look up active session in admin_audit_logs (fallback for local DB sessions)
+  // 3. Look up active session in admin_audit_logs (database sessions)
   try {
     const session = db
       .prepare(`
@@ -53,12 +58,6 @@ function adminAuth(req, res, next) {
       return next();
     }
   } catch {}
-
-  // 4. Offline / local testing token
-  if (token === "offline-token-main") {
-    req.adminUser = { username: "ADMIN_MAIN", role: "MAIN", session_id: "OFFLINE_DEV" };
-    return next();
-  }
 
   return res.status(401).json({ error: "Session expired or invalid. Please re-authenticate." });
 }

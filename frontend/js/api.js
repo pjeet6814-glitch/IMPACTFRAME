@@ -15,7 +15,13 @@
   // Purge any legacy cached demo films from browser localStorage
   try {
     const cachedFilms = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (cachedFilms && (cachedFilms.includes("dQw4w9WgXcQ") || cachedFilms.includes("Groundwater") || cachedFilms.includes("Ash & After"))) {
+    if (cachedFilms && (
+      cachedFilms.includes("dQw4w9WgXcQ") ||
+      cachedFilms.includes("Aquifer") ||
+      cachedFilms.includes("Canopy") ||
+      cachedFilms.includes("Kilowatt") ||
+      cachedFilms.includes("film-")
+    )) {
       localStorage.removeItem(LOCAL_STORAGE_KEY);
     }
   } catch {}
@@ -122,10 +128,9 @@
     try {
       const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (stored) return JSON.parse(stored);
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(DEFAULT_SAMPLE_FILMS));
-      return DEFAULT_SAMPLE_FILMS;
+      return [];
     } catch {
-      return DEFAULT_SAMPLE_FILMS;
+      return [];
     }
   }
 
@@ -322,61 +327,7 @@
       }
       return { success: false, error: data.error || "Incorrect username or password." };
     } catch (e) {
-      // Offline fallback for master admin
-      if ((norm === "ADMIN_MAIN" || norm === "ADMIN" || norm === "MAIN") && password === "impactframe2026") {
-        const loginTime = new Date().toISOString().replace("T", " ").slice(0, 19);
-        currentAdminSession = {
-          token: "impactframe2026",
-          session_id: "IF-OFFLINE-" + Date.now().toString().slice(-6),
-          username: "ADMIN_MAIN",
-          role: "MAIN",
-          full_name: "System Master Administrator (Offline)",
-          login_time: loginTime,
-        };
-        recordLocalAuditLog({
-          session_id: currentAdminSession.session_id,
-          token: currentAdminSession.token,
-          username: currentAdminSession.username,
-          role: currentAdminSession.role,
-          login_time: loginTime,
-          logout_time: null,
-          status: "ACTIVE",
-          computed_duration: 1,
-        });
-        try {
-          sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentAdminSession));
-        } catch {}
-        return { success: true, session: currentAdminSession, backend: false };
-      }
-
-      // Offline fallback for cached crew members
-      if (cachedUser) {
-        const loginTime = new Date().toISOString().replace("T", " ").slice(0, 19);
-        currentAdminSession = {
-          token: "impactframe2026",
-          session_id: "IF-CREW-" + Date.now().toString().slice(-6),
-          username: cachedUser.username,
-          role: cachedUser.role || "CREW",
-          full_name: cachedUser.full_name || cachedUser.username,
-          login_time: loginTime,
-        };
-        recordLocalAuditLog({
-          session_id: currentAdminSession.session_id,
-          token: currentAdminSession.token,
-          username: currentAdminSession.username,
-          role: currentAdminSession.role,
-          login_time: loginTime,
-          logout_time: null,
-          status: "ACTIVE",
-          computed_duration: 1,
-        });
-        try {
-          sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(currentAdminSession));
-        } catch {}
-        return { success: true, session: currentAdminSession, backend: false };
-      }
-
-      return { success: false, error: "Unable to verify credentials. Please ensure backend server is running." };
+      return { success: false, error: "Network error or server unreachable. Please verify the backend is active." };
     }
   }
 
@@ -468,7 +419,7 @@
     if (!currentAdminSession) {
       currentAdminSession = getStoredAdminSession();
     }
-    return currentAdminSession?.token || "impactframe2026";
+    return currentAdminSession?.token || "";
   }
 
   function getCurrentSession() {
@@ -1068,47 +1019,7 @@
     } catch (e) {
       console.warn("Notice loading events:", e);
     }
-    return [
-      {
-        id: 1,
-        title: "Annual IMPACTFRAME Showcase & Production Kickoff",
-        category: "CLUB SHOWCASE & ORIENTATION",
-        date_day: "18",
-        date_month: "OCTOBER",
-        location: "Central Campus Amphitheater",
-        time_info: "7:00 PM",
-        entry_fee: "Free Entry",
-        description: "Open-air screening of upcoming student productions, introduction to club departments, and interactive Q&A for aspiring student filmmakers, actors, and editors.",
-        registration_open: 1,
-        sort_order: 1,
-      },
-      {
-        id: 2,
-        title: "Field Audio in Extreme Environments: Hydrophones & Foley",
-        category: "HANDS-ON WORKSHOP",
-        date_day: "04",
-        date_month: "NOVEMBER",
-        location: "Media Studio Lab B",
-        time_info: "3:00 PM",
-        entry_fee: "Equipment provided",
-        description: "Learn how to capture the sounds people normally ignore: subterranean water flow, wind resonance across solar farms, and wet clay acoustic mapping.",
-        registration_open: 1,
-        sort_order: 2,
-      },
-      {
-        id: 3,
-        title: "Prompt to Picture: Generative AI for Eco-Storytellers",
-        category: "AI LAB COLLOQUIUM",
-        date_day: "22",
-        date_month: "NOVEMBER",
-        location: "Auditorium Hall 2",
-        time_info: "5:00 PM",
-        entry_fee: "Open to all branches",
-        description: "How our AI Film department crafts speculative climate futures without relying on plastic clichés. Includes ComfyUI workflow walkthroughs.",
-        registration_open: 1,
-        sort_order: 3,
-      }
-    ];
+    return [];
   }
 
   async function createEvent(eventData, adminKey) {

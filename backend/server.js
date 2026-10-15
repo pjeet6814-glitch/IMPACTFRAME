@@ -11,6 +11,16 @@ const authRouter = require("./routes/auth");
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// Security hardening
+app.disable("x-powered-by");
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  next();
+});
+
 app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ extended: true, limit: "25mb" }));
 // Allow text payloads for navigator.sendBeacon during page exit
